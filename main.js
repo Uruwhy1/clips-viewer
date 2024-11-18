@@ -80,7 +80,10 @@ async function getClipsFromDirectoryWithMetadata(dirPath, game) {
             game
           );
           clipFiles.push(...subClips);
-        } else if (stat.isFile() && item.endsWith(".mp4")) {
+        } else if (
+          stat.isFile() &&
+          (item.endsWith(".mp4") || item.endsWith(".mkv"))
+        ) {
           clipFiles.push({
             game,
             fileName: item,
