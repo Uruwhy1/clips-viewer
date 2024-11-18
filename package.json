@@ -3,18 +3,43 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "cross-env APP_DEV=true electron .",
+    "build": "electron-builder"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
     "electron-reload": "^2.0.0-alpha.1"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
     "fs": "^0.0.1-security",
     "path": "^0.12.7"
+  },
+  "build": {
+    "appId": "com.facundo.clipsviewer",
+    "productName": "Clips Viewer",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "main.js",
+      "preload.js",
+      "index.html",
+      "renderer.js",
+      "helpers.js",
+      "reset.css",
+      "variables.css",
+      "index.css"
+    ],
+    "win": {
+      "target": "nsis"
+    }
   }
 }

@@ -2,10 +2,14 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
 
-require("electron-reload")(__dirname, {
-  electron: path.join(__dirname, "node_modules", ".bin", "electron"),
-  ignored: /node_modules|[\/\\]\./, 
-});
+var isDev = process.env.APP_DEV ? process.env.APP_DEV.trim() == "true" : false;
+
+if (isDev) {
+  require("electron-reload")(__dirname, {
+    electron: path.join(__dirname, "node_modules", ".bin", "electron"),
+    ignored: /node_modules|[\/\\]\./,
+  });
+}
 
 const GAMES_DIR = path.join(__dirname, "../clips");
 
@@ -81,7 +85,7 @@ async function getClipsFromDirectoryWithMetadata(dirPath, game) {
             game,
             fileName: item,
             filePath: fullPath,
-            date: stat.mtime, 
+            date: stat.mtime,
           });
         }
       } catch (error) {
@@ -91,7 +95,7 @@ async function getClipsFromDirectoryWithMetadata(dirPath, game) {
     }
   } catch (error) {
     console.error(`Error reading directory ${dirPath}:`, error);
-    throw error; 
+    throw error;
   }
 
   return clipFiles;
