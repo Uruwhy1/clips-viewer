@@ -11,7 +11,7 @@ if (isDev) {
   });
 }
 
-const GAMES_DIR = path.join(__dirname, "../clips");
+const GAMES_DIR = "E:/Clips";
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
