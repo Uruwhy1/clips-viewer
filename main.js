@@ -64,35 +64,47 @@ async function getAllClipsWithMetadata(dirPath) {
   const favourites = await loadFavourites();
 
   try {
-    const gameDirs = (await fs.readdir(dirPath)).filter(async (dir) => {
-      const stat = await fs.stat(path.join(dirPath, dir));
-      return stat.isDirectory();
-    });
+    const items = await fs.readdir(dirPath);
 
-    for (const gameDir of gameDirs) {
-      const gamePath = path.join(dirPath, gameDir);
-      const clips = await getClipsFromDirectoryWithMetadata(
-        gamePath,
-        gameDir,
-        favourites
-      );
-      allClips.push(...clips);
+    for (const item of items) {
+      const fullPath = path.join(dirPath, item);
+
+      try {
+        const stat = await fs.stat(fullPath);
+
+        if (stat.isDirectory()) {
+          const clips = await getClipsFromDirectoryWithMetadata(
+            fullPath,
+            item,
+            favourites
+          );
+          allClips.push(...clips);
+        }
+      } catch (error) {
+        console.warn(`Skipping item ${fullPath} due to error:`, error);
+        continue;
+      }
     }
   } catch (error) {
     console.error("Error reading clips directory:", error);
   }
+
   return allClips;
 }
 
 async function getClipsFromDirectoryWithMetadata(dirPath, game, favourites) {
   const clipFiles = [];
+
   try {
     const items = await fs.readdir(dirPath);
+
     for (const item of items) {
       const fullPath = path.join(dirPath, item);
       const name = item.match(/[\sA-Za-z0-9]+/);
+
       try {
         const stat = await fs.stat(fullPath);
+
         if (stat.isDirectory()) {
           const subClips = await getClipsFromDirectoryWithMetadata(
             fullPath,
@@ -113,14 +125,14 @@ async function getClipsFromDirectoryWithMetadata(dirPath, game, favourites) {
           });
         }
       } catch (error) {
-        console.error(`Error accessing ${fullPath}:`, error);
+        console.warn(`Skipping item ${fullPath} due to error:`, error);
         continue;
       }
     }
   } catch (error) {
     console.error(`Error reading directory ${dirPath}:`, error);
-    throw error;
   }
+
   return clipFiles;
 }
 

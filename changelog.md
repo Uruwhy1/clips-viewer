@@ -1,3 +1,8 @@
+## [1.1.1] - 2024-11-19
+
+### Bug Fixes
+- Clip fetching no longer stops if it finds a non-directory. 
+
 ## [1.1.0] - 2024-11-19
 
 ### Favourites System
