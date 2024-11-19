@@ -21,6 +21,7 @@ function createWindow() {
       sandbox: false,
       nodeIntegration: false,
       contextIsolation: true,
+      devTools: false,
       preload: path.join(__dirname, "preload.js"),
     },
   });
@@ -43,7 +44,7 @@ app.on("activate", () => {
   }
 });
 
-const FAVOURITES_PATH = path.join(__dirname, "favourites.json");
+const FAVOURITES_PATH = "E:/Clips/favourites.json";
 
 async function loadFavourites() {
   try {
