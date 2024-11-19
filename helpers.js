@@ -4,6 +4,23 @@ const clipTitle = document.getElementById("clip-title");
 const clipGame = document.getElementById("clip-game");
 const clipDate = document.getElementById("clip-date");
 const clipFilename = document.getElementById("clip-filename");
+const clipFavourite = document.getElementById("clip-favourite");
+
+document.addEventListener("DOMContentLoaded", () => {
+  clipFavourite.addEventListener("click", (e) => {
+    window.electron
+      .toggleFavourite(clipFilename.textContent)
+      .then((favourites) => {
+        const isFavourite = favourites.includes(clipFilename.textContent);
+        clipFavourite.textContent = isFavourite ? "★" : "☆";
+        clipFavourite.classList.toggle("active");
+
+        if (window.updateFavouriteStatus) {
+          window.updateFavouriteStatus(clipFilename.textContent, isFavourite);
+        }
+      });
+  });
+});
 
 const monthNames = [
   "January",
@@ -51,9 +68,46 @@ export const createClipItem = (clip) => {
   const clipItem = document.createElement("div");
   const clipDate = new Date(clip.date);
   clipItem.textContent = `${clip.fileName} (${clipDate.toLocaleTimeString()})`;
-  clipItem.className = "clip-item";
+  clipItem.className = `clip-item ${clip.isFavourite ? "favourite" : ""}`;
+
+  const favouriteIcon = document.createElement("span");
+  favouriteIcon.textContent = clip.isFavourite ? "★" : "☆";
+  favouriteIcon.className = "favourite-icon";
+  favouriteIcon.addEventListener("click", (e) => {
+    e.stopPropagation();
+    window.electron.toggleFavourite(clip.filePath).then((favourites) => {
+      const isFavourite = favourites.includes(clip.filePath);
+      favouriteIcon.textContent = isFavourite ? "★" : "☆";
+      clipItem.classList.toggle("favourite");
+
+      if (window.updateFavouriteStatus) {
+        window.updateFavouriteStatus(clip.filePath, isFavourite);
+      }
+    });
+  });
+
+  clipItem.appendChild(favouriteIcon);
   clipItem.addEventListener("click", () => playClip(clip));
   return clipItem;
+};
+
+export const createFavouritesSection = (clips) => {
+  const favouriteClips = clips.filter((clip) => clip.isFavourite);
+  if (favouriteClips.length === 0) return null;
+
+  const { section, clipsContainer } = createCollapsibleSection(
+    "Favourites",
+    "favourites-section"
+  );
+
+  // have section open by default
+  section.querySelector("h3").classList.add("collapsed");
+  clipsContainer.style.display = "flex";
+
+  favouriteClips
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .forEach((clip) => clipsContainer.appendChild(createClipItem(clip)));
+  return section;
 };
 
 export const groupClipsByGameAndDate = (clips) => {
@@ -150,6 +204,13 @@ function playClip(clip) {
   clipGame.textContent = `${clip.game}`;
   clipDate.textContent = `${new Date(clip.date).toLocaleString()}`;
   clipFilename.textContent = `${clip.filePath}`;
+
+  clipFavourite.textContent = clip.isFavourite ? "★" : "☆";
+  if (clip.isFavourite) {
+    clipFavourite.classList.add("active");
+  } else {
+    clipFavourite.classList.remove("active");
+  }
 
   clipFilename.addEventListener("click", () => {
     window.electron.openFileExplorer(clip.filePath);

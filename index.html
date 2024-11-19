@@ -14,17 +14,20 @@
         <source id="video-source" src="" type="video/mp4" />
       </video>
       <div>
-        <h1 id="clip-title">Title</h1>
+        <div class="clip-title-container">
+          <h1 id="clip-title">Title</h1>
+          <p id="clip-favourite">☆</p>
+        </div>
         <p id="clip-game">Unknown</p>
         <p id="clip-date">Unknown</p>
         <p id="clip-filename">Unknown</p>
       </div>
     </div>
-
     <div class="right">
       <div id="view-switcher">
         <button id="view-by-game">By Game</button>
         <button id="view-by-recent">Most Recent</button>
+        <button id="view-favourites">Favourites</button>
       </div>
       <div id="clips-list">
         <!-- List of clips will be dynamically populated here -->
