@@ -71,6 +71,8 @@ async function getClipsFromDirectoryWithMetadata(dirPath, game) {
     for (const item of items) {
       const fullPath = path.join(dirPath, item);
 
+      const name = item.match(/[\sA-Za-z0-9]+/);
+
       try {
         const stat = await fs.stat(fullPath);
 
@@ -86,7 +88,7 @@ async function getClipsFromDirectoryWithMetadata(dirPath, game) {
         ) {
           clipFiles.push({
             game,
-            fileName: item,
+            fileName: name || item,
             filePath: fullPath,
             date: stat.mtime,
           });

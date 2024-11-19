@@ -1,5 +1,9 @@
 const videoElement = document.getElementById("video");
 const videoSource = document.getElementById("video-source");
+const clipTitle = document.getElementById("clip-title");
+const clipGame = document.getElementById("clip-game");
+const clipDate = document.getElementById("clip-date");
+const clipFilename = document.getElementById("clip-filename");
 
 const monthNames = [
   "January",
@@ -48,7 +52,7 @@ export const createClipItem = (clip) => {
   const clipDate = new Date(clip.date);
   clipItem.textContent = `${clip.fileName} (${clipDate.toLocaleTimeString()})`;
   clipItem.className = "clip-item";
-  clipItem.addEventListener("click", () => playClip(clip.filePath));
+  clipItem.addEventListener("click", () => playClip(clip));
   return clipItem;
 };
 
@@ -137,8 +141,13 @@ export const isSameDay = (date1, date2) => {
   );
 };
 
-function playClip(clipPath) {
-  videoSource.src = clipPath;
+function playClip(clip) {
+  videoSource.src = clip.filePath;
   videoElement.load();
   videoElement.play();
+
+  clipTitle.textContent = clip.fileName;
+  clipGame.textContent = `${clip.game}`;
+  clipDate.textContent = `${new Date(clip.date).toLocaleString()}`;
+  clipFilename.textContent = `${clip.filePath}`;
 }
