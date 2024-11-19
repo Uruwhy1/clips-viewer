@@ -66,6 +66,7 @@ body {
 }
 #clip-filename {
   user-select: auto;
+  cursor: pointer;
 }
 
 #clip-game::before {

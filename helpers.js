@@ -150,4 +150,8 @@ function playClip(clip) {
   clipGame.textContent = `${clip.game}`;
   clipDate.textContent = `${new Date(clip.date).toLocaleString()}`;
   clipFilename.textContent = `${clip.filePath}`;
+
+  clipFilename.addEventListener("click", () => {
+    window.electron.openFileExplorer(clip.filePath);
+  });
 }
