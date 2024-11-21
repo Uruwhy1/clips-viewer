@@ -104,9 +104,9 @@ export const createFavouritesSection = (clips) => {
   section.querySelector("h3").classList.add("collapsed");
   clipsContainer.style.display = "flex";
 
-  favouriteClips
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .forEach((clip) => clipsContainer.appendChild(createClipItem(clip)));
+  favouriteClips.forEach((clip) =>
+    clipsContainer.appendChild(createClipItem(clip))
+  );
   return section;
 };
 
@@ -138,14 +138,6 @@ export const groupClipsByGameAndDate = (clips) => {
     }
   });
 
-  Object.values(gameGroups).forEach((group) => {
-    group.today.sort((a, b) => b.date - a.date);
-    group.yesterday.sort((a, b) => b.date - a.date);
-    Object.values(group.earlier).forEach((clips) =>
-      clips.sort((a, b) => b.date - a.date)
-    );
-  });
-
   return gameGroups;
 };
 
@@ -174,9 +166,6 @@ export const groupClipsByDate = (clips) => {
 
   groups.today.sort((a, b) => b.date - a.date);
   groups.yesterday.sort((a, b) => b.date - a.date);
-  Object.values(groups.earlier).forEach((clips) =>
-    clips.sort((a, b) => b.date - a.date)
-  );
 
   return groups;
 };
@@ -195,7 +184,7 @@ export const isSameDay = (date1, date2) => {
   );
 };
 
-function playClip(clip) {
+export function playClip(clip) {
   videoSource.src = clip.filePath;
   videoElement.load();
   videoElement.play();

@@ -209,7 +209,8 @@ async function getClipsFromDirectoryWithMetadata(dirPath, game, favourites) {
 ipcMain.handle("get-all-clips", async () => {
   try {
     const allClips = await getAllClipsWithMetadata(GAMES_DIR);
-    return allClips;
+    const sortedClips = allClips.sort((a, b) => b.date - a.date);
+    return sortedClips;
   } catch (error) {
     console.error("Error loading clips:", error);
     return [];
