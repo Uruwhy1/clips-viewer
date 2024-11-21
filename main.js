@@ -1,13 +1,13 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, Tray, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
 const { exec } = require("child_process");
 
 const OBSWebSocket = require("obs-websocket-js").OBSWebSocket;
 const obs = new OBSWebSocket();
-let obsConnected = false;
 
 let mainWindow;
+let tray = null;
 
 let isDev = process.env.APP_DEV ? process.env.APP_DEV.trim() == "true" : false;
 if (isDev) {
@@ -95,23 +95,36 @@ function createWindow() {
   });
 
   mainWindow.loadFile("index.html");
+
+  mainWindow.on("close", (event) => {
+    mainWindow.hide();
+  });
+}
+
+function handleQuit() {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 }
 
 app.whenReady().then(async () => {
   createWindow();
   startGameDetection();
+  tray = new Tray(__dirname + "/icon.png");
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: "Quit", type: "normal", click: handleQuit },
+  ]);
+  tray.setToolTip("This is my application.");
+  tray.setContextMenu(contextMenu);
+
+  tray.addListener("click", () => mainWindow.show());
 });
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
+app.on("window-all-closed", () => {});
 
 app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
+  mainWindow.show();
 });
 
 const FAVOURITES_PATH = "E:/Clips/favourites.json";

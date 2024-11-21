@@ -1,3 +1,11 @@
+## [1.2.3] - 2024-11-21
+
+- App now minimizes to tray.
+
+### Bug Fixes
+
+- Fix dates not getting properly formatted (This might break if the app is opened with a local date format different from mine :D).
+
 ## [1.2.1] - 2024-11-21
 
 - Opens the latest clip (sorted by date) when the app starts.

@@ -123,7 +123,8 @@ export const groupClipsByGameAndDate = (clips) => {
     }
 
     const clipDate = new Date(clip.date);
-    const dateKey = clipDate.toISOString().split("T")[0];
+    const dateKey = clipDate.toLocaleString().split(",")[0];
+
     const group = gameGroups[clip.game];
 
     if (isSameDay(new Date(), clipDate)) {
@@ -150,7 +151,7 @@ export const groupClipsByDate = (clips) => {
 
   clips.forEach((clip) => {
     const clipDate = new Date(clip.date);
-    const dateKey = clipDate.toISOString().split("T")[0];
+    const dateKey = clipDate.toLocaleString().split(",")[0];
 
     if (isSameDay(new Date(), clipDate)) {
       groups.today.push(clip);
@@ -171,7 +172,7 @@ export const groupClipsByDate = (clips) => {
 };
 
 export const formatDate = (dateKey) => {
-  const [year, month, day] = dateKey.split("-").map(Number);
+  const [month, day, year] = dateKey.split("/").map(Number);
   const monthName = monthNames[month - 1];
   return `${monthName} ${day}, ${year}`;
 };
@@ -187,7 +188,6 @@ export const isSameDay = (date1, date2) => {
 export function playClip(clip) {
   videoSource.src = clip.filePath;
   videoElement.load();
-  videoElement.play();
 
   clipTitle.textContent = clip.fileName;
   clipGame.textContent = `${clip.game}`;
