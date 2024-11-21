@@ -1,3 +1,9 @@
+## [1.2.4] - 2024-11-21
+
+- Store game processes object in JSON file.
+- Update OBS recordings output based on game.
+
+
 ## [1.2.3] - 2024-11-21
 
 - App now minimizes to tray.

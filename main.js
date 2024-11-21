@@ -18,14 +18,61 @@ if (isDev) {
 }
 
 const GAMES_DIR = "E:/Clips";
-const GAME_PROCESSES = {
+const CONFIG_PATH = path.join(app.getPath("userData"), "gameConfig.json");
+console.log("Config files in: " + CONFIG_PATH);
+const DEFAULT_GAME_CONFIG = {
   "League of Legends": ["League of Legends.exe"],
   "Rocket League": ["RocketLeague.exe", "RocketLeague_DX11.exe"],
   "Football Manager": ["fm.exe", "FootballManager.exe"],
   "Crusader Kings II": ["ck2.exe", "CrusaderKings2.exe"],
 };
+let GAME_PROCESSES = null;
 
-function checkGameRunning() {
+async function loadGameConfig() {
+  try {
+    const configExists = await fs
+      .access(CONFIG_PATH)
+      .then(() => true)
+      .catch(() => false);
+
+    if (!configExists) {
+      await fs.writeFile(
+        CONFIG_PATH,
+        JSON.stringify(DEFAULT_GAME_CONFIG, null, 2)
+      );
+      return DEFAULT_GAME_CONFIG;
+    }
+
+    const configData = await fs.readFile(CONFIG_PATH, "utf8");
+    return JSON.parse(configData);
+  } catch (error) {
+    console.error("Error loading game configuration:", error);
+    return DEFAULT_GAME_CONFIG;
+  }
+}
+
+async function setOutputPathForGame(gameName) {
+  try {
+    const gameDir = path.join(GAMES_DIR, gameName);
+    await fs.mkdir(gameDir, { recursive: true });
+
+    await obs.call("SetRecordDirectory", {
+      recordDirectory: gameDir,
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error setting output path:", error.message);
+    return false;
+  }
+}
+
+async function checkGameRunning() {
+  if (!GAME_PROCESSES) {
+    GAME_PROCESSES = await loadGameConfig();
+  }
+  const gameProcesses = GAME_PROCESSES || DEFAULT_GAME_CONFIG;
+
   return new Promise((resolve, reject) => {
     exec("tasklist", (err, stdout) => {
       if (err) {
@@ -36,7 +83,7 @@ function checkGameRunning() {
 
       const runningProcesses = stdout.toLowerCase();
 
-      for (const [gameName, processNames] of Object.entries(GAME_PROCESSES)) {
+      for (const [gameName, processNames] of Object.entries(gameProcesses)) {
         const gameRunning = processNames.some((process) =>
           runningProcesses.includes(process.toLowerCase())
         );
@@ -62,6 +109,7 @@ function startGameDetection() {
       console.log(`${currentGame} detected! Starting OBS recording.`);
 
       try {
+        await setOutputPathForGame(currentGame);
         mainWindow.webContents.send("start-obs-recording");
 
         console.log(`Started recording for ${currentGame}`);
