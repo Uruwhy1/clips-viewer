@@ -5,6 +5,7 @@ import {
   groupClipsByDate,
   formatDate,
   createFavouritesSection,
+  playClip,
 } from "./helpers.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -18,6 +19,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     allClips = await window.electron.getAllClips();
+    allClips = allClips.sort((a, b) => b.date - a.date);
+    playClip(allClips[0]);
 
     function updateFavouriteStatus(filePath, isFavourite) {
       const clipToUpdate = allClips.find((clip) => clip.filePath === filePath);

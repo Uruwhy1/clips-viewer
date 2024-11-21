@@ -1,13 +1,19 @@
+## [1.2.1] - 2024-11-21
+
+- Opens the latest clip (sorted by date) when the app starts.
+
 ### [1.2.0] - 2024-11-21
 
 ## OBS System
+
 - Connects to OBS on app start.
 - Automatically starts and stops OBS recording when a game is detected.
- 
- ## [1.1.1] - 2024-11-19
+
+## [1.1.1] - 2024-11-19
 
 ### Bug Fixes
-- Clip fetching no longer stops if it finds a non-directory. 
+
+- Clip fetching no longer stops if it finds a non-directory.
 
 ## [1.1.0] - 2024-11-19
 
