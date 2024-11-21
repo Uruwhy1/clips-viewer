@@ -10,6 +10,12 @@ body {
   max-height: 100vh;
 }
 
+#obs-status {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+}
+
 .left {
   flex: var(--video-container-ratio);
   padding: var(--spacing-6);

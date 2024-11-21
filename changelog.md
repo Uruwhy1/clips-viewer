@@ -1,4 +1,10 @@
-## [1.1.1] - 2024-11-19
+### [1.2.0] - 2024-11-21
+
+## OBS System
+- Connects to OBS on app start.
+- Automatically starts and stops OBS recording when a game is detected.
+ 
+ ## [1.1.1] - 2024-11-19
 
 ### Bug Fixes
 - Clip fetching no longer stops if it finds a non-directory. 
