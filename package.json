@@ -1,6 +1,6 @@
 {
   "name": "gaming-clips-viewer",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "main": "main.js",
   "scripts": {
     "start": "cross-env APP_DEV=true electron .",
@@ -43,7 +43,9 @@
       {
         "from": "assets",
         "to": "assets",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "win": {

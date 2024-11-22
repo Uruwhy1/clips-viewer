@@ -70,6 +70,12 @@ async function setOutputPathForGame(gameName) {
       recordDirectory: gameDir,
     });
 
+    await obs.call("SetProfileParameter", {
+      parameterCategory: "Output",
+      parameterName: "FilenameFormatting",
+      parameterValue: `${gameName}_%DD-%MM-%CCYY_%hh-%mm-%ss%`,
+    });
+
     return true;
   } catch (error) {
     console.error("Error setting output path:", error.message);
@@ -81,7 +87,7 @@ async function checkGameRunning() {
   if (!GAME_PROCESSES) {
     GAME_PROCESSES = await loadGameConfig();
   }
-  const gameProcesses = GAME_PROCESSES || DEFAULT_GAME_CONFIG;
+  const gameProcesses = GAME_PROCESSES;
 
   return new Promise((resolve, reject) => {
     exec("tasklist", (err, stdout) => {
