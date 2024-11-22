@@ -161,7 +161,7 @@ function createWindow() {
 
   mainWindow.loadFile("index.html");
 
-  mainWindow.on("close", (event) => {
+  mainWindow.on("minimize", (event) => {
     mainWindow.hide();
   });
 }
@@ -188,7 +188,9 @@ app.whenReady().then(async () => {
   tray.addListener("click", () => mainWindow.show());
 });
 
-app.on("window-all-closed", () => {});
+app.on("window-all-closed", () => {
+  handleQuit();
+});
 
 app.on("activate", () => {
   mainWindow.show();

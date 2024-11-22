@@ -37,7 +37,8 @@
       "helpers.js",
       "reset.css",
       "variables.css",
-      "index.css"
+      "index.css",
+      "obs-recording.js"
     ],
     "extraResources": [
       {
