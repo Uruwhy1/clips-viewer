@@ -17,9 +17,19 @@ if (isDev) {
   });
 }
 
+function getAssetPath(asset) {
+  if (isDev) {
+    return path.join(__dirname, "assets", asset);
+  } else {
+    return path.join(process.resourcesPath, "assets", asset);
+  }
+}
+
 const GAMES_DIR = "E:/Clips";
 const CONFIG_PATH = path.join(app.getPath("userData"), "gameConfig.json");
+const FAVOURITES_PATH = path.join(app.getPath("userData"), "favourites.json");
 console.log("Config files in: " + CONFIG_PATH);
+
 const DEFAULT_GAME_CONFIG = {
   "League of Legends": ["League of Legends.exe"],
   "Rocket League": ["RocketLeague.exe", "RocketLeague_DX11.exe"],
@@ -130,6 +140,7 @@ function startGameDetection() {
     }
   }, 10000);
 }
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1980,
@@ -158,7 +169,9 @@ function handleQuit() {
 app.whenReady().then(async () => {
   createWindow();
   startGameDetection();
-  tray = new Tray(__dirname + "/icon.png");
+  const iconPath = getAssetPath("icon.png");
+  console.log("Loading tray icon from:", iconPath);
+  tray = new Tray(iconPath);
 
   const contextMenu = Menu.buildFromTemplate([
     { label: "Quit", type: "normal", click: handleQuit },
@@ -174,8 +187,6 @@ app.on("window-all-closed", () => {});
 app.on("activate", () => {
   mainWindow.show();
 });
-
-const FAVOURITES_PATH = "E:/Clips/favourites.json";
 
 async function loadFavourites() {
   try {

@@ -39,6 +39,13 @@
       "variables.css",
       "index.css"
     ],
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": ["**/*"]
+      }
+    ],
     "win": {
       "target": "nsis"
     }
