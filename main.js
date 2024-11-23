@@ -2,7 +2,6 @@ const { app, BrowserWindow, ipcMain, Tray, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
 const { exec } = require("child_process");
-const AutoLaunch = require("auto-launch");
 
 const OBSWebSocket = require("obs-websocket-js").OBSWebSocket;
 const obs = new OBSWebSocket();
@@ -16,22 +15,6 @@ if (isDev) {
     electron: path.join(__dirname, "node_modules", ".bin", "electron"),
     ignored: /node_modules|[\/\\]\.|favourites.json/,
   });
-}
-
-let autoLauncher = new AutoLaunch({
-  name: "Clips Viewer",
-});
-
-if (!isDev) {
-  autoLauncher
-    .isEnabled()
-    .then(function (isEnabled) {
-      if (isEnabled) return;
-      autoLauncher.enable();
-    })
-    .catch(function (err) {
-      throw err;
-    });
 }
 
 function getAssetPath(asset) {

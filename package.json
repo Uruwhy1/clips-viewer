@@ -16,7 +16,6 @@
     "electron-reload": "^2.0.0-alpha.1"
   },
   "dependencies": {
-    "auto-launch": "^5.0.6",
     "date-fns": "^4.1.0",
     "fs": "^0.0.1-security",
     "obs-websocket-js": "^5.0.6",
