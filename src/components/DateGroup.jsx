@@ -17,7 +17,7 @@ const DateGroup = ({ date, clips }) => {
       {!isCollapsed && (
         <div className="clips-container">
           {clips.map((clip) => (
-            <ClipItem key={clip.name} clip={clip} />
+            <ClipItem key={clip.filePath} clip={clip} />
           ))}
         </div>
       )}

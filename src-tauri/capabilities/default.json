@@ -6,9 +6,20 @@
   "permissions": [
     "core:default",
     "shell:allow-open",
+    "fs:allow-read",
+    "fs:allow-read-file",
+    "fs:allow-read-dir",
+    "fs:allow-app-meta-recursive",
+    "fs:allow-app-meta",
+    "fs:allow-app-write",
+    "fs:allow-write-file",
+    "fs:allow-read-text-file",
+    "fs:allow-create",
+    "fs:allow-write-text-file",
+    "fs:allow-write",
     {
-      "identifier": "fs:allow-app-read-recursive",
-      "allow": [{ "path": "E:/Clips/*" }]
+      "identifier": "fs:scope",
+      "allow": [{ "path": "E:/Clips/**" }, { "path": "*/**" }]
     }
   ]
 }

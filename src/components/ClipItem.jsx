@@ -2,20 +2,19 @@ import { useContext } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 
 const ClipItem = ({ clip }) => {
-  const { setAllClips } = useContext(GlobalContext);
+  const { setCurrentClip } = useContext(GlobalContext);
 
-  const toggleFavorite = () => {
-    setAllClips((prevClips) =>
-      prevClips.map((c) =>
-        c.name === clip.name && c.date === clip.date
-          ? { ...c, isFavourite: !c.isFavourite }
-          : c
-      )
-    );
+  const handleClick = () => {
+    setCurrentClip(clip);
   };
 
   return (
-    <div className={`clip-item ${clip.isFavourite ? "favourite" : ""}`}>
+    <div
+      onClick={() => {
+        handleClick(clip);
+      }}
+      className={`clip-item ${clip.isFavourite ? "favourite" : ""}`}
+    >
       <span>{clip.name}</span>
       <span
         className="favourite-icon"

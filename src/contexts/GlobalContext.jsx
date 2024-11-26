@@ -9,11 +9,13 @@ export const GlobalProvider = ({ children }) => {
   const [allClips, setAllClips] = useState([]);
   const [currentClip, setCurrentClip] = useState(null);
 
-  useEffect(async () => {
-    const initialClips = await getAllClips(gamesDir);
+  useEffect(() => {
+    (async () => {
+      const initialClips = await getAllClips(gamesDir);
 
-    setAllClips(initialClips);
-    setCurrentClip(initialClips[0]);
+      setAllClips(initialClips);
+      setCurrentClip(initialClips[0]);
+    })();
   }, []);
 
   const contextValue = useMemo(

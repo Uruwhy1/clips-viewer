@@ -18,8 +18,12 @@ const GameGroup = ({ game, clipsByDate }) => {
         <div className="game-dates">
           {Object.keys(clipsByDate)
             .sort((a, b) => new Date(b) - new Date(a)) // Sort dates descending
-            .map((date) => (
-              <DateGroup key={date} date={date} clips={clipsByDate[date]} />
+            .map((formattedDate) => (
+              <DateGroup
+                key={formattedDate}
+                date={formattedDate}
+                clips={clipsByDate[formattedDate]}
+              />
             ))}
         </div>
       )}

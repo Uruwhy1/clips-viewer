@@ -10,10 +10,10 @@ const GamesList = () => {
     if (!acc[clip.game]) {
       acc[clip.game] = {};
     }
-    if (!acc[clip.game][clip.date]) {
-      acc[clip.game][clip.date] = [];
+    if (!acc[clip.game][clip.formattedDate]) {
+      acc[clip.game][clip.formattedDate] = [];
     }
-    acc[clip.game][clip.date].push(clip);
+    acc[clip.game][clip.formattedDate].push(clip);
     return acc;
   }, {});
 

@@ -1,3 +1,4 @@
+import { convertFileSrc } from "@tauri-apps/api/core";
 import { useContext } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 
@@ -7,11 +8,14 @@ const CurrentVideo = () => {
   if (currentClip == null) {
     return <div>Loading...</div>;
   }
-  console.log(currentClip);
 
   return (
     <>
-      <video id="video" src={currentClip.path}></video>
+      <video
+        id="video"
+        controls
+        src={convertFileSrc(currentClip.filePath)}
+      ></video>
       <div className="info">
         <div className="clip-title-container">
           <p id="clip-title">{currentClip.name}</p>
@@ -23,8 +27,8 @@ const CurrentVideo = () => {
           </p>
         </div>
         <p id="clip-game">{currentClip.game}</p>
-        <p id="clip-date">{currentClip.date}</p>
-        <p id="clip-filename">{currentClip.path}</p>
+        <p id="clip-date">{currentClip.formattedDate}</p>
+        <p id="clip-filename">{currentClip.filePath}</p>
       </div>
     </>
   );
