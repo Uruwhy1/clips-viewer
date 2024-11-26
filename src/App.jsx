@@ -1,14 +1,16 @@
 import "./reset.css";
 import "./App.css";
 import "./Variables.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CurrentVideo from "./components/CurrentVideo";
 import GamesList from "./components/GamesList";
 import RecentClips from "./components/RecentClips";
 import FavouriteClips from "./components/FavouriteClips";
+import { checkOBSStatus, connectOBS } from "./helpers/OBS";
 
 function App() {
   const [view, setView] = useState("games");
+  const [obs, setObs] = useState(null);
 
   const renderView = () => {
     switch (view) {
@@ -22,6 +24,13 @@ function App() {
         return <GamesList />;
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      await connectOBS();
+      setObs("Connected to OBS (" + (await checkOBSStatus()).version + ")");
+    })();
+  }, []);
 
   return (
     <>
@@ -52,6 +61,9 @@ function App() {
 
         <div className="view-content">{renderView()}</div>
       </div>
+      <p style={{ position: "absolute", bottom: "0.5rem", right: "1rem" }}>
+        {obs}
+      </p>
     </>
   );
 }

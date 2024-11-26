@@ -2,10 +2,21 @@ import { documentDir } from "@tauri-apps/api/path";
 import { readTextFile, exists, mkdir } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 
-export async function loadFavourites() {
+let tauriFolderPath;
+
+async function initializePaths() {
   try {
     const docsDir = await documentDir();
-    const tauriFolderPath = await join(docsDir, "Tauri");
+    tauriFolderPath = await join(docsDir, "Tauri");
+  } catch (error) {
+    console.error("Error initializing paths:", error);
+  }
+}
+
+export async function loadFavourites() {
+  try {
+    if (!tauriFolderPath) await initializePaths();
+
     const tauriFolderExists = await exists(tauriFolderPath);
 
     if (!tauriFolderExists) {
@@ -23,6 +34,25 @@ export async function loadFavourites() {
     }
   } catch (error) {
     console.error("Error loading or creating favourites:", error);
+    return null;
+  }
+}
+
+export async function loadOBSConfig() {
+  try {
+    if (!tauriFolderPath) await initializePaths();
+
+    const tauriFolderExists = await exists(tauriFolderPath);
+    if (!tauriFolderExists) {
+      await mkdir(tauriFolderPath);
+    }
+
+    const configFilePath = await join(tauriFolderPath, "gameConfig.json");
+    const configData = await readTextFile(configFilePath);
+
+    return JSON.parse(configData);
+  } catch (error) {
+    console.error("Error loading OBS config:", error);
     return null;
   }
 }
