@@ -1,76 +1,87 @@
 import { readDir, stat } from "@tauri-apps/plugin-fs";
-import { loadFavourites } from "./loadExternalFiles";
+import { loadFavourites } from "./externalFiles";
 import { join } from "@tauri-apps/api/path";
 
 export async function getAllClips(dirPath) {
-  const allClips = [];
-  const favourites = await loadFavourites();
+  const favouritesSet = new Set(await loadFavourites());
 
+  const allClips = [];
   try {
     const items = await readDir(dirPath);
-
-    for (const item of items) {
-      const fullPath = dirPath + "/" + item.name;
-
+    const clipPromises = items.map(async (item) => {
+      const fullPath = await join(dirPath, item.name);
       try {
         const stat1 = await stat(fullPath);
         if (stat1.isDirectory) {
           const clips = await getClipsFromDirectoryWithMetadata(
             fullPath,
             item.name,
-            favourites
+            favouritesSet
           );
-          allClips.push(...clips);
+          return clips;
         }
+        return [];
       } catch (error) {
         console.warn(`Skipping item ${fullPath} due to error:`, error);
-        continue;
+        return [];
       }
-    }
+    });
+
+    const processedClips = await Promise.all(clipPromises);
+    allClips.push(...processedClips.flat());
   } catch (error) {
     console.error("Error reading clips directory:", error);
   }
 
-  const sortedClips = allClips.sort((a, b) => b.date - a.date);
-  return sortedClips;
+  return [
+    favouritesSet,
+    allClips.sort((a, b) => b.date.getTime() - a.date.getTime()),
+  ];
 }
 
-async function getClipsFromDirectoryWithMetadata(dirPath, game, favourites) {
+async function getClipsFromDirectoryWithMetadata(dirPath, game, favouritesSet) {
   const clipFiles = [];
-
   try {
     const items = await readDir(dirPath);
 
-    for (const item of items) {
+    const filePromises = items.map(async (item) => {
       const fullPath = await join(dirPath, item.name);
-      const name = item.name.match(/[\sA-Za-z0-9]+/)[0];
       try {
         const stat1 = await stat(fullPath);
-
-        let formattedDate = formatDate(stat1.mtime);
 
         if (stat1.isDirectory) {
           const subClips = await getClipsFromDirectoryWithMetadata(
             fullPath,
             game,
-            favourites
+            favouritesSet
           );
-          clipFiles.push(...subClips);
-        } else if (stat1.isFile) {
-          clipFiles.push({
-            game,
-            name: name || item.name,
-            filePath: fullPath,
-            formattedDate,
-            date: new Date(stat1.mtime),
-            isFavourite: favourites.includes(fullPath),
-          });
+          return subClips;
         }
+
+        if (stat1.isFile) {
+          const name = item.name.match(/[\sA-Za-z0-9]+/)?.[0] || item.name;
+
+          return [
+            {
+              game,
+              name,
+              filePath: fullPath,
+              formattedDate: formatDate(stat1.mtime),
+              date: new Date(stat1.mtime),
+              isFavourite: favouritesSet.has(fullPath),
+            },
+          ];
+        }
+
+        return [];
       } catch (error) {
         console.warn(`Skipping item ${fullPath} due to error:`, error);
-        continue;
+        return [];
       }
-    }
+    });
+
+    const processedFiles = await Promise.all(filePromises);
+    clipFiles.push(...processedFiles.flat());
   } catch (error) {
     console.error(`Error reading directory ${dirPath}:`, error);
   }

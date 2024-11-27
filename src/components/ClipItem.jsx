@@ -2,10 +2,14 @@ import { useContext } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 
 const ClipItem = ({ clip }) => {
-  const { setCurrentClip } = useContext(GlobalContext);
+  const { setCurrentClip, toggleFavourite } = useContext(GlobalContext);
 
   const handleClick = () => {
     setCurrentClip(clip);
+  };
+
+  const handleFavouriteClick = (path) => {
+    toggleFavourite(path);
   };
 
   return (
@@ -20,7 +24,7 @@ const ClipItem = ({ clip }) => {
         className="favourite-icon"
         onClick={(e) => {
           e.stopPropagation();
-          toggleFavorite();
+          handleFavouriteClick(clip.filePath);
         }}
       >
         ★

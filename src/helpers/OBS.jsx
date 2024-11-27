@@ -1,5 +1,5 @@
 import OBSWebSocket from "obs-websocket-js";
-import { loadOBSConfig } from "./loadExternalFiles";
+import { loadOBSConfig } from "./externalFiles";
 import { invoke } from "@tauri-apps/api/core";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";

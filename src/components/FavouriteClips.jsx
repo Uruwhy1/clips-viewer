@@ -13,7 +13,7 @@ const FavouriteClips = () => {
     <div id="clips-list">
       <div className="clips-container">
         {favouriteClips.map((clip) => (
-          <ClipItem key={clip.name} clip={clip} />
+          <ClipItem key={clip.filePath} clip={clip} />
         ))}
       </div>
     </div>

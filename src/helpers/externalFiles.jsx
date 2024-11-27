@@ -1,5 +1,6 @@
 import { documentDir } from "@tauri-apps/api/path";
 import { readTextFile, exists, mkdir } from "@tauri-apps/plugin-fs";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
 
 let tauriFolderPath;
@@ -35,6 +36,16 @@ export async function loadFavourites() {
   } catch (error) {
     console.error("Error loading or creating favourites:", error);
     return null;
+  }
+}
+
+export async function saveFavourites(favourites) {
+  try {
+    if (!tauriFolderPath) await initializePaths();
+    const favouritesFilePath = await join(tauriFolderPath, "favourites.json");
+    await writeTextFile(favouritesFilePath, JSON.stringify([...favourites]));
+  } catch (error) {
+    console.error("Error saving favourites:", error);
   }
 }
 

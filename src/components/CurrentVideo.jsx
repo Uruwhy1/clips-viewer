@@ -3,11 +3,15 @@ import { useContext } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 
 const CurrentVideo = () => {
-  const { currentClip } = useContext(GlobalContext);
+  const { currentClip, toggleFavourite } = useContext(GlobalContext);
 
   if (currentClip == null) {
     return <div>Loading...</div>;
   }
+
+  const handleFavouriteClick = (path) => {
+    toggleFavourite(path);
+  };
 
   return (
     <>
@@ -22,6 +26,7 @@ const CurrentVideo = () => {
           <p
             id="clip-favourite"
             className={currentClip.isFavourite ? "active" : ""}
+            onClick={() => handleFavouriteClick(currentClip.filePath)}
           >
             ★
           </p>
