@@ -1,4 +1,4 @@
-import { convertFileSrc } from "@tauri-apps/api/core";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { useContext } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 
@@ -11,6 +11,10 @@ const CurrentVideo = () => {
 
   const handleFavouriteClick = (path) => {
     toggleFavourite(path);
+  };
+
+  const handlePathClick = (path) => {
+    invoke("open_file_explorer", { path: path });
   };
 
   return (
@@ -33,7 +37,14 @@ const CurrentVideo = () => {
         </div>
         <p id="clip-game">{currentClip.game}</p>
         <p id="clip-date">{currentClip.formattedDate}</p>
-        <p id="clip-filename">{currentClip.filePath}</p>
+        <p
+          id="clip-filename"
+          onClick={() => {
+            handlePathClick(currentClip.filePath);
+          }}
+        >
+          {currentClip.filePath}
+        </p>
       </div>
     </>
   );
