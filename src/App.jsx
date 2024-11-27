@@ -7,7 +7,6 @@ import GamesList from "./components/GamesList";
 import RecentClips from "./components/RecentClips";
 import FavouriteClips from "./components/FavouriteClips";
 import { checkOBSStatus, connectOBS } from "./helpers/OBS";
-
 function App() {
   const [view, setView] = useState("games");
   const [obs, setObs] = useState(null);
@@ -58,7 +57,6 @@ function App() {
             Favourites
           </button>
         </div>
-
         <div className="view-content">{renderView()}</div>
       </div>
       <p style={{ position: "absolute", bottom: "0.5rem", right: "1rem" }}>

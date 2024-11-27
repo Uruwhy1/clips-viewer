@@ -17,6 +17,7 @@
     "fs:allow-create",
     "fs:allow-write-text-file",
     "fs:allow-write",
+    "core:app:allow-default-window-icon",
     {
       "identifier": "fs:scope",
       "allow": [{ "path": "E:/Clips/**" }, { "path": "*/**" }]

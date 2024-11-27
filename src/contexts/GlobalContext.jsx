@@ -1,6 +1,7 @@
 import { createContext, useState, useMemo, useEffect } from "react";
 import { getAllClips } from "../helpers/readFilesFromDirectory";
 import { saveFavourites } from "../helpers/externalFiles";
+import { startGameDetection } from "../helpers/OBS";
 
 const GlobalContext = createContext();
 
@@ -16,6 +17,8 @@ export const GlobalProvider = ({ children }) => {
       setAllClips(initialClips);
       setCurrentClip(initialClips[0]);
       setFavourites(favouritesSet);
+
+      startGameDetection();
     })();
   }, []);
 

@@ -78,7 +78,7 @@ export async function checkGameRunning() {
   }
 }
 
-function startGameDetection() {
+export function startGameDetection() {
   let lastDetectedGame = null;
 
   setInterval(async () => {
@@ -109,7 +109,6 @@ function startGameDetection() {
     }
   }, 5000);
 }
-startGameDetection();
 
 async function setOutputPathForGame(gameName) {
   const GAMES_DIR = "E:/Clips";

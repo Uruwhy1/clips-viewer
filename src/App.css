@@ -321,6 +321,48 @@ video::-webkit-media-controls-volume-slider {
   color: var(--color-slate-50);
 }
 
+.custom-video-bar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background-color: #ccc;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.progress {
+  position: absolute;
+  height: 100%;
+  background-color: #007bff;
+}
+
+.clip-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: row !important;
+}
+.clip-controls button {
+  width: 100px;
+}
+
+.start,
+.end {
+  position: absolute;
+  top: -0px;
+  width: 12px;
+  height: 12px;
+  background-color: #3cff00;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.end {
+  background-color: red;
+}
+
+.custom-video-bar:hover .scrubber {
+  cursor: pointer;
+}
 /* Responsive styles */
 @media (max-width: 768px) {
   body {
