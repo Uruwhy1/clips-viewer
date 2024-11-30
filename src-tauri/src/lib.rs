@@ -3,10 +3,51 @@ use std::fs;
 use std::time::{ UNIX_EPOCH };
 use filetime::{ FileTime, set_file_mtime };
 
+use tauri::tray::TrayIconBuilder;
+use tauri::menu::MenuBuilder;
+use tauri::menu::MenuItemBuilder;
+use tauri::{ Manager };
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder
         ::default()
+        .setup(|app| {
+            /* system tray setup */
+
+            let quit = MenuItemBuilder::new("Quit").id("quit").build(app).unwrap();
+            let hide = MenuItemBuilder::new("Hide").id("hide").build(app).unwrap();
+            let show = MenuItemBuilder::new("Show").id("show").build(app).unwrap();
+            let menu = MenuBuilder::new(app).items(&[&quit, &hide, &show]).build().unwrap();
+
+            let window = app.get_webview_window("main").unwrap();
+
+            let _ = TrayIconBuilder::new()
+                .tooltip("Gaming Viewer")
+                .icon(app.default_window_icon().unwrap().clone())
+                .menu(&menu)
+                // events handling here
+                .on_menu_event(|app, event| {
+                    match event.id().as_ref() {
+                        "quit" => app.exit(0),
+                        "hide" => {
+                            dbg!("menu item hide clicked");
+                            let window = app.get_webview_window("main").unwrap();
+                            window.hide().unwrap();
+                        }
+                        "show" => {
+                            dbg!("menu item show clicked");
+                            let window = app.get_webview_window("main").unwrap();
+                            window.show().unwrap();
+                        }
+                        _ => {}
+                    }
+                })
+
+                .build(app);
+
+            Ok(())
+        })
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(
