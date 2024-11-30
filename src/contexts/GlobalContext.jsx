@@ -51,10 +51,16 @@ export const GlobalProvider = ({ children }) => {
     }
   };
 
+  const addClip = (newClip) => {
+    setAllClips((prevClips) => [...prevClips, newClip]);
+    setCurrentClip(newClip);
+  };
+
   const contextValue = useMemo(
     () => ({
       allClips,
       currentClip,
+      addClip,
       setCurrentClip,
       setAllClips,
       toggleFavourite,

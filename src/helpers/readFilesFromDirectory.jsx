@@ -1,6 +1,7 @@
 import { readDir, stat } from "@tauri-apps/plugin-fs";
 import { loadFavourites } from "./externalFiles";
 import { join } from "@tauri-apps/api/path";
+import { formatDate } from "./formatDate";
 
 export async function getAllClips(dirPath) {
   const favouritesSet = new Set(await loadFavourites());
@@ -77,13 +78,3 @@ async function processFile(item, dirPath, game, favouritesSet) {
     ];
   }
 }
-
-export const formatDate = (dateKey) => {
-  dateKey = dateKey.toString();
-  const parts = dateKey.split(" ");
-  const monthIndex = parts[1];
-  const day = parseInt(parts[2]);
-  const year = parts[3];
-
-  return `${monthIndex} ${day}, ${year}`;
-};

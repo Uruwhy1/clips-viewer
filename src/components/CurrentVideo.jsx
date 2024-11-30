@@ -1,29 +1,32 @@
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-import { useContext, useState, useRef } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import { formatTime } from "../helpers/formatTime";
 
 const CurrentVideo = () => {
-  const { currentClip, toggleFavourite } = useContext(GlobalContext);
-  const [editing, setEditing] = useState(true);
+  const { currentClip, toggleFavourite, addClip } = useContext(GlobalContext);
+  const [editing, setEditing] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const videoRef = useRef(null);
 
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
+  const [newName, setNewName] = useState(null);
+
+  useEffect(() => {
+    setEditing(false);
+    setStartTime(null);
+    setEndTime(null);
+  }, [currentClip]);
 
   if (currentClip == null) {
     return <div>Loading...</div>;
   }
 
-  const handleFavouriteClick = (path) => {
-    toggleFavourite(path);
-  };
+  const handleFavouriteClick = (path) => toggleFavourite(path);
 
-  const handlePathClick = (path) => {
-    invoke("open_file_explorer", { path: path });
-  };
+  const handlePathClick = (path) => invoke("open_file_explorer", { path });
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
@@ -40,42 +43,48 @@ const CurrentVideo = () => {
     }
   };
 
-  const markStart = () => {
-    setStartTime(videoRef.current.currentTime);
-  };
+  const markStart = () => setStartTime(videoRef.current.currentTime);
 
-  const markEnd = () => {
-    setEndTime(videoRef.current.currentTime);
-  };
+  const markEnd = () => setEndTime(videoRef.current.currentTime);
 
   const createClipHandler = async () => {
     if (startTime >= endTime) {
       alert("The start is after the end! D:");
       return;
     }
-
     if (startTime !== null && endTime !== null && currentClip) {
       const startFormatted = formatTime(startTime);
       const endFormatted = formatTime(endTime);
 
-      const outputFilePath =
-        currentClip.filePath.replace(/\.[^/.]+$/, "") + "_clip.mp4";
+      const parts = currentClip.filePath.split("_");
+      parts[0] = newName ? newName : `${parts[0]} Clip`;
+      const outputFilePath = parts.join("_").replace(/\.[^/.]+$/, "") + ".mp4";
+
       try {
-        const response = await invoke("create_clip", {
+        await invoke("create_clip", {
           inputFile: currentClip.filePath,
           startTime: startFormatted,
           endTime: endFormatted,
           outputFile: outputFilePath,
         });
-        alert(response);
+
+        const newClip = {
+          filePath: outputFilePath,
+          name: newName ? newName : `${currentClip.name} Clip`,
+          game: currentClip.game,
+          formattedDate: currentClip.formattedDate,
+          isFavourite: false,
+        };
+
+        addClip(newClip);
       } catch (error) {
         alert(`Error creating clip: ${error}`);
+        console.error(error);
       }
     } else {
       alert("Please mark both start and end times first.");
     }
   };
-
   return (
     <>
       <video
@@ -86,7 +95,7 @@ const CurrentVideo = () => {
         onTimeUpdate={handleTimeUpdate}
       ></video>
 
-      {editing && (
+      {editing ? (
         <>
           <div className="custom-video-bar" onClick={handleSeek}>
             <div
@@ -118,9 +127,7 @@ const CurrentVideo = () => {
             <button onClick={createClipHandler}>Create Clip</button>
           </div>
         </>
-      )}
-
-      {!editing && (
+      ) : (
         <div className="info">
           <div className="clip-title-container">
             <p id="clip-title">{currentClip.name}</p>
@@ -136,14 +143,16 @@ const CurrentVideo = () => {
           <p id="clip-date">{currentClip.formattedDate}</p>
           <p
             id="clip-filename"
-            onClick={() => {
-              handlePathClick(currentClip.filePath);
-            }}
+            onClick={() => handlePathClick(currentClip.filePath)}
           >
             {currentClip.filePath}
           </p>
         </div>
       )}
+
+      <button onClick={() => setEditing(!editing)}>
+        {editing ? "Exit Editing" : "Enter Editing"}
+      </button>
     </>
   );
 };

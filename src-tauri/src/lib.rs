@@ -1,4 +1,7 @@
 use std::process::Command;
+use std::fs;
+use std::time::{ UNIX_EPOCH };
+use filetime::{ FileTime, set_file_mtime };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -45,20 +48,32 @@ async fn create_clip(
     end_time: String,
     output_file: String
 ) -> Result<String, String> {
+    // Retrieve original mtime
+    let original_metadata = fs::metadata(&input_file).map_err(|e| e.to_string())?;
+    let original_mtime = original_metadata.modified().map_err(|e| e.to_string())?;
+
     let output = Command::new("ffmpeg")
         .arg("-i")
-        .arg(input_file)
+        .arg(&input_file)
         .arg("-ss")
-        .arg(start_time)
+        .arg(&start_time)
         .arg("-to")
-        .arg(end_time)
+        .arg(&end_time)
         .arg("-c")
         .arg("copy")
-        .arg(output_file)
+        .arg(&output_file)
         .output()
         .map_err(|e| e.to_string())?;
 
     if output.status.success() {
+        // Convert original mtime to UNIX timestamp
+        let mtime_unix = original_mtime.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+
+        // Set mtime of the new clip to match the original
+        set_file_mtime(&output_file, FileTime::from_unix_time(mtime_unix, 0)).map_err(|e|
+            e.to_string()
+        )?;
+
         Ok("Clip created successfully".to_string())
     } else {
         Err(String::from_utf8_lossy(&output.stderr).to_string())
