@@ -7,6 +7,7 @@ use tauri::tray::TrayIconBuilder;
 use tauri::menu::MenuBuilder;
 use tauri::menu::MenuItemBuilder;
 use tauri::{ Manager };
+use std::os::windows::process::CommandExt;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -56,10 +57,12 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[tauri::command]
 fn get_running_processes() -> Result<String, String> {
     let output = Command::new("tasklist")
+        .creation_flags(CREATE_NO_WINDOW) // CREATE_NO_WINDOW constant
         .output()
         .map_err(|e| format!("Error executing tasklist: {}", e))?;
 
