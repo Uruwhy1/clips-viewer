@@ -12,12 +12,13 @@ const CurrentVideo = () => {
 
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
-  const [newName, setNewName] = useState(null);
+  const [newName, setNewName] = useState("");
 
   useEffect(() => {
     setEditing(false);
     setStartTime(null);
     setEndTime(null);
+    setNewName("");
   }, [currentClip]);
 
   if (currentClip == null) {
@@ -57,7 +58,14 @@ const CurrentVideo = () => {
       const endFormatted = formatTime(endTime);
 
       const parts = currentClip.filePath.split("_");
-      parts[0] = newName ? newName : `${parts[0]} Clip`;
+      const clipName = parts.shift().split("\\");
+
+      clipName[clipName.length - 1] = newName
+        ? newName
+        : clipName[clipName.length - 1] + " Clip";
+
+      parts.unshift(clipName.join("\\"));
+
       const outputFilePath = parts.join("_").replace(/\.[^/.]+$/, "") + ".mp4";
 
       try {
@@ -85,6 +93,7 @@ const CurrentVideo = () => {
       alert("Please mark both start and end times first.");
     }
   };
+
   return (
     <>
       <video
@@ -124,6 +133,12 @@ const CurrentVideo = () => {
           <div className="clip-controls">
             <button onClick={markStart}>Start</button>
             <button onClick={markEnd}>End</button>
+            <input
+              type="text"
+              placeholder="New clip name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
             <button onClick={createClipHandler}>Create Clip</button>
           </div>
         </>
