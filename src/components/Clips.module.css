@@ -1,0 +1,63 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+
+  font-weight: 500;
+}
+
+.filters button {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+
+  gap: 0.4rem;
+
+  background: none;
+  border: 1px solid var(--borders);
+
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:first-of-type {
+    flex-grow: 1;
+  }
+  &:last-of-type {
+    min-width: 20%;
+
+    justify-content: center;
+  }
+}
+
+.filters button.active {
+  &:last-of-type {
+    background-color: #000;
+    color: #fff;
+  }
+
+  fill: gold;
+}
+
+.clipGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.noClips {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}

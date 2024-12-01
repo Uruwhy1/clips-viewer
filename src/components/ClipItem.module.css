@@ -1,0 +1,49 @@
+.clipCard {
+  border: 1px solid var(--borders);
+  border-radius: 8px;
+  overflow: hidden;
+
+  padding: 0.5rem;
+
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.header {
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+}
+
+.favouriteButton {
+  cursor: pointer;
+  fill: none;
+
+  &.active {
+    stroke: gold;
+    fill: gold;
+  }
+}
+
+.clipMeta {
+  display: flex;
+  justify-content: space-between;
+
+  color: #666;
+  font-size: 0.8rem;
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+}

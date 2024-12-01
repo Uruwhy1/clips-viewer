@@ -1,0 +1,9 @@
+body {
+  background-color: var(--page-bg);
+  font-family: system-ui;
+}
+
+:root {
+  --page-bg: #fff;
+  --borders: #e0e0e0;
+}

@@ -2,6 +2,7 @@ import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { useContext, useState, useRef, useEffect } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import { formatTime } from "../helpers/formatTime";
+import createClipHandler from "../helpers/createClip";
 
 const CurrentVideo = () => {
   const { currentClip, toggleFavourite, addClip } = useContext(GlobalContext);
@@ -20,6 +21,10 @@ const CurrentVideo = () => {
     setEndTime(null);
     setNewName("");
   }, [currentClip]);
+
+  useEffect(() => {
+    console.log(startTime, endTime);
+  }, [endTime, startTime]);
 
   if (currentClip == null) {
     return <div>Loading...</div>;
@@ -43,56 +48,8 @@ const CurrentVideo = () => {
       videoRef.current.currentTime = newTime;
     }
   };
-
   const markStart = () => setStartTime(videoRef.current.currentTime);
-
   const markEnd = () => setEndTime(videoRef.current.currentTime);
-
-  const createClipHandler = async () => {
-    if (startTime >= endTime) {
-      alert("The start is after the end! D:");
-      return;
-    }
-    if (startTime !== null && endTime !== null && currentClip) {
-      const startFormatted = formatTime(startTime);
-      const endFormatted = formatTime(endTime);
-
-      const parts = currentClip.filePath.split("_");
-      const clipName = parts.shift().split("\\");
-
-      clipName[clipName.length - 1] = newName
-        ? newName
-        : clipName[clipName.length - 1] + " Clip";
-
-      parts.unshift(clipName.join("\\"));
-
-      const outputFilePath = parts.join("_").replace(/\.[^/.]+$/, "") + ".mp4";
-
-      try {
-        await invoke("create_clip", {
-          inputFile: currentClip.filePath,
-          startTime: startFormatted,
-          endTime: endFormatted,
-          outputFile: outputFilePath,
-        });
-
-        const newClip = {
-          filePath: outputFilePath,
-          name: newName ? newName : `${currentClip.name} Clip`,
-          game: currentClip.game,
-          formattedDate: currentClip.formattedDate,
-          isFavourite: false,
-        };
-
-        addClip(newClip);
-      } catch (error) {
-        alert(`Error creating clip: ${error}`);
-        console.error(error);
-      }
-    } else {
-      alert("Please mark both start and end times first.");
-    }
-  };
 
   return (
     <>
@@ -139,7 +96,19 @@ const CurrentVideo = () => {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
-            <button onClick={createClipHandler}>Create Clip</button>
+            <button
+              onClick={() =>
+                createClipHandler(
+                  newName,
+                  startTime,
+                  endTime,
+                  currentClip,
+                  addClip
+                )
+              }
+            >
+              Create Clip
+            </button>
           </div>
         </>
       ) : (
