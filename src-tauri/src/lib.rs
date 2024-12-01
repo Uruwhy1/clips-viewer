@@ -62,7 +62,7 @@ const CREATE_NO_WINDOW: u32 = 0x08000000;
 #[tauri::command]
 fn get_running_processes() -> Result<String, String> {
     let output = Command::new("tasklist")
-        .creation_flags(CREATE_NO_WINDOW) // CREATE_NO_WINDOW constant
+        .creation_flags(CREATE_NO_WINDOW)
         .output()
         .map_err(|e| format!("Error executing tasklist: {}", e))?;
 
@@ -106,6 +106,7 @@ async fn create_clip(
         .arg("-c")
         .arg("copy")
         .arg(&output_file)
+        .creation_flags(CREATE_NO_WINDOW)
         .output()
         .map_err(|e| e.to_string())?;
 
