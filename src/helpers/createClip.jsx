@@ -1,7 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
 import { formatTime } from "./formatTime";
-import { useContext } from "react";
-import GlobalContext from "../contexts/GlobalContext";
 
 async function createClipHandler(
   newName,

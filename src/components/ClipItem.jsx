@@ -14,11 +14,14 @@ const ClipItem = ({ clip }) => {
   };
 
   return (
-    <div className={styles.clipCard}>
+    <div className={styles.clipCard} onClick={(e) => handleClick(clip)}>
       <div className={styles.header}>
         <h3>{clip.name}</h3>
         <svg
-          onClick={() => handleFavouriteClick(clip.filePath)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleFavouriteClick(clip.filePath);
+          }}
           className={`${styles.favouriteButton} ${
             clip.isFavourite ? styles.active : ""
           }`}
