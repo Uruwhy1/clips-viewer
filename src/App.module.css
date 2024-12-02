@@ -5,6 +5,13 @@ body {
 
 :root {
   --page-bg: #fff;
+  --page-cover: #0000006f;
   --borders: #e0e0e0;
-  --clip-hover: #94b1ff;
+
+  --accent: #0099ff;
+  --accent-washed: #94b1ff;
+  --accent-white: #e7edff;
+
+  --clip-hover: var(--accent-washed);
+  --clip-hover-bg: var(--accent-white);
 }

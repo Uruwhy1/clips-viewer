@@ -13,6 +13,18 @@
   gap: 10px;
 
   font-weight: 500;
+
+  > div {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    > * {
+      width: 100%;
+    }
+  }
 }
 
 .filters button {
@@ -22,31 +34,65 @@
 
   gap: 0.4rem;
 
-  background: none;
+  background: #fff;
   border: 1px solid var(--borders);
 
   padding: 10px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:first-of-type {
-    flex-grow: 1;
-  }
-  &:last-of-type {
-    min-width: 20%;
-
-    justify-content: center;
-  }
 }
 
-.filters button.active {
-  &:last-of-type {
+.filters > button {
+  min-width: 20%;
+  justify-content: center;
+
+  &.active {
     background-color: #000;
     color: #fff;
   }
+}
 
-  fill: gold;
+.gamesList {
+  position: absolute;
+  z-index: 1;
+
+  top: 110%;
+
+  background-color: #fff;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+
+  border: 1px solid var(--borders);
+  box-shadow: 4px 4px 0px var(--clip-hover);
+  border-radius: 8px;
+  overflow: hidden;
+
+  > button {
+    border: 0;
+    border-radius: 0;
+
+    &:hover {
+      background-color: var(--clip-hover-bg);
+    }
+
+    &.active {
+      color: var(--accent);
+    }
+  }
+}
+
+.cover {
+  position: fixed;
+  left: 0;
+  top: 0;
+  content: "";
+
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--page-cover);
 }
 
 .clipGrid {

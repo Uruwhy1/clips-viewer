@@ -5,12 +5,19 @@ import styles from "./Clips.module.css";
 import ClipItem from "./ClipItem";
 
 const Clips = () => {
-  const { allClips, toggleFavourite } = useContext(GlobalContext);
+  const { allClips } = useContext(GlobalContext);
   const [clips, setClips] = useState(allClips);
   const [filter, setFilter] = useState({
     game: "All",
     showFavourites: false,
   });
+  const [games, setGames] = useState(false);
+  const [showGames, setShowGames] = useState(false);
+
+  useEffect(() => {
+    const gamesList = Array.from(new Set(allClips.map((clip) => clip.game)));
+    setGames(gamesList);
+  }, [allClips]);
 
   useEffect(() => {
     const filteredClips = allClips
@@ -24,29 +31,57 @@ const Clips = () => {
     setClips(filteredClips);
   }, [allClips, filter]);
 
+  const handleFilterClick = () => {
+    setShowGames(!showGames);
+  };
+
+  const handleGameClick = (game) => {
+    const newGame = game === filter.game ? "All" : game;
+
+    setFilter((prev) => ({
+      ...prev,
+      game: newGame,
+    }));
+
+    setShowGames(false);
+  };
+
   return (
     <div className={styles.container}>
+      {showGames && <div className={styles.cover}></div>}
       <div className={styles.filters}>
-        <button
-          className={filter.game === "All" ? styles.active : ""}
-          onClick={() => setFilter((prev) => ({ ...prev, game: "All" }))}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
-            <polyline points="17 2 12 7 7 2"></polyline>
-          </svg>
-          <p>All</p>
-        </button>
+        <div>
+          <button onClick={handleFilterClick}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+              <polyline points="17 2 12 7 7 2"></polyline>
+            </svg>
+            <p>{filter.game}</p>
+          </button>
+          {showGames && (
+            <div className={styles.gamesList}>
+              {games.map((game, index) => (
+                <button
+                  className={`${filter.game === game ? styles.active : ""}`}
+                  onClick={() => handleGameClick(game)}
+                  key={index}
+                >
+                  {game}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <button
           className={filter.showFavourites ? styles.active : ""}
           onClick={() =>
