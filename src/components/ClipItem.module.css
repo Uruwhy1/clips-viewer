@@ -3,12 +3,12 @@
   border-radius: 8px;
   overflow: hidden;
 
-  padding: 0.5rem;
+  padding: var(--inline-padding);
 
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--inline-gap);
 
   > div {
     display: flex;
@@ -26,8 +26,8 @@
 
 .header {
   h3 {
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-size: var(--header-small-size);
+    font-weight: var(--header-small-weight);
   }
 }
 
@@ -46,11 +46,11 @@
   justify-content: space-between;
 
   color: #666;
-  font-size: 0.8rem;
+  font-size: var(--font-size-small);
 
   > div {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: var(--inline-gap-small);
   }
 }

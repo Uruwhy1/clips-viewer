@@ -1,8 +1,8 @@
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { useContext, useState, useRef, useEffect } from "react";
 import GlobalContext from "../contexts/GlobalContext";
-import { formatTime } from "../helpers/formatTime";
 import createClipHandler from "../helpers/createClip";
+import styles from "./CurrentVideo.module.css";
 
 const CurrentVideo = () => {
   const { currentClip, toggleFavourite, addClip } = useContext(GlobalContext);
@@ -21,10 +21,6 @@ const CurrentVideo = () => {
     setEndTime(null);
     setNewName("");
   }, [currentClip]);
-
-  useEffect(() => {
-    console.log(startTime, endTime);
-  }, [endTime, startTime]);
 
   if (currentClip == null) {
     return <div>Loading...</div>;
@@ -52,92 +48,143 @@ const CurrentVideo = () => {
   const markEnd = () => setEndTime(videoRef.current.currentTime);
 
   return (
-    <>
-      <video
-        ref={videoRef}
-        id="video"
-        controls
-        src={convertFileSrc(currentClip.filePath)}
-        onTimeUpdate={handleTimeUpdate}
-      ></video>
-
-      {editing ? (
-        <>
-          <div className="custom-video-bar" onClick={handleSeek}>
-            <div
-              className="progress"
-              style={{
-                width: `${(currentTime / duration) * 100}%`,
-              }}
-            ></div>
-            {startTime && (
-              <div
-                className="start"
-                style={{
-                  left: `${(startTime / duration) * 100}%`,
-                }}
-              ></div>
-            )}
-            {endTime && (
-              <div
-                className="end"
-                style={{
-                  left: `${(endTime / duration) * 100}%`,
-                }}
-              ></div>
-            )}
-          </div>
-          <div className="clip-controls">
-            <button onClick={markStart}>Start</button>
-            <button onClick={markEnd}>End</button>
-            <input
-              type="text"
-              placeholder="New clip name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
-            <button
-              onClick={() =>
-                createClipHandler(
-                  newName,
-                  startTime,
-                  endTime,
-                  currentClip,
-                  addClip
-                )
-              }
-            >
-              Create Clip
-            </button>
-          </div>
-        </>
-      ) : (
-        <div className="info">
-          <div className="clip-title-container">
-            <p id="clip-title">{currentClip.name}</p>
-            <p
-              id="clip-favourite"
-              className={currentClip.isFavourite ? "active" : ""}
-              onClick={() => handleFavouriteClick(currentClip.filePath)}
-            >
-              ★
-            </p>
-          </div>
-          <p id="clip-game">{currentClip.game}</p>
-          <p id="clip-date">{currentClip.formattedDate}</p>
+    <main className={styles.container}>
+      <div>
+        <video
+          ref={videoRef}
+          id="video"
+          controls
+          src={convertFileSrc(currentClip.filePath)}
+          onTimeUpdate={handleTimeUpdate}
+          className={styles.video}
+        ></video>
+      </div>
+      <div className={styles.info}>
+        <div className={styles.clipTitleContainer}>
+          <h2 className={styles.title}>{currentClip.name}</h2>
+          <svg
+            onClick={(e) => {
+              e.stopPropagation();
+              handleFavouriteClick(currentClip.filePath);
+            }}
+            className={`${styles.favouriteButton} ${
+              currentClip.isFavourite ? styles.active : ""
+            }`}
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        </div>
+        <div className={styles.infoItem}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+            <polyline points="17 2 12 7 7 2"></polyline>
+          </svg>
+          <p className={styles.game}>{currentClip.game}</p>
+        </div>
+        <div className={styles.infoItem}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <p className={styles.date}>{currentClip.formattedDate}</p>
+        </div>
+        <div className={styles.infoItem}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
           <p
-            id="clip-filename"
+            className={styles.path}
             onClick={() => handlePathClick(currentClip.filePath)}
           >
             {currentClip.filePath}
           </p>
         </div>
-      )}
-
-      <button onClick={() => setEditing(!editing)}>
-        {editing ? "Exit Editing" : "Enter Editing"}
-      </button>
-    </>
+      </div>
+      <div className={styles.editing}>
+        <div className={styles.customVideoBar} onClick={handleSeek}>
+          <div
+            className={styles.progress}
+            style={{ width: `${(currentTime / duration) * 100}%` }}
+          ></div>
+          {startTime && (
+            <div
+              className={styles.start}
+              style={{ left: `${(startTime / duration) * 100}%` }}
+            ></div>
+          )}
+          {endTime && (
+            <div
+              className={styles.end}
+              style={{ left: `${(endTime / duration) * 100}%` }}
+            ></div>
+          )}
+        </div>
+        <div className={styles.clipControls}>
+          <button onClick={markStart}>Start</button>
+          <button onClick={markEnd}>End</button>
+          <input
+            type="text"
+            placeholder="New clip name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+          />
+          <button
+            onClick={() =>
+              createClipHandler(
+                newName,
+                startTime,
+                endTime,
+                currentClip,
+                addClip
+              )
+            }
+          >
+            Create Clip
+          </button>
+        </div>
+      </div>
+    </main>
   );
 };
 

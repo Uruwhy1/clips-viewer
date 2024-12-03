@@ -1,0 +1,36 @@
+body {
+  background-color: var(--page-bg);
+  font-family: system-ui;
+}
+
+:root {
+  --page-bg: #fff;
+  --page-cover: #0000006f;
+  --page-padding: 1.5rem;
+  --page-padding-small: 1rem;
+  --borders: #e0e0e0;
+
+  --accent: #0099ff;
+  --accent-washed: #94b1ff;
+  --accent-white: #e7edff;
+
+  --clip-hover: var(--accent-washed);
+  --clip-hover-bg: var(--accent-white);
+
+  --button-padding: 10px;
+  --radius-big: 8px;
+
+  --inline-padding: 0.5rem;
+  --inline-gap: 0.5rem;
+  --inline-gap-small: 0.3rem;
+
+  --gap-big: 20px;
+  --gap-medium: 1rem;
+  --gap-small: 10px;
+
+  --header-medium-size: 1.5rem;
+  --header-small-size: 1.1rem;
+  --header-small-weight: 500;
+
+  --font-size-small: 0.8rem;
+}

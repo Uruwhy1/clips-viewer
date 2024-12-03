@@ -1,0 +1,71 @@
+.container {
+  padding: var(--page-padding-small);
+
+  max-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: 1fr 0.5fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "video info"
+    "edit info";
+  gap: var(--gap-medium);
+
+  > div {
+    border-radius: var(--radius-big);
+    border: 1px solid var(--borders);
+    overflow: hidden;
+  }
+}
+
+video {
+}
+
+.info {
+  grid-area: info;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--inline-gap);
+
+  > *:not(:first-child) {
+    padding: 0 var(--inline-padding);
+  }
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: var(--inline-gap-small);
+
+    > * {
+      flex-shrink: 0;
+    }
+  }
+}
+
+.editing {
+  grid-area: edit;
+}
+
+.clipTitleContainer {
+  justify-content: space-between;
+  color: #fff;
+
+  background-color: var(--accent-washed);
+  padding: var(--inline-padding);
+
+  font-size: var(--header-medium-size);
+  .title {
+    font-size: inherit;
+  }
+
+  .favouriteButton {
+    cursor: pointer;
+
+    &.active {
+      color: rgb(246, 255, 0);
+    }
+  }
+}

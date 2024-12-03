@@ -1,5 +1,5 @@
 import "./reset.css";
-import styles from "./App.module.css";
+import "./App.css";
 import { useContext, useEffect, useState } from "react";
 import CurrentVideo from "./components/CurrentVideo";
 import { checkOBSStatus, connectOBS } from "./helpers/OBS";
@@ -34,7 +34,17 @@ function App() {
   return (
     <>
       {!currentClip ? <Clips /> : <CurrentVideo />}
-      <p style={{ position: "fixed", bottom: "0.5rem", right: "1rem" }}>
+      <p
+        style={{
+          background: "#000",
+          color: "#fff",
+          position: "fixed",
+          padding: "0.2rem",
+          bottom: "0rem",
+          right: "0rem",
+          borderRadius: "0.2rem 0 0.2rem",
+        }}
+      >
         {obs}
       </p>
     </>

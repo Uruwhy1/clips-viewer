@@ -1,16 +1,16 @@
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: var(--page-padding);
 
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--gap-medium);
 }
 
 .filters {
   display: flex;
-  gap: 10px;
+  gap: var(--gap-small);
 
   font-weight: 500;
 
@@ -32,13 +32,13 @@
   align-items: center;
   justify-content: start;
 
-  gap: 0.4rem;
+  gap: var(--inline-gap);
 
   background: #fff;
   border: 1px solid var(--borders);
 
-  padding: 10px;
-  border-radius: 8px;
+  padding: var(--button-padding);
+  border-radius: var(--radius-big);
   cursor: pointer;
 }
 
@@ -67,7 +67,7 @@
 
   border: 1px solid var(--borders);
   box-shadow: 4px 4px 0px var(--clip-hover);
-  border-radius: 8px;
+  border-radius: var(--radius-big);
   overflow: hidden;
 
   > button {
@@ -98,7 +98,7 @@
 .clipGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 20px;
+  gap: var(--gap-big);
 }
 
 .noClips {
