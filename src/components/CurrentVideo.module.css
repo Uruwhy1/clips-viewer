@@ -20,11 +20,13 @@
   }
 }
 
-video {
-}
-
 .info {
   grid-area: info;
+
+  background: linear-gradient(white 20%, rgba(255, 255, 255, 0)) left,
+    var(--current-game-cover) no-repeat center;
+  background-size: cover;
+  background-blend-mode: lighten;
 
   display: flex;
   flex-direction: column;

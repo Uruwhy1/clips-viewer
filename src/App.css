@@ -10,9 +10,11 @@ body {
   --page-padding-small: 1rem;
   --borders: #e0e0e0;
 
-  --accent: #0099ff;
-  --accent-washed: #94b1ff;
-  --accent-white: #e7edff;
+  --accent: #c74632;
+  --accent-washed: #f4795b;
+  --accent-white: #fee5e5;
+
+  --curent-game-cover: "";
 
   --clip-hover: var(--accent-washed);
   --clip-hover-bg: var(--accent-white);

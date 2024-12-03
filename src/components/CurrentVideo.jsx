@@ -20,6 +20,11 @@ const CurrentVideo = () => {
     setStartTime(null);
     setEndTime(null);
     setNewName("");
+
+    document.documentElement.style.setProperty(
+      "--current-game-cover",
+      `url("/${currentClip.game}.jpg")`
+    );
   }, [currentClip]);
 
   if (currentClip == null) {

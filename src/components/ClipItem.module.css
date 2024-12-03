@@ -20,6 +20,7 @@
   transition: all 0.15s;
   &:hover {
     transform: scale(1.02);
+    border-color: var(--clip-hover);
     box-shadow: 0 4px 0 var(--clip-hover);
   }
 }

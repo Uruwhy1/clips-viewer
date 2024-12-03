@@ -43,12 +43,20 @@
 }
 
 .filters > button {
+  --star: gold;
+
   min-width: 20%;
   justify-content: center;
 
+  stroke: var(--star);
+  fill: #fff;
+
   &.active {
-    background-color: #000;
+    --star: yellow;
+    fill: var(--star);
+
     color: #fff;
+    background-color: var(--accent-washed);
   }
 }
 
@@ -65,8 +73,6 @@
   flex-direction: column;
   justify-content: stretch;
 
-  border: 1px solid var(--borders);
-  box-shadow: 4px 4px 0px var(--clip-hover);
   border-radius: var(--radius-big);
   overflow: hidden;
 
@@ -79,7 +85,8 @@
     }
 
     &.active {
-      color: var(--accent);
+      color: #fff;
+      background-color: var(--accent-washed);
     }
   }
 }
