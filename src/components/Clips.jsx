@@ -1,50 +1,43 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Clips.module.css";
 
 import ClipItem from "./ClipItem";
 
 const Clips = () => {
-  const { allClips } = useContext(GlobalContext);
-  const [clips, setClips] = useState(allClips);
-  const [filter, setFilter] = useState({
-    game: "All",
-    showFavourites: false,
-  });
-  const [games, setGames] = useState(false);
-  const [showGames, setShowGames] = useState(false);
+  const { filteredClips, games, filter, updateFilter } =
+    useContext(GlobalContext);
 
-  useEffect(() => {
-    const gamesList = Array.from(new Set(allClips.map((clip) => clip.game)));
-    setGames(gamesList);
-  }, [allClips]);
-
-  useEffect(() => {
-    const filteredClips = allClips
-      .filter(
-        (clip) =>
-          (filter.game === "All" || clip.game === filter.game) &&
-          (!filter.showFavourites || clip.isFavourite)
-      )
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    setClips(filteredClips);
-  }, [allClips, filter]);
+  const [showGames, setShowGames] = React.useState(false);
 
   const handleFilterClick = () => {
     setShowGames(!showGames);
   };
 
   const handleGameClick = (game) => {
-    const newGame = game === filter.game ? "All" : game;
-
-    setFilter((prev) => ({
-      ...prev,
-      game: newGame,
-    }));
-
+    updateFilter({
+      game: game === filter.game ? "All" : game,
+    });
     setShowGames(false);
   };
+
+  useEffect(() => {
+    const storedPosition = localStorage.getItem("position");
+
+    if (storedPosition) {
+      document.documentElement.scrollTop = JSON.parse(storedPosition);
+    }
+
+    const handleScroll = () => {
+      const pagePosition = document.documentElement.scrollTop;
+      localStorage.setItem("position", JSON.stringify(pagePosition));
+    };
+
+    document.addEventListener("scroll", handleScroll);
+    return () => {
+      document.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -70,11 +63,11 @@ const Clips = () => {
           </button>
           {showGames && (
             <div className={styles.gamesList}>
-              {games.map((game, index) => (
+              {games.map((game) => (
                 <button
-                  className={`${filter.game === game ? styles.active : ""}`}
+                  key={game}
+                  className={filter.game === game ? styles.active : ""}
                   onClick={() => handleGameClick(game)}
-                  key={index}
                 >
                   {game}
                 </button>
@@ -85,10 +78,9 @@ const Clips = () => {
         <button
           className={filter.showFavourites ? styles.active : ""}
           onClick={() =>
-            setFilter((prev) => ({
-              ...prev,
-              showFavourites: !prev.showFavourites,
-            }))
+            updateFilter({
+              showFavourites: !filter.showFavourites,
+            })
           }
         >
           <svg
@@ -109,11 +101,11 @@ const Clips = () => {
       </div>
 
       <div className={styles.clipGrid}>
-        {clips.map((clip) => (
+        {filteredClips.map((clip) => (
           <ClipItem key={clip.filePath} clip={clip} />
         ))}
 
-        {clips.length === 0 && (
+        {filteredClips.length === 0 && (
           <div className={styles.noClips}>
             No clips found. Try adjusting your filters.
           </div>

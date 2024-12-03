@@ -8,7 +8,11 @@ const GlobalContext = createContext();
 export const GlobalProvider = ({ children }) => {
   const gamesDir = "E:/Clips";
   const [allClips, setAllClips] = useState([]);
-  const [currentClip, setCurrentClip] = useState(null);
+  const [filter, setFilter] = useState({
+    game: "All",
+    showFavourites: false,
+  });
+  const [games, setGames] = useState([]);
   const [favourites, setFavourites] = useState(new Set());
 
   useEffect(() => {
@@ -21,6 +25,24 @@ export const GlobalProvider = ({ children }) => {
       startGameDetection();
     })();
   }, []);
+
+  useEffect(() => {
+    const gamesList = Array.from(new Set(allClips.map((clip) => clip.game)));
+    setGames(gamesList);
+  }, [allClips]);
+
+  // filtered clips (this is what the clips view should use) 
+  const filteredClips = useMemo(() => {
+    return allClips
+      .filter(
+        (clip) =>
+          (filter.game === "All" || clip.game === filter.game) &&
+          (!filter.showFavourites || clip.isFavourite)
+      )
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [allClips, filter]);
+
+  const [currentClip, setCurrentClip] = useState(null);
 
   const toggleFavourite = async (clipPath) => {
     const newFavourites = new Set(favourites);
@@ -56,16 +78,27 @@ export const GlobalProvider = ({ children }) => {
     setCurrentClip(newClip);
   };
 
+  const updateFilter = (newFilter) => {
+    setFilter((prev) => ({
+      ...prev,
+      ...newFilter,
+    }));
+  };
+
   const contextValue = useMemo(
     () => ({
       allClips,
       currentClip,
+      filteredClips,
+      games,
+      filter,
+      updateFilter,
       addClip,
       setCurrentClip,
       setAllClips,
       toggleFavourite,
     }),
-    [allClips, currentClip, favourites]
+    [allClips, currentClip, favourites, filter]
   );
 
   return (
