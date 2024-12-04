@@ -43,6 +43,7 @@ function App() {
           bottom: "0rem",
           right: "0rem",
           borderRadius: "0.2rem 0 0.2rem",
+          zIndex: "99",
         }}
       >
         {obs}

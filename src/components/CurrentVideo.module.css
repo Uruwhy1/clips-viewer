@@ -6,12 +6,12 @@
   overflow: hidden;
 
   display: grid;
-  grid-template-columns: 1fr 0.5fr;
+  grid-template-columns: 1fr 0.4fr;
   grid-template-rows: auto 1fr;
   grid-template-areas:
     "video info"
     "edit info";
-  gap: var(--gap-medium);
+  gap: var(--gap-smallest);
 
   > div {
     border-radius: var(--radius-big);
@@ -23,42 +23,64 @@
 .info {
   grid-area: info;
 
-  background: linear-gradient(white 20%, rgba(255, 255, 255, 0)) left,
-    var(--current-game-cover) no-repeat center;
-  background-size: cover;
-  background-blend-mode: lighten;
+  user-select: none;
+  background-color: var(--card-bg);
 
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.infoContainer {
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: var(--inline-gap);
 
-  > *:not(:first-child) {
-    padding: 0 var(--inline-padding);
-  }
-
-  > div {
-    display: flex;
-    align-items: center;
-    gap: var(--inline-gap-small);
-
-    > * {
-      flex-shrink: 0;
-    }
-  }
+  padding: var(--padding-medium) var(--padding-slightly-bigger);
 }
 
-.editing {
-  grid-area: edit;
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-smallest);
+
+  color: #ccc;
+
+  overflow: hidden;
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  > p {
+    width: calc(100% - var(--padding-big));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  > svg {
+    stroke-width: 3;
+    stroke: var(--accent-washed);
+  }
+
+  &.filePath {
+    cursor: pointer;
+  }
+
+  font-weight: 500;
+  transition: 0.1s color;
+  &:hover {
+    color: #fff;
+  }
 }
 
 .clipTitleContainer {
   justify-content: space-between;
+  font-size: var(--header-medium-size);
   color: #fff;
 
-  background-color: var(--accent-washed);
-  padding: var(--inline-padding);
-
-  font-size: var(--header-medium-size);
   .title {
     font-size: inherit;
   }
@@ -66,8 +88,109 @@
   .favouriteButton {
     cursor: pointer;
 
+    stroke: currentColor;
     &.active {
       color: rgb(246, 255, 0);
     }
   }
+}
+
+.imageDiv {
+  z-index: 1;
+  position: relative;
+  &::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: "";
+    background: linear-gradient(var(--card-bg) 0%, transparent 130%);
+    width: 100%;
+    height: 110%;
+  }
+
+  > img {
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
+.editing {
+  grid-area: edit;
+
+  background-color: var(--card-bg);
+
+  border-radius: var(--radius-big);
+  padding: var(--padding-big);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.customVideoBar {
+  position: relative;
+  width: 100%;
+  height: 8px;
+
+  background-color: var(--accent-white);
+  border-radius: var(--radius-big);
+
+  cursor: pointer;
+}
+
+.progress {
+  background-color: var(--accent-washed);
+  height: 100%;
+  border-radius: var(--radius-big);
+}
+
+.start,
+.end {
+  position: absolute;
+  bottom: 0;
+  height: 200%;
+  width: 10px;
+}
+.start {
+  background-color: rgb(0, 255, 0);
+}
+.end {
+  background-color: rgb(0, 191, 255);
+}
+
+.clipControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.clipControls button {
+  background-color: var(--accent);
+  color: white;
+
+  border: none;
+  padding: var(--padding-medium) var(--padding-big);
+
+  font-weight: 500;
+
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.clipControls button:hover {
+  background-color: var(--accent-dark);
+}
+
+.clipControls input {
+  flex: 1;
+  padding: var(--padding-medium);
+  border-radius: 4px;
+  border: 1px solid var(--borders);
+  background-color: #2b2b2b;
+  color: white;
+}
+
+.clipControls input::placeholder {
+  color: #aaa;
 }

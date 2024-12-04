@@ -7,14 +7,16 @@ body {
   --page-bg: #fff;
   --page-cover: #0000006f;
   --page-padding: 1.5rem;
-  --page-padding-small: 1rem;
+  --page-padding-small: 0.25rem;
   --borders: #e0e0e0;
 
+  --accent-dark: #ad3320;
   --accent: #c74632;
   --accent-washed: #f4795b;
   --accent-white: #fee5e5;
 
   --curent-game-cover: "";
+  --card-bg: #1e1e1e;
 
   --clip-hover: var(--accent-washed);
   --clip-hover-bg: var(--accent-white);
@@ -22,13 +24,19 @@ body {
   --button-padding: 10px;
   --radius-big: 8px;
 
+  --padding-big: 1rem;
+  --padding-slightly-bigger: 0.75rem;
+  --padding-medium: 0.5rem;
+  --padding-small: 0.25rem;
+
   --inline-padding: 0.5rem;
   --inline-gap: 0.5rem;
-  --inline-gap-small: 0.3rem;
+  --inline-gap-small: 0.25rem;
 
   --gap-big: 20px;
   --gap-medium: 1rem;
   --gap-small: 10px;
+  --gap-smallest: 0.3rem;
 
   --header-medium-size: 1.5rem;
   --header-small-size: 1.1rem;
