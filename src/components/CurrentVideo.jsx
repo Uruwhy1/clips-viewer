@@ -13,6 +13,43 @@ const CurrentVideo = () => {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
   const [newName, setNewName] = useState("");
+  const [timeIntervals, setTimeIntervals] = useState([]);
+
+  const generateTimeIntervals = (videoDuration) => {
+    const intervalOptions = [1, 5, 10, 30, 60, 300, 600];
+    const styles = ["markerMini", "markerSmall", "markerMedium", "markerBig"];
+
+    const selectedIntervals = intervalOptions.filter(
+      (interval) =>
+        interval * 2 < videoDuration && interval * 200 > videoDuration
+    );
+
+    const markers = [];
+    let count = Math.max(0, 3 - selectedIntervals.length);
+
+    selectedIntervals.slice(-4).forEach((interval) => {
+      for (let time = interval; time < videoDuration; time += interval) {
+        markers.push({
+          time,
+          percentage: (time / videoDuration) * 100,
+          style: styles[count],
+        });
+      }
+      count++;
+    });
+
+    return markers;
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const secs = Math.floor(seconds % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${mins}:${secs}`;
+  };
 
   useEffect(() => {
     setStartTime(null);
@@ -24,6 +61,12 @@ const CurrentVideo = () => {
       `url("/${currentClip.game}.jpg")`
     );
   }, [currentClip]);
+
+  useEffect(() => {
+    if (duration > 0) {
+      setTimeIntervals(generateTimeIntervals(duration));
+    }
+  }, [currentClip, duration]);
 
   if (currentClip == null) {
     return <div>Loading...</div>;
@@ -47,12 +90,18 @@ const CurrentVideo = () => {
       videoRef.current.currentTime = newTime;
     }
   };
-  const markStart = () => setStartTime(videoRef.current.currentTime);
+  const markStart = () => {
+    if (videoRef.current.currentTime !== 0) {
+      setStartTime(videoRef.current.currentTime);
+    } else {
+      setStartTime(1);
+    }
+  };
   const markEnd = () => setEndTime(videoRef.current.currentTime);
 
   return (
     <main className={styles.container}>
-      <div>
+      <div className={styles.videoContainer}>
         <video
           ref={videoRef}
           id="video"
@@ -60,6 +109,15 @@ const CurrentVideo = () => {
           src={convertFileSrc(currentClip.filePath)}
           onTimeUpdate={handleTimeUpdate}
           className={styles.video}
+          // play and pause immediately so duration gets set up
+          autoPlay
+          onLoadedData={() => {
+            if (videoRef.current) {
+              setTimeout(() => {
+                videoRef.current.pause();
+              }, 1);
+            }
+          }}
         ></video>
       </div>
       <div className={styles.info}>
@@ -154,7 +212,15 @@ const CurrentVideo = () => {
           <div
             className={styles.progress}
             style={{ width: `${(currentTime / duration) * 100}%` }}
-          ></div>
+          ></div>{" "}
+          {timeIntervals.map((marker, index) => (
+            <div
+              key={index}
+              className={`${styles.marker} ${styles[marker.style]}`}
+              style={{ left: `${marker.percentage}%` }}
+              title={`${marker.label} marker`}
+            />
+          ))}
           {startTime && (
             <div
               className={styles.start}
@@ -166,7 +232,12 @@ const CurrentVideo = () => {
               className={styles.end}
               style={{ left: `${(endTime / duration) * 100}%` }}
             ></div>
-          )}
+          )}{" "}
+          <div className={styles.durationLabels}>
+            <span className={styles.timeLabel}>00:00</span>
+            <span className={styles.timeLabel}>{formatTime(duration / 2)}</span>
+            <span className={styles.timeLabel}>{formatTime(duration)}</span>
+          </div>
         </div>
         <div className={styles.clipControls}>
           <button onClick={markStart}>Start</button>
