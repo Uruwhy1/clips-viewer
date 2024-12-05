@@ -231,6 +231,17 @@ const CurrentVideo = () => {
               style={{ left: `${(startTime / duration) * 100}%` }}
             ></div>
           )}
+          {startTime && endTime && (
+            <div
+              className={styles.clipMarker}
+              style={{
+                left: `${(startTime / duration) * 100}%`,
+                width: `calc(${(endTime / duration) * 100}% - ${
+                  (startTime / duration) * 100
+                }%)`,
+              }}
+            ></div>
+          )}
           {endTime && (
             <div
               className={styles.end}

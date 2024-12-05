@@ -189,20 +189,59 @@
   top: -10px;
 }
 
+.clipMarker {
+  position: absolute;
+  bottom: 0;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.445);
+
+  z-index: 1;
+}
+
 .start,
 .end {
   position: absolute;
   bottom: 0;
-  height: 200%;
-  width: 8px;
+  height: 100%;
+  width: 6px;
 
   transform: translateX(-4px);
+
+  --color: #11ff00;
+  background-color: var(--color);
+  z-index: 2;
+
+  &::after,
+  &::before {
+    position: absolute;
+    content: "";
+    background-color: var(--color);
+    width: 10px;
+    height: 6px;
+  }
 }
 .start {
-  background-color: rgb(0, 255, 0);
+  &::after,
+  &::before {
+    bottom: calc(100% - 6px);
+    left: 0;
+  }
+
+  &::before {
+    top: calc((100% - 6px));
+  }
 }
 .end {
-  background-color: rgb(0, 191, 255);
+  transform: rotate(180deg);
+  &::after,
+  &::before {
+    bottom: calc(100% - 6px);
+    left: 0;
+  }
+
+  &::before {
+    top: calc((100% - 6px));
+  }
 }
 
 .clipControls {
@@ -245,5 +284,29 @@
 
   &::placeholder {
     color: #878787;
+  }
+}
+
+@media screen and (max-width: 1300px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+
+    flex: 1;
+  }
+
+  .videoContainer {
+    height: auto;
+    justify-content: start;
+  }
+
+  .editing {
+    flex-grow: 1;
+    justify-content: end;
+    gap: 2rem;
+  }
+
+  .imageDiv {
+    display: none;
   }
 }
