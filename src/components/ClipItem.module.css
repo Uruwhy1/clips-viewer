@@ -5,6 +5,9 @@
 
   padding: var(--inline-padding);
 
+  background-color: var(--page-bg);
+  color: var(--page-bg-opposite);
+
   display: flex;
   justify-content: space-between;
   flex-direction: column;
@@ -48,7 +51,7 @@
   display: flex;
   justify-content: space-between;
 
-  color: #666;
+  color: var(--gray-color);
   font-size: var(--font-size-small);
 
   > div {

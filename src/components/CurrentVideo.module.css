@@ -1,6 +1,4 @@
 .container {
-  padding: var(--page-padding-small);
-
   max-height: 100vh;
   height: 100vh;
   overflow: hidden;
@@ -11,11 +9,8 @@
   grid-template-areas:
     "video info"
     "edit info";
-  gap: var(--gap-smallest);
 
   > div {
-    border-radius: var(--radius-big);
-    border: 1px solid var(--borders);
     overflow: hidden;
   }
 }
@@ -130,7 +125,6 @@
 
   background-color: var(--card-bg);
 
-  border-radius: var(--radius-big);
   padding: var(--padding-big);
 
   display: flex;
@@ -239,11 +233,17 @@
   flex: 1;
   padding: var(--padding-medium);
   border-radius: 4px;
-  border: 1px solid var(--borders);
-  background-color: #2b2b2b;
-  color: white;
-}
 
-.clipControls input::placeholder {
-  color: #aaa;
+  border: 1px solid var(--borders);
+
+  background-color: #ffffff;
+  color: #000;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: #878787;
+  }
 }

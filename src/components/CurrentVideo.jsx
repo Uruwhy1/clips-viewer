@@ -56,10 +56,12 @@ const CurrentVideo = () => {
     setEndTime(null);
     setNewName("");
 
-    document.documentElement.style.setProperty(
-      "--current-game-cover",
-      `url("/${currentClip.game}.jpg")`
-    );
+    if (currentClip) {
+      document.documentElement.style.setProperty(
+        "--current-game-cover",
+        `url("/${currentClip.game}.jpg")`
+      );
+    }
   }, [currentClip]);
 
   useEffect(() => {
@@ -106,6 +108,7 @@ const CurrentVideo = () => {
           ref={videoRef}
           id="video"
           controls
+          muted
           src={convertFileSrc(currentClip.filePath)}
           onTimeUpdate={handleTimeUpdate}
           className={styles.video}
@@ -115,7 +118,8 @@ const CurrentVideo = () => {
             if (videoRef.current) {
               setTimeout(() => {
                 videoRef.current.pause();
-              }, 1);
+                videoRef.current.muted = false;
+              }, 50);
             }
           }}
         ></video>

@@ -5,18 +5,25 @@ body {
 
 :root {
   --page-bg: #fff;
+  --page-bg-opposite: #000;
+
+  --card-bg: #1e1e1e;
+  --card-bg-color: #fff;
+
+  --gray-color: #666;
+
   --page-cover: #0000006f;
+
+  --borders: #e0e0e0;
   --page-padding: 1.5rem;
   --page-padding-small: 0.25rem;
-  --borders: #e0e0e0;
 
-  --accent-dark: #ad3320;
-  --accent: #c74632;
+  --accent-dark: #852112;
+  --accent: #9d2816;
   --accent-washed: #f4795b;
   --accent-white: #fee5e5;
 
   --curent-game-cover: "";
-  --card-bg: #1e1e1e;
 
   --clip-hover: var(--accent-washed);
   --clip-hover-bg: var(--accent-white);
