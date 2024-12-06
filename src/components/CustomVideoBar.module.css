@@ -1,0 +1,119 @@
+.customVideoBar {
+  position: relative;
+  width: 100%;
+  height: 30%;
+
+  background-color: var(--accent-white);
+
+  cursor: pointer;
+}
+
+.progress,
+.clipMarker,
+.start,
+.end,
+.timeLabel,
+.marker {
+  pointer-events: none;
+}
+
+.marker {
+  position: absolute;
+  bottom: 0;
+  background-color: #000;
+}
+.markerMini {
+  height: 20%;
+  width: 1px;
+}
+.markerSmall {
+  height: 30%;
+  width: 2px;
+
+  transform: translateX(-1px);
+}
+.markerMedium {
+  height: 50%;
+  width: 3px;
+
+  transform: translateX(-1.5px);
+}
+.markerBig {
+  height: 80%;
+  width: 4px;
+
+  transform: translateX(-2px);
+}
+
+.progress {
+  background-color: var(--accent-washed);
+  height: 100%;
+}
+
+.durationLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  font-size: 12px;
+  color: #fff;
+}
+
+.timeLabel {
+  position: relative;
+  top: -10px;
+}
+
+.clipMarker {
+  position: absolute;
+  bottom: 0;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.445);
+
+  z-index: 1;
+}
+
+.start,
+.end {
+  position: absolute;
+  bottom: 0;
+  height: 100%;
+  width: 6px;
+
+  transform: translateX(-4px);
+
+  --color: #11ff00;
+  background-color: var(--color);
+  z-index: 2;
+
+  &::after,
+  &::before {
+    position: absolute;
+    content: "";
+    background-color: var(--color);
+    width: 10px;
+    height: 6px;
+  }
+}
+.start {
+  &::after,
+  &::before {
+    bottom: calc(100% - 6px);
+    left: 0;
+  }
+
+  &::before {
+    top: calc((100% - 6px));
+  }
+}
+.end {
+  transform: rotate(180deg);
+  &::after,
+  &::before {
+    bottom: calc(100% - 6px);
+    left: 0;
+  }
+
+  &::before {
+    top: calc((100% - 6px));
+  }
+}

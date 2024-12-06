@@ -51,12 +51,18 @@
   stroke: var(--star);
   fill: #fff;
 
-  &.active {
-    --star: yellow;
-    fill: var(--star);
+  & svg {
+    stroke: var(--star);
+  }
 
+  &.active {
     color: #fff;
     background-color: var(--accent-washed);
+
+    > svg {
+      --star: yellow;
+      fill: var(--star);
+    }
   }
 }
 
