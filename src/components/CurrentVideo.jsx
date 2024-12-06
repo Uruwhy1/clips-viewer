@@ -1,14 +1,14 @@
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { useContext, useState, useRef, useEffect } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import createClipHandler from "../helpers/createClip";
+import Video from "./Video";
 import styles from "./CurrentVideo.module.css";
 
 const CurrentVideo = () => {
   const { currentClip, toggleFavourite, addClip } = useContext(GlobalContext);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const videoRef = useRef(null);
+  const videoRef = useRef(null);  // Define videoRef here
 
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
@@ -78,11 +78,9 @@ const CurrentVideo = () => {
 
   const handlePathClick = (path) => invoke("open_file_explorer", { path });
 
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-      setDuration(videoRef.current.duration);
-    }
+  const handleTimeUpdate = (currentTime, duration) => {
+    setCurrentTime(currentTime);
+    setDuration(duration);
   };
 
   const handleSeek = (event) => {
@@ -92,6 +90,7 @@ const CurrentVideo = () => {
       videoRef.current.currentTime = newTime;
     }
   };
+  
   const markStart = () => {
     if (videoRef.current.currentTime !== 0) {
       setStartTime(videoRef.current.currentTime);
@@ -103,27 +102,11 @@ const CurrentVideo = () => {
 
   return (
     <main className={styles.container}>
-      <div className={styles.videoContainer}>
-        <video
-          ref={videoRef}
-          id="video"
-          controls
-          muted
-          src={convertFileSrc(currentClip.filePath)}
-          onTimeUpdate={handleTimeUpdate}
-          className={styles.video}
-          // play and pause immediately so duration gets set up
-          autoPlay
-          onLoadedData={() => {
-            if (videoRef.current) {
-              setTimeout(() => {
-                videoRef.current.pause();
-                videoRef.current.muted = false;
-              }, 50);
-            }
-          }}
-        ></video>
-      </div>
+      <Video
+        currentClip={currentClip}
+        onTimeUpdate={handleTimeUpdate}
+        ref={videoRef}  
+      />
       <div className={styles.info}>
         <div className={styles.infoContainer}>
           <div className={`${styles.clipTitleContainer} ${styles.infoItem}`}>
@@ -216,7 +199,7 @@ const CurrentVideo = () => {
           <div
             className={styles.progress}
             style={{ width: `${(currentTime / duration) * 100}%` }}
-          ></div>{" "}
+          ></div>
           {timeIntervals.map((marker, index) => (
             <div
               key={index}

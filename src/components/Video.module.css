@@ -1,0 +1,12 @@
+.videoContainer {
+  position: relative;
+  width: 100%;
+
+  aspect-ratio: 16 / 9;
+  background-color: var(--card-bg);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}

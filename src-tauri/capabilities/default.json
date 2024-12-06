@@ -20,6 +20,8 @@
     "core:app:allow-default-window-icon",
     "core:window:allow-hide",
     "core:window:allow-show",
+    "core:window:allow-set-fullscreen",
+    "core:window:allow-is-fullscreen",
     {
       "identifier": "fs:scope",
       "allow": [{ "path": "E:/Clips/**" }, { "path": "*/**" }]
