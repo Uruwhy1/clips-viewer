@@ -17,16 +17,14 @@ async function createClipHandler(
     const startFormatted = formatTime(startTime);
     const endFormatted = formatTime(endTime);
 
-    const parts = currentClip.filePath.split("_");
-    const clipName = parts.shift().split("\\");
+    const parts = currentClip.filePath.split("\\");
+    const clipName = parts.pop().split("_");
 
-    clipName[clipName.length - 1] = newName
-      ? newName
-      : clipName[clipName.length - 1] + " Clip";
+    clipName[0] = newName ? newName : clipName[0] + " Clip";
 
-    parts.unshift(clipName.join("\\"));
+    parts.push(clipName.join("_"));
 
-    const outputFilePath = parts.join("_").replace(/\.[^/.]+$/, "") + ".mp4";
+    const outputFilePath = parts.join("\\");
 
     try {
       await invoke("create_clip", {

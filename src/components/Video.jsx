@@ -66,7 +66,6 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
       } else {
         ref.current.play();
       }
-      console.log("Xd", isPlaying);
       setIsPlaying(!isPlaying);
     }
   };

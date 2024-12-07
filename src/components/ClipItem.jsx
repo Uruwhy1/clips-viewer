@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./ClipItem.module.css";
-import { Calendar, Calendar1, Star, Tv } from "lucide-react";
+import { Calendar, Star, Tv } from "lucide-react";
 
 const ClipItem = ({ clip }) => {
   const { setCurrentClip, toggleFavourite } = useContext(GlobalContext);

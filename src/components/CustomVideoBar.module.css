@@ -1,9 +1,10 @@
 .customVideoBar {
   position: relative;
   width: 100%;
-  height: 30%;
+  height: 40%;
 
   background-color: var(--accent-white);
+  margin-bottom: 0.5rem;
 
   cursor: pointer;
 }

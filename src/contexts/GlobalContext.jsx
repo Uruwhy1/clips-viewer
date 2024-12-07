@@ -31,7 +31,7 @@ export const GlobalProvider = ({ children }) => {
     setGames(gamesList);
   }, [allClips]);
 
-  // filtered clips (this is what the clips view should use) 
+  // filtered clips (this is what the clips view should use)
   const filteredClips = useMemo(() => {
     return allClips
       .filter(
@@ -74,7 +74,7 @@ export const GlobalProvider = ({ children }) => {
   };
 
   const addClip = (newClip) => {
-    setAllClips((prevClips) => [...prevClips, newClip]);
+    setAllClips((prevClips) => [newClip, ...prevClips]);
     setCurrentClip(newClip);
   };
 
