@@ -3,6 +3,7 @@ import { loadOBSConfig } from "./externalFiles";
 import { invoke } from "@tauri-apps/api/core";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
+import { window } from "@tauri-apps/api";
 
 const obs = new OBSWebSocket();
 
@@ -16,8 +17,10 @@ export const connectOBS = async () => {
   }
 };
 
-export const startRecording = async () => {
+export const startRecording = async (currentGame) => {
   try {
+    await setSceneForGame(currentGame);
+
     const response = await obs.call("StartRecord");
     const response2 = await obs.call("StartReplayBuffer");
     return { success: true };
@@ -31,6 +34,11 @@ export const stopRecording = async () => {
   try {
     const response = await obs.call("StopRecord");
     const response2 = await obs.call("StopReplayBuffer");
+
+    location.reload();
+    let current = window.getCurrentWindow();
+    current.show();
+
     return { success: true };
   } catch (error) {
     console.error("OBS Recording Stop Error:", error);
@@ -89,7 +97,7 @@ export function startGameDetection() {
 
       try {
         await setOutputPathForGame(currentGame);
-        startRecording();
+        startRecording(currentGame);
 
         console.log(`Started recording for ${currentGame}`);
       } catch (error) {
@@ -131,4 +139,15 @@ async function setOutputPathForGame(gameName) {
     console.error("Error setting output path:", error);
     return false;
   }
+}
+
+async function setSceneForGame(gameName) {
+  let scenes = (await obs.call("GetSceneList")).scenes;
+  let sceneName = "Default";
+  if (scenes.some((i) => i.sceneName.includes(gameName))) {
+    sceneName = gameName;
+  }
+  await obs.call("SetCurrentProgramScene", {
+    sceneName,
+  });
 }
