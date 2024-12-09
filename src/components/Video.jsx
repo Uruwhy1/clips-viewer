@@ -20,18 +20,33 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
   const divRef = useRef();
 
   useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape" && isFullscreen) {
-        e.stopPropagation();
-        toggleFullscreen();
+    const handleKeystroke = (e) => {
+      switch (e.key) {
+        case "Escape":
+          if (isFullscreen) {
+            e.stopPropagation();
+            toggleFullscreen();
+          }
+          break;
+        case "ArrowLeft":
+          ref.current.currentTime = ref.current.currentTime - 5;
+          setCurrentTime(ref.current.currentTime);
+          break;
+        case "ArrowRight":
+          ref.current.currentTime = ref.current.currentTime + 5;
+          setCurrentTime(ref.current.currentTime);
+          break;
+        case " ":
+          togglePlayPause();
+          break;
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("keydown", handleKeystroke);
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("keydown", handleKeystroke);
     };
-  }, [isFullscreen]);
+  }, [isFullscreen, isPlaying]);
 
   useEffect(() => {
     const handleDoubleClick = () => toggleFullscreen();
@@ -87,16 +102,24 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
 
   const handleTimeUpdate = () => {
     if (ref.current) {
-      const progressFill = document.querySelector(`.${styles.progressBarFill}`);
-      const progress = (ref.current.currentTime / ref.current.duration) * 100;
       setCurrentTime(ref.current.currentTime);
       setDuration(ref.current.duration);
-      if (progressFill) {
-        progressFill.style.width = `${progress}%`;
-      }
       onTimeUpdate(ref.current.currentTime, ref.current.duration);
     }
   };
+
+  const handleSeek = (event) => {
+    if (ref.current) {
+      const newTime =
+        (event.nativeEvent.offsetX / event.target.offsetWidth) * duration;
+      ref.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keypress", () => {});
+  }, []);
 
   return (
     <div className={styles.videoContainer} ref={divRef}>
@@ -119,23 +142,11 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
 
-        <div className={styles.progressBarContainer}>
-          <div className={styles.progressBarFill}>
-            <div className={styles.progressBarCircle}></div>
-          </div>
-          <input
-            type="range"
-            className={styles.progressBar}
-            min="0"
-            max={duration}
-            value={currentTime}
-            onChange={(e) => {
-              if (ref.current) {
-                ref.current.currentTime = e.target.value;
-                setCurrentTime(e.target.value);
-              }
-            }}
-          />
+        <div className={styles.progressBarContainer} onClick={handleSeek}>
+          <div
+            className={styles.progress}
+            style={{ width: `${(currentTime / duration) * 100}%` }}
+          ></div>
         </div>
 
         <button onClick={toggleMute} className={styles.controlButton}>
