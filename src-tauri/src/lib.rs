@@ -97,12 +97,12 @@ async fn create_clip(
     let original_mtime = original_metadata.modified().map_err(|e| e.to_string())?;
 
     let output = Command::new("ffmpeg")
-        .arg("-i")
-        .arg(&input_file)
         .arg("-ss")
         .arg(&start_time)
         .arg("-to")
         .arg(&end_time)
+        .arg("-i")
+        .arg(&input_file)
         .arg("-c")
         .arg("copy")
         .arg(&output_file)
