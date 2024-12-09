@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import CurrentVideo from "./components/CurrentVideo";
 import { checkOBSStatus, connectOBS } from "./helpers/OBS";
 import Clips from "./components/Clips";
+import TitleBar from "./components/TitleBar";
 import GlobalContext from "./contexts/GlobalContext";
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
 
   return (
     <>
+      <TitleBar />
       {!currentClip ? <Clips /> : <CurrentVideo />}
       <p
         style={{

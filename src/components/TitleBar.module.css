@@ -1,0 +1,46 @@
+.titleBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--card-bg);
+  color: #fff;
+  height: 32px;
+  user-select: none;
+}
+
+.dragRegion {
+  flex: 1;
+  -webkit-app-region: drag;
+  cursor: grab;
+}
+
+.windowControls {
+  height: 100%;
+  display: flex;
+}
+
+.controlButton {
+  color: #fff;
+  cursor: pointer;
+
+  border: none;
+  margin: auto;
+
+  width: 50px;
+  height: 100%;
+  transition: background 0.2s;
+
+  background: none;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.controlButton:hover {
+  background: #85858564;
+}
+
+.closeButton:hover {
+  background: #ff0015; /* Red for close button */
+}
