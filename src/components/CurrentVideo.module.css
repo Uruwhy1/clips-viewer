@@ -87,7 +87,7 @@
     fill: currentColor;
     stroke: currentColor;
     &.active {
-      color: rgb(246, 255, 0);
+      color: gold;
     }
   }
 }

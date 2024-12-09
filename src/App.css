@@ -23,6 +23,7 @@ body {
   --accent-washed: #f4795b;
   --accent-white: #fee5e5;
 
+  --value: 0;
   --curent-game-cover: "";
 
   --clip-hover: var(--accent-washed);

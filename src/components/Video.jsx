@@ -8,16 +8,23 @@ import {
   VolumeX,
   Maximize,
   Minimize,
+  Videotape,
 } from "lucide-react";
 import styles from "./Video.module.css";
 
 const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+  const [volume, setVolume] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playback, setPlayback] = useState(null);
   const divRef = useRef();
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--value", 0);
+  }, []);
 
   useEffect(() => {
     const handleKeystroke = (e) => {
@@ -90,6 +97,11 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
       ref.current.muted = !isMuted;
       setIsMuted(!isMuted);
     }
+
+    if (ref.current.muted) handleVolumeChange(false);
+    else {
+      handleVolumeChange(volume);
+    }
   };
 
   const formatTime = (time) => {
@@ -117,9 +129,36 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
     }
   };
 
-  useEffect(() => {
-    document.addEventListener("keypress", () => {});
-  }, []);
+  const changePlaybackRate = (rate) => {
+    if (ref.current) {
+      ref.current.playbackRate = rate;
+      setPlayback(rate);
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    let value = 0;
+    let max = 1;
+
+    if (typeof e == "number") {
+      value = e;
+    } else if (e) {
+      const newVolume = parseFloat(e.target.value);
+      setVolume(newVolume);
+      if (newVolume === 0) {
+        setIsMuted(true);
+      } else {
+        setIsMuted(false);
+      }
+      value = e.target.value;
+      max = e.target.max || 1;
+    }
+
+    ref.current.volume = value;
+    const percentage = value / max;
+
+    document.documentElement.style.setProperty("--value", percentage);
+  };
 
   return (
     <div className={styles.videoContainer} ref={divRef}>
@@ -149,11 +188,41 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
           ></div>
         </div>
 
-        <button onClick={toggleMute} className={styles.controlButton}>
-          {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-        </button>
+        <div className={styles.volumeControl}>
+          <button onClick={toggleMute} className={styles.controlButton}>
+            {isMuted || volume === 0 ? (
+              <VolumeX size={20} />
+            ) : (
+              <Volume2 size={20} />
+            )}
+          </button>
+          <div className={styles.volumeSlider}>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={isMuted ? 0 : volume}
+              onChange={handleVolumeChange}
+            />
+          </div>
+        </div>
+
         <button onClick={toggleFullscreen} className={styles.controlButton}>
           {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+        </button>
+        <button
+          className={`${styles.controlButton} ${styles.playbackContainer}`}
+        >
+          <Videotape />
+          {/* prettier-ignore */}
+          <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : "" }`}>
+            <div className={styles.playback} onClick={() => changePlaybackRate(2)}>2x</div>
+            <div className={styles.playback} onClick={() => changePlaybackRate(1.5)}>1.5x</div>
+            <div className={styles.playback} onClick={() => changePlaybackRate(1)}>1x</div>
+            <div className={styles.playback} onClick={() => changePlaybackRate(0.5)}>0.5x</div>
+            <div className={styles.playback} onClick={() => changePlaybackRate(0.25)}>0.25x</div>
+          </div>
         </button>
       </div>
     </div>
