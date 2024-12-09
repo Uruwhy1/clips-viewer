@@ -115,7 +115,7 @@ export function startGameDetection() {
 
       lastDetectedGame = null;
     }
-  }, 5000);
+  }, 2500);
 }
 
 async function setOutputPathForGame(gameName) {
