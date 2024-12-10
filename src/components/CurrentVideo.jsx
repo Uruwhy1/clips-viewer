@@ -10,6 +10,7 @@ const CurrentVideo = () => {
   const { currentClip, toggleFavourite } = useContext(GlobalContext);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [editing, setEditing] = useState(false);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -85,11 +86,25 @@ const CurrentVideo = () => {
           <img src={`/${currentClip.game}.jpg`} alt="" />
         </div>
       </div>
-      <EditingControls
-        duration={duration}
-        currentTime={currentTime}
-        videoRef={videoRef}
-      />
+
+      {!editing && (
+        <div className={styles.editingButton}>
+          <button
+            onClick={() => {
+              setEditing(true);
+            }}
+          >
+            EDITING MODE
+          </button>
+        </div>
+      )}
+      {editing && (
+        <EditingControls
+          duration={duration}
+          currentTime={currentTime}
+          videoRef={videoRef}
+        />
+      )}
     </main>
   );
 };

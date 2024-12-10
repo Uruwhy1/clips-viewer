@@ -13,6 +13,11 @@ async function createClipHandler(
     return;
   }
 
+  if (newName.match(/[^A-Za-z0-9]/)) {
+    alert("Invalid name input... idiot.");
+    return;
+  }
+
   if (startTime !== null && endTime !== null && currentClip) {
     const startFormatted = formatTime(startTime);
     const endFormatted = formatTime(endTime);

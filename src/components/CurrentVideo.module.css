@@ -112,6 +112,35 @@
   }
 }
 
+.editingButton {
+  flex: 1;
+  background-color: var(--card-bg);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  > button {
+    font-weight: 500;
+    color: #fff;
+    background-color: transparent;
+
+    border: 2px solid #fff;
+    border-radius: var(--radius-small);
+
+    padding: 0.5rem 3rem;
+    cursor: pointer;
+
+    transition: all 0.2s;
+    &:hover {
+      color: var(--accent-washed);
+      border-color: var(--accent-washed);
+      box-shadow: 0px 2px 0px var(--accent-washed);
+      transform: translateY(-5px);
+    }
+  }
+}
+
 @media screen and (max-width: 1300px) {
   .container {
     margin-top: var(--title-bar-height);
