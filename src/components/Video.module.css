@@ -9,6 +9,8 @@
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
+
+  z-index: 101;
 }
 
 video {
@@ -200,4 +202,8 @@ video {
     var(--accent-white) calc(var(--value) * 100%),
     var(--accent-white) 100%
   );
+}
+
+@media screen {
+  
 }

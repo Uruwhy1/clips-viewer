@@ -1,5 +1,4 @@
 .container {
-  max-height: calc(100vh - 32px);
   height: 100vh;
   overflow: hidden;
 
@@ -27,6 +26,8 @@
 }
 
 .infoContainer {
+  margin-top: var(--title-bar-height);
+
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -113,10 +114,17 @@
 
 @media screen and (max-width: 1300px) {
   .container {
+    margin-top: var(--title-bar-height);
+    max-height: calc(100vh - var(--title-bar-height));
+
     display: flex;
     flex-direction: column;
 
     flex: 1;
+  }
+
+  .infoContainer {
+    margin-top: 0;
   }
 
   .imageDiv {

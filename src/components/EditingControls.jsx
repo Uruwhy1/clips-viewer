@@ -51,6 +51,7 @@ const EditingControls = ({ duration, currentTime, videoRef }) => {
         <button onClick={markStart}>Start</button>
         <button onClick={markEnd}>End</button>
         <input
+          pattern="[A-Za-z0-9]"
           type="text"
           placeholder="New clip name"
           value={newName}

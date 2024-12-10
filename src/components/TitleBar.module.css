@@ -4,8 +4,15 @@
   justify-content: space-between;
   background-color: var(--card-bg);
   color: #fff;
-  height: 32px;
+  height: var(--title-bar-height);
   user-select: none;
+
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+
+  z-index: 100;
 }
 
 .dragRegion {
