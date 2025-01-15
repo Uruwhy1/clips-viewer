@@ -5,11 +5,13 @@ import CurrentVideo from "./components/CurrentVideo";
 import { checkOBSStatus, connectOBS } from "./helpers/OBS";
 import Clips from "./components/Clips";
 import TitleBar from "./components/TitleBar";
+import Sidebar from "./components/Sidebar";
 import GlobalContext from "./contexts/GlobalContext";
 
 function App() {
   const [obs, setObs] = useState(null);
   const { currentClip, setCurrentClip } = useContext(GlobalContext);
+  const [view, setView] = useState("clips");
 
   useEffect(() => {
     (async () => {
@@ -21,7 +23,7 @@ function App() {
   useEffect(() => {
     const handleEscapeKey = (event) => {
       if (event.key === "Escape") {
-        setCurrentClip(null);
+        setView("clips");
       }
     };
 
@@ -32,10 +34,22 @@ function App() {
     };
   }, []);
 
+  const currentView = () => {
+    switch (view) {
+      case "clips":
+        return <Clips setView={setView} />;
+      case "video":
+        return <CurrentVideo />;
+      case "settings":
+        return "xd";
+    }
+  };
+
   return (
     <>
       <TitleBar />
-      {!currentClip ? <Clips /> : <CurrentVideo />}
+      <Sidebar setView={setView} />
+      {currentView()}
       <p
         style={{
           background: "#000",

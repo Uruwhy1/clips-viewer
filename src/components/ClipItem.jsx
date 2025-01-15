@@ -3,11 +3,12 @@ import GlobalContext from "../contexts/GlobalContext";
 import styles from "./ClipItem.module.css";
 import { Calendar, Star, Tv } from "lucide-react";
 
-const ClipItem = ({ clip }) => {
+const ClipItem = ({ clip, setView }) => {
   const { setCurrentClip, toggleFavourite } = useContext(GlobalContext);
 
   const handleClick = () => {
     setCurrentClip(clip);
+    setView("video");
   };
 
   const handleFavouriteClick = (path) => {

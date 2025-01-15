@@ -5,7 +5,7 @@ import styles from "./Clips.module.css";
 import ClipItem from "./ClipItem";
 import { Star, Tv } from "lucide-react";
 
-const Clips = () => {
+const Clips = ({ setView }) => {
   const { filteredClips, games, filter, updateFilter } =
     useContext(GlobalContext);
 
@@ -78,7 +78,7 @@ const Clips = () => {
 
       <div className={styles.clipGrid}>
         {filteredClips.map((clip) => (
-          <ClipItem key={clip.filePath} clip={clip} />
+          <ClipItem key={clip.filePath} clip={clip} setView={setView} />
         ))}
 
         {filteredClips.length === 0 && (

@@ -3,11 +3,20 @@ body {
   font-family: system-ui;
 }
 
+#root {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+}
+
 :root {
   --page-bg: #fff;
   --page-bg-opposite: #000;
 
   --title-bar-height: 32px;
+
+  --sidebar-bg: var(--accent-washed);
+  --sidebar-color: #fff;
+  --sidebar-hover: #00000026;
 
   --card-bg: #1e1e1e;
   --card-bg-color: #fff;

@@ -17,6 +17,7 @@ const TitleBar = () => {
 
   const handleMinimize = () => {
     currentWindow.minimize();
+    currentWindow.hide();
   };
 
   const handleMaximize = async () => {

@@ -1,0 +1,32 @@
+.sidebar {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-color);
+  z-index: 9000;
+
+  height: 100vh;
+  padding: 0.5rem 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.button {
+  width: 80%;
+  aspect-ratio: 1 /1;
+
+  display: grid;
+  place-content: center;
+
+  border-radius: var(--radius-small);
+
+  transition: background 0.15s;
+  &:hover {
+    background-color: var(--sidebar-hover);
+  }
+}
+
+.settings {
+  margin-top: auto;
+}
