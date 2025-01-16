@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Clips.module.css";
 
@@ -8,8 +8,7 @@ import { Star, Tv } from "lucide-react";
 const Clips = ({ setView }) => {
   const { filteredClips, games, filter, updateFilter } =
     useContext(GlobalContext);
-
-  const [showGames, setShowGames] = React.useState(false);
+  const [showGames, setShowGames] = useState(false);
 
   const handleFilterClick = () => {
     setShowGames(!showGames);

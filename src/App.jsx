@@ -10,7 +10,6 @@ import GlobalContext from "./contexts/GlobalContext";
 
 function App() {
   const [obs, setObs] = useState(null);
-  const { currentClip, setCurrentClip } = useContext(GlobalContext);
   const [view, setView] = useState("clips");
 
   useEffect(() => {
@@ -23,7 +22,19 @@ function App() {
   useEffect(() => {
     const handleEscapeKey = (event) => {
       if (event.key === "Escape") {
-        setView("clips");
+        switch (view) {
+          case "video":
+            setView("clips");
+            break;
+          case "clips":
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+            break;
+          default:
+            break;
+        }
       }
     };
 
@@ -32,7 +43,7 @@ function App() {
     return () => {
       window.removeEventListener("keydown", handleEscapeKey);
     };
-  }, []);
+  }, [view]);
 
   const currentView = () => {
     switch (view) {

@@ -12,7 +12,6 @@ export const GlobalProvider = ({ children }) => {
     game: "All",
     showFavourites: false,
   });
-  const [games, setGames] = useState([]);
   const [favourites, setFavourites] = useState(new Set());
 
   useEffect(() => {
@@ -26,11 +25,6 @@ export const GlobalProvider = ({ children }) => {
     })();
   }, []);
 
-  useEffect(() => {
-    const gamesList = Array.from(new Set(allClips.map((clip) => clip.game)));
-    setGames(gamesList);
-  }, [allClips]);
-
   // filtered clips (this is what the clips view should use)
   const filteredClips = useMemo(() => {
     return allClips
@@ -40,6 +34,14 @@ export const GlobalProvider = ({ children }) => {
           (!filter.showFavourites || clip.isFavourite)
       )
       .sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [allClips, filter]);
+
+  const games = useMemo(() => {
+    const filteredClipsForGames = filter.showFavourites
+      ? allClips.filter((clip) => clip.isFavourite)
+      : allClips;
+
+    return Array.from(new Set(filteredClipsForGames.map((clip) => clip.game)));
   }, [allClips, filter]);
 
   const [currentClip, setCurrentClip] = useState(null);

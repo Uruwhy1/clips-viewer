@@ -1,11 +1,11 @@
 body {
   background-color: var(--page-bg);
   font-family: system-ui;
+  scroll-behavior: smooth;
 }
 
 #root {
-  display: grid;
-  grid-template-columns: 50px 1fr;
+  margin-left: 50px;
 }
 
 :root {

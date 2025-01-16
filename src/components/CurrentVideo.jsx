@@ -23,7 +23,7 @@ const CurrentVideo = () => {
   }, [currentClip]);
 
   if (currentClip == null) {
-    return <div>Loading...</div>;
+    return <div>There's no clip. This should not be possible.</div>;
   }
 
   const handleFavouriteClick = (path) => toggleFavourite(path);
