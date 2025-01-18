@@ -3,7 +3,7 @@ import styles from "./Sidebar.module.css";
 
 const Sidebar = ({ setView }) => {
   return (
-    <div className={styles.sidebar}>
+    <aside className={styles.sidebar}>
       <div className={styles.button} onClick={() => setView("video")}>
         <LucideCirclePlay />
       </div>
@@ -16,7 +16,7 @@ const Sidebar = ({ setView }) => {
       >
         <Settings />
       </div>
-    </div>
+    </aside>
   );
 };
 
