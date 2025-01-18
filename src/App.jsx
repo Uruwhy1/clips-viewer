@@ -1,12 +1,12 @@
 import "./reset.css";
 import "./App.css";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CurrentVideo from "./components/CurrentVideo";
 import { checkOBSStatus, connectOBS } from "./helpers/OBS";
 import Clips from "./components/Clips";
 import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
-import GlobalContext from "./contexts/GlobalContext";
+import Settings from "./components/Settings";
 
 function App() {
   const [obs, setObs] = useState(null);
@@ -52,7 +52,7 @@ function App() {
       case "video":
         return <CurrentVideo />;
       case "settings":
-        return "xd";
+        return <Settings />;
     }
   };
 

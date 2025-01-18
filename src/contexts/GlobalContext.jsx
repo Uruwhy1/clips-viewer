@@ -2,11 +2,16 @@ import { createContext, useState, useMemo, useEffect } from "react";
 import { getAllClips } from "../helpers/readFilesFromDirectory";
 import { saveFavourites } from "../helpers/externalFiles";
 import { startGameDetection } from "../helpers/OBS";
+import { loadSettings, saveSettings } from "../helpers/settingsFile";
 
 const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
-  const gamesDir = "E:/Clips";
+  const [settings, setSettings] = useState({
+    gamesDir: null,
+  });
+  const [loadedSettings, setLoadedSettings] = useState(false); // to prevent race conditiosn between loading and saving
+
   const [allClips, setAllClips] = useState([]);
   const [filter, setFilter] = useState({
     game: "All",
@@ -15,15 +20,38 @@ export const GlobalProvider = ({ children }) => {
   const [favourites, setFavourites] = useState(new Set());
 
   useEffect(() => {
-    (async () => {
-      const [favouritesSet, initialClips] = await getAllClips(gamesDir);
-      setAllClips(initialClips);
-      setCurrentClip(initialClips[0]);
-      setFavourites(favouritesSet);
+    const load = async () => {
+      await loadSettings(setSettings);
+      setLoadedSettings(true);
+    };
 
-      startGameDetection();
-    })();
+    load();
   }, []);
+
+  useEffect(() => {
+    const save = async () => {
+      if (loadedSettings) {
+        await saveSettings(settings);
+      }
+    };
+    save();
+  }, [settings]);
+
+  useEffect(() => {
+    const fetchClips = async () => {
+      if (settings.gamesDir) {
+        const [favouritesSet, initialClips] = await getAllClips(
+          settings.gamesDir
+        );
+        setAllClips(initialClips);
+        setCurrentClip(initialClips[0]);
+        setFavourites(favouritesSet);
+        startGameDetection();
+      }
+    };
+
+    fetchClips();
+  }, [settings.gamesDir]);
 
   // filtered clips (this is what the clips view should use)
   const filteredClips = useMemo(() => {
@@ -99,6 +127,8 @@ export const GlobalProvider = ({ children }) => {
       setCurrentClip,
       setAllClips,
       toggleFavourite,
+      setSettings,
+      settings,
     }),
     [allClips, currentClip, favourites, filter]
   );

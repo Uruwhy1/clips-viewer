@@ -50,7 +50,7 @@
   }
 
   > p {
-    width: calc(100% - var(--padding-big));
+    width: 95%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -62,7 +62,7 @@
   }
 
   &.filePath {
-    width: fit-content;
+    width: 100%;
     cursor: pointer;
   }
 
