@@ -1,3 +1,42 @@
 .settingsContainer {
   margin-top: var(--title-bar-height);
+
+  padding: var(--padding-big);
+
+  height: calc(100vh - var(--title-bar-height));
+  max-width: 1000px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-big);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-small);
+}
+
+.settingItem {
+  border: 1px solid rgba(128, 128, 128, 0.325);
+  border-radius: 5px;
+  padding: var(--padding-big);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-small);
+}
+
+.setting {
+  display: flex;
+  gap: var(--gap-smallest);
+}
+
+.settingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: var(--padding-small);
+  background-color: var(--accent-white);
 }
