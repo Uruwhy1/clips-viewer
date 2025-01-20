@@ -39,6 +39,14 @@
   padding: var(--button-padding);
   border-radius: var(--radius-big);
   cursor: pointer;
+
+  border-width: 1px;
+
+  transition: border 0.15s, box-shadow 0.15s;
+  &:hover {
+    box-shadow: 0px 0px 0px 1px var(--accent-washed);
+    border-color: var(--accent-washed);
+  }
 }
 
 .filters > button {
@@ -57,6 +65,7 @@
   &.active {
     color: #fff;
     background-color: var(--accent-washed);
+    border-color: var(--accent-washed);
 
     > svg {
       --star: yellow;

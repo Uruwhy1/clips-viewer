@@ -20,7 +20,7 @@
 
   border-right: 1px solid var(--gray-color);
 
-  transition: transform 1s ease;
+  transition: transform 0.75s ease;
   z-index: 1000;
 
   user-select: none;
