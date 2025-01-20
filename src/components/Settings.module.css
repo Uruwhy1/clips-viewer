@@ -20,8 +20,10 @@
   border-right: 2px solid;
 
   transform: translateX(var(--sidebar-width));
-  transition: transform 1.25s;
+  transition: transform 1s ease;
   z-index: 1000;
+
+  user-select: none;
 }
 
 .closed {
@@ -58,4 +60,8 @@
 .settingInfo {
   display: flex;
   gap: var(--gap-smallest);
+
+  > p {
+    user-select: all;
+  }
 }
