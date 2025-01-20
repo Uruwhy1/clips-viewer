@@ -26,7 +26,7 @@ const Settings = ({ isOpen }) => {
     <div
       className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
     >
-      <div className={styles.title}>
+      <div className={`${styles.title} ${styles.mainTitle}`}>
         <SettingsIcon size={30} />
         <h1>Settings</h1>
       </div>
@@ -36,14 +36,16 @@ const Settings = ({ isOpen }) => {
           <h3 className={styles.sectionTitle}>Clips Storage</h3>
         </div>
         <div className={styles.settingContainer}>
-          <div className={styles.settingInfo}>
-            <strong>Clips Directory:</strong>
+          <div>
+            <strong>Clips Directory</strong>
+            <SettingButton
+              func={handleSelectDirectory}
+              text={"Change Directory"}
+            />
+          </div>
+          <div>
             <p>{settings.gamesDir}</p>
           </div>
-          <SettingButton
-            func={handleSelectDirectory}
-            text={"Select Games Directory"}
-          />
         </div>
       </div>
     </div>
