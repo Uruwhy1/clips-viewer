@@ -1,14 +1,31 @@
 .settingsContainer {
-  margin-top: var(--title-bar-height);
+  --width: 500px;
+
+  background-color: #fff;
 
   padding: var(--padding-big);
 
-  height: calc(100vh - var(--title-bar-height));
-  max-width: 1000px;
+  height: 100vh;
+  width: var(--width);
+  max-width: 800px;
 
   display: flex;
   flex-direction: column;
   gap: var(--gap-big);
+
+  position: fixed;
+  left: 0;
+  top: 0;
+
+  border-right: 2px solid;
+
+  transform: translateX(var(--sidebar-width));
+  transition: transform 1.25s;
+  z-index: 1000;
+}
+
+.closed {
+  transform: translateX(calc(var(--width) * -1.25));
 }
 
 .title {
@@ -27,16 +44,18 @@
   gap: var(--gap-small);
 }
 
-.setting {
-  display: flex;
-  gap: var(--gap-smallest);
-}
-
 .settingContainer {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: var(--padding-small);
+  padding: var(--padding-medium);
   background-color: var(--accent-white);
+
+  border-radius: var(--radius-small);
+}
+
+.settingInfo {
+  display: flex;
+  gap: var(--gap-smallest);
 }

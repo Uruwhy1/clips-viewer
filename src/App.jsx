@@ -11,6 +11,7 @@ import Settings from "./components/Settings";
 function App() {
   const [obs, setObs] = useState(null);
   const [view, setView] = useState("clips");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -22,18 +23,22 @@ function App() {
   useEffect(() => {
     const handleEscapeKey = (event) => {
       if (event.key === "Escape") {
-        switch (view) {
-          case "video":
-            setView("clips");
-            break;
-          case "clips":
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            });
-            break;
-          default:
-            break;
+        if (isSettingsOpen) {
+          setIsSettingsOpen(false);
+        } else {
+          switch (view) {
+            case "video":
+              setView("clips");
+              break;
+            case "clips":
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+              break;
+            default:
+              break;
+          }
         }
       }
     };
@@ -43,7 +48,7 @@ function App() {
     return () => {
       window.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [view]);
+  }, [view, isSettingsOpen]);
 
   const currentView = () => {
     switch (view) {
@@ -51,16 +56,23 @@ function App() {
         return <Clips setView={setView} />;
       case "video":
         return <CurrentVideo />;
-      case "settings":
-        return <Settings />;
+      default:
+        return null;
     }
   };
 
   return (
     <>
       <TitleBar />
-      <Sidebar setView={setView} />
+      <Sidebar
+        setView={setView}
+        openSettings={() => setIsSettingsOpen(!isSettingsOpen)}
+      />
       {currentView()}
+      <Settings
+        isOpen={isSettingsOpen}
+        closeSettings={() => setIsSettingsOpen(false)}
+      />
       <p
         style={{
           background: "#000",

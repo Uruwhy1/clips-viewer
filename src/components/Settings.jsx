@@ -3,8 +3,9 @@ import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Settings.module.css";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Folder, SettingsIcon } from "lucide-react";
+import SettingButton from "./SettingButton";
 
-const Settings = () => {
+const Settings = ({ isOpen }) => {
   const { settings, setSettings } = useContext(GlobalContext);
 
   const handleSelectDirectory = async () => {
@@ -22,7 +23,9 @@ const Settings = () => {
   };
 
   return (
-    <div className={styles.settingsContainer}>
+    <div
+      className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
+    >
       <div className={styles.title}>
         <SettingsIcon size={30} />
         <h1>Settings</h1>
@@ -33,16 +36,14 @@ const Settings = () => {
           <h3 className={styles.sectionTitle}>Clips Storage</h3>
         </div>
         <div className={styles.settingContainer}>
-          <div className={styles.setting}>
+          <div className={styles.settingInfo}>
             <strong>Clips Directory:</strong>
             <p>{settings.gamesDir}</p>
           </div>
-          <button
-            className={styles.selectFolderButton}
-            onClick={handleSelectDirectory}
-          >
-            Select Games Directory
-          </button>
+          <SettingButton
+            func={handleSelectDirectory}
+            text={"Select Games Directory"}
+          />
         </div>
       </div>
     </div>

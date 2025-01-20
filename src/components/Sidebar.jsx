@@ -1,7 +1,7 @@
 import { GalleryThumbnails, LucideCirclePlay, Settings } from "lucide-react";
 import styles from "./Sidebar.module.css";
 
-const Sidebar = ({ setView }) => {
+const Sidebar = ({ setView, openSettings }) => {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.button} onClick={() => setView("video")}>
@@ -12,7 +12,7 @@ const Sidebar = ({ setView }) => {
       </div>
       <div
         className={`${styles.button} ${styles.settings}`}
-        onClick={() => setView("settings")}
+        onClick={() => openSettings()}
       >
         <Settings />
       </div>
