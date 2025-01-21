@@ -60,8 +60,8 @@ export const checkOBSStatus = async () => {
   }
 };
 
-export async function checkGameRunning() {
-  const gameProcesses = await loadOBSConfig();
+export async function checkGameRunning(gamesToRecord) {
+  const gameProcesses = gamesToRecord;
 
   try {
     const runningProcesses = await invoke("get_running_processes");
@@ -86,11 +86,11 @@ export async function checkGameRunning() {
   }
 }
 
-export function startGameDetection() {
+export function startGameDetection(settings) {
   let lastDetectedGame = null;
 
   setInterval(async () => {
-    const currentGame = await checkGameRunning();
+    const currentGame = await checkGameRunning(settings);
 
     if (currentGame && currentGame !== lastDetectedGame) {
       console.log(`${currentGame} detected! Starting OBS recording.`);

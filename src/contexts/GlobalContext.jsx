@@ -9,15 +9,16 @@ const GlobalContext = createContext();
 export const GlobalProvider = ({ children }) => {
   const [settings, setSettings] = useState({
     gamesDir: null,
+    gamesConfig: {},
   });
-  const [loadedSettings, setLoadedSettings] = useState(false); // to prevent race conditiosn between loading and saving
-
+  const [loadedSettings, setLoadedSettings] = useState(false);
   const [allClips, setAllClips] = useState([]);
   const [filter, setFilter] = useState({
     game: "All",
     showFavourites: false,
   });
   const [favourites, setFavourites] = useState(new Set());
+  const [currentClip, setCurrentClip] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -46,10 +47,9 @@ export const GlobalProvider = ({ children }) => {
         setAllClips(initialClips);
         setCurrentClip(initialClips[0]);
         setFavourites(favouritesSet);
-        startGameDetection();
+        startGameDetection(settings.gamesConfig);
       }
     };
-
     fetchClips();
   }, [settings.gamesDir]);
 
@@ -71,8 +71,6 @@ export const GlobalProvider = ({ children }) => {
 
     return Array.from(new Set(filteredClipsForGames.map((clip) => clip.game)));
   }, [allClips, filter]);
-
-  const [currentClip, setCurrentClip] = useState(null);
 
   const toggleFavourite = async (clipPath) => {
     const newFavourites = new Set(favourites);
@@ -130,7 +128,7 @@ export const GlobalProvider = ({ children }) => {
       setSettings,
       settings,
     }),
-    [allClips, currentClip, favourites, filter]
+    [allClips, currentClip, filteredClips, games, filter, settings, favourites]
   );
 
   return (

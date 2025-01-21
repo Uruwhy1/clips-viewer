@@ -13,7 +13,7 @@ export const loadSettings = async (setSettings) => {
     if (error.includes("The system cannot find the file")) {
       console.warn("Settings file not found. Creating default settings.");
 
-      const defaultSettings = { gamesDir: null };
+      const defaultSettings = { gamesDir: null, gamesConfig: {} };
       await saveSettings(defaultSettings);
     } else {
       console.error("Failed to load settings:", error);
