@@ -1,11 +1,11 @@
-import { useContext } from "react";
+import { forwardRef, useContext } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Settings.module.css";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Folder, SettingsIcon } from "lucide-react";
 import SettingButton from "./SettingButton";
 
-const Settings = ({ isOpen }) => {
+const Settings = forwardRef(({ isOpen }, ref) => {
   const { settings, setSettings } = useContext(GlobalContext);
 
   const handleSelectDirectory = async () => {
@@ -64,6 +64,7 @@ const Settings = ({ isOpen }) => {
   return (
     <div
       className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
+      ref={ref}
     >
       <div className={`${styles.title} ${styles.mainTitle}`}>
         <SettingsIcon size={30} />
@@ -82,7 +83,7 @@ const Settings = ({ isOpen }) => {
               text={"Change Directory"}
             />
           </div>
-          <div className={styles.currentDirectory}>
+          <div className={styles.currentSetting}>
             <p>{settings.gamesDir}</p>
           </div>
         </div>
@@ -91,30 +92,28 @@ const Settings = ({ isOpen }) => {
             <strong>Capturing Games</strong>
             <SettingButton func={handleAddGame} text={"Add Game"} />
           </div>
-          <div>
-            <ul>
-              {settings.gamesConfig &&
-              Object.keys(settings.gamesConfig).length > 0 ? (
-                Object.entries(settings.gamesConfig).map(
-                  ([gameName, processes], index) => (
-                    <li
-                      className={styles.gameItem}
-                      onClick={() => removeGame(gameName)}
-                      key={index}
-                    >
-                      {gameName} - {processes.join(",")}
-                    </li>
-                  )
+          <div role="list" className={styles.gamesContainer}>
+            {settings.gamesConfig &&
+            Object.keys(settings.gamesConfig).length > 0 ? (
+              Object.entries(settings.gamesConfig).map(
+                ([gameName, processes], index) => (
+                  <p
+                    className={`${styles.gameItem} ${styles.currentSetting}`}
+                    onClick={() => removeGame(gameName)}
+                    key={index}
+                  >
+                    {gameName} - {processes.join(", ")}
+                  </p>
                 )
-              ) : (
-                <p>No games added yet.</p>
-              )}
-            </ul>
+              )
+            ) : (
+              <p>No games added yet.</p>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
-};
+});
 
 export default Settings;

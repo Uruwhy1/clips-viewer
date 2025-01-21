@@ -13,6 +13,7 @@ const Sidebar = ({ setView, openSettings }) => {
       <div
         className={`${styles.button} ${styles.settings}`}
         onClick={() => openSettings()}
+        data-role="settings"
       >
         <Settings />
       </div>

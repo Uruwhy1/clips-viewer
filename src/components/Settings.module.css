@@ -20,7 +20,7 @@
 
   border-right: 1px solid var(--gray-color);
 
-  transition: transform 0.75s ease;
+  transition: transform 0.5s ease;
   z-index: 1000;
 
   user-select: none;
@@ -77,7 +77,7 @@
     align-items: center;
   }
 
-  .currentDirectory {
+  .currentSetting {
     user-select: all;
     background-color: #66666622;
     border-radius: var(--radius-small);
@@ -89,6 +89,12 @@
       overflow: hidden;
     }
   }
+}
+
+.gamesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-smallest);
 }
 
 .gameItem {

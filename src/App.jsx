@@ -1,6 +1,6 @@
+import { useEffect, useState, useRef } from "react";
 import "./reset.css";
 import "./App.css";
-import { useEffect, useState } from "react";
 import CurrentVideo from "./components/CurrentVideo";
 import { checkOBSStatus, connectOBS } from "./helpers/OBS";
 import Clips from "./components/Clips";
@@ -12,12 +12,16 @@ function App() {
   const [obs, setObs] = useState(null);
   const [view, setView] = useState("clips");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const settingsRef = useRef(null);
 
   useEffect(() => {
-    (async () => {
+    const fetchObsStatus = async () => {
       await connectOBS();
-      setObs("Connected to OBS (" + (await checkOBSStatus()).version + ")");
-    })();
+      const obsStatus = await checkOBSStatus();
+      setObs(`Connected to OBS (${obsStatus.version})`);
+    };
+
+    fetchObsStatus();
   }, []);
 
   useEffect(() => {
@@ -43,10 +47,24 @@ function App() {
       }
     };
 
+    const handleClick = (event) => {
+      const settingsIcon = document.querySelector('[data-role="settings"]');
+      if (
+        isSettingsOpen &&
+        settingsRef.current &&
+        !settingsRef.current.contains(event.target) &&
+        !settingsIcon.contains(event.target)
+      ) {
+        setIsSettingsOpen(false);
+      }
+    };
+
     window.addEventListener("keydown", handleEscapeKey);
+    window.addEventListener("click", handleClick);
 
     return () => {
       window.removeEventListener("keydown", handleEscapeKey);
+      window.removeEventListener("click", handleClick);
     };
   }, [view, isSettingsOpen]);
 
@@ -69,10 +87,7 @@ function App() {
         openSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
       {currentView()}
-      <Settings
-        isOpen={isSettingsOpen}
-        closeSettings={() => setIsSettingsOpen(false)}
-      />
+      <Settings ref={settingsRef} isOpen={isSettingsOpen} />
       <p
         style={{
           background: "#000",
