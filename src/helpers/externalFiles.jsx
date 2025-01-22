@@ -48,22 +48,3 @@ export async function saveFavourites(favourites) {
     console.error("Error saving favourites:", error);
   }
 }
-
-export async function loadOBSConfig() {
-  try {
-    if (!tauriFolderPath) await initializePaths();
-
-    const tauriFolderExists = await exists(tauriFolderPath);
-    if (!tauriFolderExists) {
-      await mkdir(tauriFolderPath);
-    }
-
-    const configFilePath = await join(tauriFolderPath, "gameConfig.json");
-    const configData = await readTextFile(configFilePath);
-
-    return JSON.parse(configData);
-  } catch (error) {
-    console.error("Error loading OBS config:", error);
-    return null;
-  }
-}

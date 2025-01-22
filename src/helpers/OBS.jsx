@@ -1,5 +1,4 @@
 import OBSWebSocket from "obs-websocket-js";
-import { loadOBSConfig } from "./externalFiles";
 import { invoke } from "@tauri-apps/api/core";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
@@ -9,7 +8,7 @@ const obs = new OBSWebSocket();
 
 export const connectOBS = async (host, password) => {
   try {
-    await obs.connect("ws://localhost:4455", "bolso02");
+    await obs.connect(`ws://localhost:${host}`, password);
     return { connected: true, message: "Successfully connected to OBS" };
   } catch (error) {
     console.error("OBS Connection Error:", error);

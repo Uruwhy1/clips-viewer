@@ -13,6 +13,10 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
   const [showAddGameForm, setShowAddGameForm] = useState(false);
   const [removingIndex, setRemovingIndex] = useState(null);
 
+  const [showObsForm, setShowObsForm] = useState(false);
+  const [obsPort, setObsPort] = useState(settings.obs?.port || "");
+  const [obsPassword, setObsPassword] = useState(settings.obs?.password || "");
+
   const handleSelectDirectory = async () => {
     const selectedDir = await open({
       directory: true,
@@ -46,11 +50,28 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
   };
 
   const handleObsClick = async () => {
-    await connectOBS();
+    if (!obsPort || !obsPassword) {
+      alert("Both port and password are required!");
+      return;
+    }
+
+    await connectOBS(obsPort, obsPassword);
 
     let status = await checkOBSStatus();
     if (status.connected) {
       setObs(`Connected to OBS (${status.version})`);
+      setShowObsForm(false);
+      setObsPort("");
+      setObsPassword("");
+
+      const updatedObsConfig = { port: obsPort, password: obsPassword };
+
+      setSettings((prevSettings) => {
+        return {
+          ...prevSettings,
+          obs: updatedObsConfig,
+        };
+      });
     } else {
       setObs("Failed to connect.");
     }
@@ -114,9 +135,39 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
         <div className={styles.settingIndividual}>
           <div className={styles.subSectionTitle}>
             <strong>Websocket Connection</strong>
-            <SettingButton text={"Connect"} func={handleObsClick} />
+            <SettingButton
+              text={showObsForm ? "Cancel" : "Connect"}
+              func={() => setShowObsForm((prev) => !prev)}
+            />
           </div>
           <div className={styles.currentSetting}>{obs}</div>
+          {showObsForm && (
+            <div className={styles.addGameForm}>
+              <div className={styles.inputGroup}>
+                <label htmlFor="obsPort">Port</label>
+                <input
+                  autoComplete="off"
+                  id="obsPort"
+                  type="text"
+                  value={obsPort}
+                  onChange={(e) => setObsPort(e.target.value)}
+                  placeholder="Enter OBS port"
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <label htmlFor="obsPassword">Password</label>
+                <input
+                  autoComplete="off"
+                  id="obsPassword"
+                  type="password"
+                  value={obsPassword}
+                  onChange={(e) => setObsPassword(e.target.value)}
+                  placeholder="Enter OBS password"
+                />
+              </div>
+              <SettingButton func={handleObsClick} text={"Connect"} />
+            </div>
+          )}
         </div>
         <div className={styles.settingIndividual}>
           <div className={styles.subSectionTitle}>

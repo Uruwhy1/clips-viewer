@@ -14,11 +14,13 @@ function App() {
   const [view, setView] = useState("clips");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef(null);
-  const { coverCache } = useContext(GlobalContext);
+  const { coverCache, settings } = useContext(GlobalContext);
 
   useEffect(() => {
     const fetchObsStatus = async () => {
-      await connectOBS();
+      const obsSettings = settings.obs;
+
+      await connectOBS(obsSettings.port, obsSettings.password);
       const obsStatus = await checkOBSStatus();
       if (obsStatus.connected) {
         setObs(`Connected to OBS (${obsStatus.version})`);

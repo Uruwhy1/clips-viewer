@@ -12,6 +12,7 @@ export const GlobalProvider = ({ children }) => {
   const [settings, setSettings] = useState({
     gamesDir: null,
     gamesConfig: {},
+    obs: { port: 4455, password: "bolso02" },
   });
   const settingsRef = useRef(settings); // Create a mutable reference for settings
   const [loadedSettings, setLoadedSettings] = useState(false);
