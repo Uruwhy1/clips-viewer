@@ -7,7 +7,7 @@ import { window } from "@tauri-apps/api";
 
 const obs = new OBSWebSocket();
 
-export const connectOBS = async () => {
+export const connectOBS = async (host, password) => {
   try {
     await obs.connect("ws://localhost:4455", "bolso02");
     return { connected: true, message: "Successfully connected to OBS" };

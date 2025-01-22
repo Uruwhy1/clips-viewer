@@ -1,4 +1,4 @@
-import { forwardRef, useContext } from "react";
+import { forwardRef, useContext, useState } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Settings.module.css";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -8,6 +8,10 @@ import { checkOBSStatus, connectOBS } from "../helpers/OBS";
 
 const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
   const { settings, setSettings } = useContext(GlobalContext);
+  const [gameName, setGameName] = useState("");
+  const [processNames, setProcessNames] = useState("");
+  const [showAddGameForm, setShowAddGameForm] = useState(false);
+  const [removingIndex, setRemovingIndex] = useState(null);
 
   const handleSelectDirectory = async () => {
     const selectedDir = await open({
@@ -23,15 +27,9 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     }
   };
 
-  const handleAddGame = async () => {
-    const gameName = prompt("Enter the game name:");
-    const processNames = prompt(
-      "Enter the game process names (comma separated):"
-    );
-
+  const handleAddGame = () => {
     if (gameName && processNames) {
       const processArray = processNames.split(",").map((name) => name.trim());
-
       setSettings((prevSettings) => ({
         ...prevSettings,
         gamesConfig: {
@@ -39,6 +37,9 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
           [gameName]: processArray,
         },
       }));
+      setGameName("");
+      setProcessNames("");
+      setShowAddGameForm(false);
     } else {
       alert("Both game name and process names are required!");
     }
@@ -55,28 +56,28 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     }
   };
 
-  const removeGame = async (gameName) => {
-    const confirmRemove = await window.confirm(
-      `Are you sure you want to remove "${gameName}"?`
-    );
+  const handleGameClick = (index) => {
+    setRemovingIndex(index);
+  };
 
-    if (confirmRemove) {
-      console.log("Xd");
-      setSettings((prevSettings) => {
-        const updatedGamesConfig = { ...prevSettings.gamesConfig };
-        delete updatedGamesConfig[gameName];
-        return {
-          ...prevSettings,
-          gamesConfig: updatedGamesConfig,
-        };
-      });
-    }
+  const removeGame = async (gameName) => {
+    setRemovingIndex(null);
+
+    setSettings((prevSettings) => {
+      const updatedGamesConfig = { ...prevSettings.gamesConfig };
+      delete updatedGamesConfig[gameName];
+      return {
+        ...prevSettings,
+        gamesConfig: updatedGamesConfig,
+      };
+    });
   };
 
   return (
     <div
       className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
       ref={ref}
+      onClick={(e) => e.stopPropagation()}
     >
       <div className={`${styles.title} ${styles.mainTitle}`}>
         <SettingsIcon size={30} />
@@ -116,21 +117,64 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
         </div>
         <div className={styles.settingIndividual}>
           <div className={styles.subSectionTitle}>
-            <strong>Capturing Games</strong>
-            <SettingButton func={handleAddGame} text={"Add Game"} />
+            <strong>Game Configurations</strong>
+            <SettingButton
+              text={showAddGameForm ? "Cancel" : "Add Game"}
+              func={() => setShowAddGameForm((prev) => !prev)}
+            />
           </div>
-          <div role="list" className={styles.gamesContainer}>
+          {showAddGameForm && (
+            <div className={styles.addGameForm}>
+              <div className={styles.inputGroup}>
+                <label htmlFor="gameName">Game Name</label>
+                <input
+                  autoComplete="off"
+                  id="gameName"
+                  type="text"
+                  value={gameName}
+                  onChange={(e) => setGameName(e.target.value)}
+                  placeholder="Enter game name"
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <label htmlFor="processNames">Game Processes</label>
+                <input
+                  autoComplete="off"
+                  id="processNames"
+                  type="text"
+                  value={processNames}
+                  onChange={(e) => setProcessNames(e.target.value)}
+                  placeholder="Enter process names, separated by commas"
+                />
+              </div>
+              <SettingButton func={handleAddGame} text={"Save Game"} />
+            </div>
+          )}
+          <div className={styles.gamesContainer}>
             {settings.gamesConfig &&
             Object.keys(settings.gamesConfig).length > 0 ? (
               Object.entries(settings.gamesConfig).map(
                 ([gameName, processes], index) => (
-                  <p
-                    className={`${styles.gameItem} ${styles.currentSetting}`}
-                    onClick={() => removeGame(gameName)}
+                  <div
+                    className={`${styles.gameItem} ${styles.currentSetting} ${
+                      index == removingIndex ? styles.remove : ""
+                    }`}
                     key={index}
+                    onClick={
+                      index == removingIndex ? "" : () => handleGameClick(index)
+                    }
                   >
-                    {gameName} - {processes.join(", ")}
-                  </p>
+                    {index == removingIndex ? (
+                      <button onClick={() => removeGame(gameName)}>
+                        Remove?
+                      </button>
+                    ) : (
+                      <>
+                        <strong>{gameName}</strong>
+                        <p>{processes.join(", ")}</p>
+                      </>
+                    )}
+                  </div>
                 )
               )
             ) : (
