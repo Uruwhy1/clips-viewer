@@ -77,7 +77,10 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     <div
       className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
       ref={ref}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        setRemovingIndex(null);
+      }}
     >
       <div className={`${styles.title} ${styles.mainTitle}`}>
         <SettingsIcon size={30} />
@@ -161,18 +164,22 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                     }`}
                     key={index}
                     onClick={
-                      index == removingIndex ? "" : () => handleGameClick(index)
+                      index == removingIndex
+                        ? ""
+                        : (e) => {
+                            e.stopPropagation();
+                            handleGameClick(index);
+                          }
                     }
                   >
+                    <strong>{gameName}</strong>
+                    <p>{processes.join(", ")}</p>
                     {index == removingIndex ? (
                       <button onClick={() => removeGame(gameName)}>
                         Remove?
                       </button>
                     ) : (
-                      <>
-                        <strong>{gameName}</strong>
-                        <p>{processes.join(", ")}</p>
-                      </>
+                      ""
                     )}
                   </div>
                 )
