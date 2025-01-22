@@ -141,33 +141,31 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
             />
           </div>
           <div className={styles.currentSetting}>{obs}</div>
-          {showObsForm && (
-            <div className={styles.addGameForm}>
-              <div className={styles.inputGroup}>
-                <label htmlFor="obsPort">Port</label>
-                <input
-                  autoComplete="off"
-                  id="obsPort"
-                  type="text"
-                  value={obsPort}
-                  onChange={(e) => setObsPort(e.target.value)}
-                  placeholder="Enter OBS port"
-                />
-              </div>
-              <div className={styles.inputGroup}>
-                <label htmlFor="obsPassword">Password</label>
-                <input
-                  autoComplete="off"
-                  id="obsPassword"
-                  type="password"
-                  value={obsPassword}
-                  onChange={(e) => setObsPassword(e.target.value)}
-                  placeholder="Enter OBS password"
-                />
-              </div>
-              <SettingButton func={handleObsClick} text={"Connect"} />
+          <div className={`${styles.form} ${showObsForm && styles.active}`}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="obsPort">Port</label>
+              <input
+                autoComplete="off"
+                id="obsPort"
+                type="text"
+                value={obsPort}
+                onChange={(e) => setObsPort(e.target.value)}
+                placeholder="Enter OBS port"
+              />
             </div>
-          )}
+            <div className={styles.inputGroup}>
+              <label htmlFor="obsPassword">Password</label>
+              <input
+                autoComplete="off"
+                id="obsPassword"
+                type="password"
+                value={obsPassword}
+                onChange={(e) => setObsPassword(e.target.value)}
+                placeholder="Enter OBS password"
+              />
+            </div>
+            <SettingButton func={handleObsClick} text={"Connect"} />
+          </div>
         </div>
         <div className={styles.settingIndividual}>
           <div className={styles.subSectionTitle}>
@@ -177,33 +175,31 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
               func={() => setShowAddGameForm((prev) => !prev)}
             />
           </div>
-          {showAddGameForm && (
-            <div className={styles.addGameForm}>
-              <div className={styles.inputGroup}>
-                <label htmlFor="gameName">Game Name</label>
-                <input
-                  autoComplete="off"
-                  id="gameName"
-                  type="text"
-                  value={gameName}
-                  onChange={(e) => setGameName(e.target.value)}
-                  placeholder="Enter game name"
-                />
-              </div>
-              <div className={styles.inputGroup}>
-                <label htmlFor="processNames">Game Processes</label>
-                <input
-                  autoComplete="off"
-                  id="processNames"
-                  type="text"
-                  value={processNames}
-                  onChange={(e) => setProcessNames(e.target.value)}
-                  placeholder="Enter process names, separated by commas"
-                />
-              </div>
-              <SettingButton func={handleAddGame} text={"Save Game"} />
+          <div className={`${styles.form} ${showAddGameForm && styles.active}`}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="gameName">Game Name</label>
+              <input
+                autoComplete="off"
+                id="gameName"
+                type="text"
+                value={gameName}
+                onChange={(e) => setGameName(e.target.value)}
+                placeholder="Enter game name"
+              />
             </div>
-          )}
+            <div className={styles.inputGroup}>
+              <label htmlFor="processNames">Game Processes</label>
+              <input
+                autoComplete="off"
+                id="processNames"
+                type="text"
+                value={processNames}
+                onChange={(e) => setProcessNames(e.target.value)}
+                placeholder="Enter process names, separated by commas"
+              />
+            </div>
+            <SettingButton func={handleAddGame} text={"Save Game"} />
+          </div>
           <div className={styles.gamesContainer}>
             {settings.gamesConfig &&
             Object.keys(settings.gamesConfig).length > 0 ? (

@@ -26,6 +26,7 @@
   z-index: 1000;
 
   user-select: none;
+  scrollbar-gutter: stable;
 
   &&::-webkit-scrollbar {
     width: 10px !important;
@@ -165,17 +166,24 @@
 
 /* add game form */
 
-.addGameForm {
+.form {
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: var(--gap-small);
 
-  animation: expand 0.5s ease forwards;
+  height: 0px;
   overflow: hidden;
 
   > button {
     width: calc(100% - 2px);
+  }
+
+  margin-bottom: calc(var(--gap-small) * -1);
+  transition: height 0.5s ease;
+  &.active {
+    margin: 0;
+    height: 11.7rem;
   }
 }
 
@@ -197,14 +205,5 @@
 
   &:focus-visible {
     outline-color: var(--accent-washed);
-  }
-}
-
-@keyframes expand {
-  from {
-    height: 0px;
-  }
-  to {
-    height: 11.7rem;
   }
 }
