@@ -7,20 +7,19 @@ import styles from "./CurrentVideo.module.css";
 import { invoke } from "@tauri-apps/api/core";
 
 const CurrentVideo = () => {
-  const { currentClip, toggleFavourite } = useContext(GlobalContext);
+  const { currentClip, toggleFavourite, coverCache } =
+    useContext(GlobalContext);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [editing, setEditing] = useState(false);
+  const [cover, setCover] = useState(null);
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (currentClip) {
-      document.documentElement.style.setProperty(
-        "--current-game-cover",
-        `url("/${currentClip.game}.jpg")`
-      );
+    if (coverCache.has(currentClip.game)) {
+      setCover(coverCache.get(currentClip.game));
     }
-  }, [currentClip]);
+  }, [currentClip, coverCache]);
 
   if (currentClip == null) {
     return <div>There's no clip. This should not be possible.</div>;
@@ -83,7 +82,7 @@ const CurrentVideo = () => {
           </div>
         </div>
         <div className={styles.imageDiv}>
-          <img src={`/${currentClip.game}.jpg`} alt="" />
+          <img src={cover} alt={`${currentClip.game} Cover`} />
         </div>
       </div>
 

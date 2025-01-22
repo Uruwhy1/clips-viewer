@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import "./reset.css";
 import "./App.css";
 import CurrentVideo from "./components/CurrentVideo";
@@ -7,12 +7,14 @@ import Clips from "./components/Clips";
 import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
 import Settings from "./components/Settings";
+import GlobalContext from "./contexts/GlobalContext";
 
 function App() {
   const [obs, setObs] = useState(null);
   const [view, setView] = useState("clips");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef(null);
+  const { coverCache } = useContext(GlobalContext);
 
   useEffect(() => {
     const fetchObsStatus = async () => {
@@ -85,6 +87,32 @@ function App() {
 
   return (
     <>
+      {coverCache && (
+        <div
+          style={{
+            position: "absolute",
+            width: "0px",
+            height: "0px",
+            overflow: "hidden",
+            pointerEvents: "none",
+            top: 0,
+            left: 0,
+          }}
+        >
+          {Array.from(coverCache).map(([name, coverPath], index) => (
+            <img
+              key={index}
+              src={coverPath}
+              style={{
+                width: 0,
+                height: 0,
+              }}
+              alt=""
+              loading="eager"
+            />
+          ))}
+        </div>
+      )}
       <TitleBar />
       <Sidebar
         setView={setView}

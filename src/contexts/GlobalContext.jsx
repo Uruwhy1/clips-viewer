@@ -3,6 +3,8 @@ import { getAllClips } from "../helpers/readFilesFromDirectory";
 import { saveFavourites } from "../helpers/externalFiles";
 import { startGameDetection } from "../helpers/OBS";
 import { loadSettings, saveSettings } from "../helpers/settingsFile";
+import { documentDir, join } from "@tauri-apps/api/path";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 const GlobalContext = createContext();
 
@@ -20,6 +22,8 @@ export const GlobalProvider = ({ children }) => {
   });
   const [favourites, setFavourites] = useState(new Set());
   const [currentClip, setCurrentClip] = useState(null);
+
+  const [coverCache, setCoverCache] = useState(new Map());
 
   useEffect(() => {
     const load = async () => {
@@ -56,7 +60,35 @@ export const GlobalProvider = ({ children }) => {
       }
     };
     fetchClips();
+    cacheCovers();
   }, [settings.gamesDir]);
+
+  const cacheCovers = async () => {
+    if (!settings.gamesDir) return;
+
+    const newCache = new Map();
+    const uniqueGames = new Set(allClips.map((clip) => clip.game));
+
+    for (const game of uniqueGames) {
+      try {
+        const docsDir = await documentDir();
+        const coverPath = await join(
+          docsDir,
+          "Tauri",
+          "game_covers",
+          `${game}.jpg`
+        );
+        newCache.set(game, convertFileSrc(coverPath));
+      } catch (error) {
+        console.error(`Error caching cover for ${game}:`, error);
+      }
+    }
+
+    setCoverCache(newCache);
+  };
+  useEffect(() => {
+    cacheCovers();
+  }, [allClips, settings.gamesDir]);
 
   // filtered clips (this is what the clips view should use)
   const filteredClips = useMemo(() => {
@@ -132,6 +164,7 @@ export const GlobalProvider = ({ children }) => {
       toggleFavourite,
       setSettings,
       settings,
+      coverCache,
     }),
     [allClips, currentClip, filteredClips, games, filter, settings, favourites]
   );
