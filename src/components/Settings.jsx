@@ -70,12 +70,12 @@ const Settings = forwardRef(({ isOpen }, ref) => {
         <SettingsIcon size={30} />
         <h1>Settings</h1>
       </div>
-      <div className={`${styles.clipsDirectory} ${styles.settingItem}`}>
+      <div className={`${styles.settingCategory}`}>
         <div className={styles.title}>
           <Folder />
-          <h3 className={styles.sectionTitle}>Clips Storage</h3>
+          <h3>Clips Storage</h3>
         </div>
-        <div className={styles.settingContainer}>
+        <div className={styles.settingIndividual}>
           <div className={styles.subSectionTitle}>
             <strong>Clips Directory</strong>
             <SettingButton
@@ -83,11 +83,19 @@ const Settings = forwardRef(({ isOpen }, ref) => {
               text={"Change Directory"}
             />
           </div>
-          <div className={styles.currentSetting}>
+          <div
+            className={`${styles.currentSetting} ${styles.currentDirectory}`}
+          >
             <p>{settings.gamesDir}</p>
           </div>
         </div>
-        <div className={styles.settingContainer}>
+      </div>
+      <div className={`${styles.settingCategory}`}>
+        <div className={styles.title}>
+          <Folder />
+          <h3>OBS Recording</h3>
+        </div>
+        <div className={styles.settingIndividual}>
           <div className={styles.subSectionTitle}>
             <strong>Capturing Games</strong>
             <SettingButton func={handleAddGame} text={"Add Game"} />

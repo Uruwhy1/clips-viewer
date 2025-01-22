@@ -42,7 +42,7 @@
   gap: var(--gap-small);
 }
 
-.settingItem {
+.settingCategory {
   border: 1px solid rgba(128, 128, 128, 0.325);
   border-radius: 5px;
   padding: var(--padding-big);
@@ -52,7 +52,7 @@
   gap: var(--gap-small);
 }
 
-.settingContainer {
+.settingIndividual {
   width: 100%;
 
   display: flex;
@@ -70,25 +70,28 @@
   > div {
     width: 100%;
   }
+}
 
-  .subSectionTitle {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.subSectionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.currentSetting {
+  background-color: #66666622;
+  border-radius: var(--radius-small);
+  padding: var(--padding-small) var(--padding-medium);
+
+  > p {
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
+}
 
-  .currentSetting {
-    user-select: all;
-    background-color: #66666622;
-    border-radius: var(--radius-small);
-    padding: var(--padding-small) var(--padding-medium);
-
-    > p {
-      text-wrap: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
-  }
+.currentDirectory {
+  user-select: all;
 }
 
 .gamesContainer {
