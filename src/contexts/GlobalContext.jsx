@@ -1,4 +1,4 @@
-import { createContext, useState, useMemo, useEffect } from "react";
+import { createContext, useState, useMemo, useEffect, useRef } from "react";
 import { getAllClips } from "../helpers/readFilesFromDirectory";
 import { saveFavourites } from "../helpers/externalFiles";
 import { startGameDetection } from "../helpers/OBS";
@@ -11,6 +11,7 @@ export const GlobalProvider = ({ children }) => {
     gamesDir: null,
     gamesConfig: {},
   });
+  const settingsRef = useRef(settings); // Create a mutable reference for settings
   const [loadedSettings, setLoadedSettings] = useState(false);
   const [allClips, setAllClips] = useState([]);
   const [filter, setFilter] = useState({
@@ -30,6 +31,10 @@ export const GlobalProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
+  useEffect(() => {
     const save = async () => {
       if (loadedSettings) {
         await saveSettings(settings);
@@ -47,7 +52,7 @@ export const GlobalProvider = ({ children }) => {
         setAllClips(initialClips);
         setCurrentClip(initialClips[0]);
         setFavourites(favouritesSet);
-        startGameDetection(settings.gamesConfig);
+        startGameDetection(settingsRef);
       }
     };
     fetchClips();

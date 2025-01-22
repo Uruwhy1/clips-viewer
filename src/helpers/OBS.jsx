@@ -90,7 +90,7 @@ export function startGameDetection(settings) {
   let lastDetectedGame = null;
 
   setInterval(async () => {
-    const currentGame = await checkGameRunning(settings);
+    const currentGame = await checkGameRunning(settings.current.gamesConfig);
 
     if (currentGame && currentGame !== lastDetectedGame) {
       console.log(`${currentGame} detected! Starting OBS recording.`);
