@@ -18,7 +18,11 @@ function App() {
     const fetchObsStatus = async () => {
       await connectOBS();
       const obsStatus = await checkOBSStatus();
-      setObs(`Connected to OBS (${obsStatus.version})`);
+      if (obsStatus.connected) {
+        setObs(`Connected to OBS (${obsStatus.version})`);
+      } else {
+        setObs("Disconnected.");
+      }
     };
 
     fetchObsStatus();
@@ -87,21 +91,12 @@ function App() {
         openSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
       {currentView()}
-      <Settings ref={settingsRef} isOpen={isSettingsOpen} />
-      <p
-        style={{
-          background: "#000",
-          color: "#fff",
-          position: "fixed",
-          padding: "0.2rem",
-          bottom: "0rem",
-          right: "0rem",
-          borderRadius: "0.2rem 0 0.2rem",
-          zIndex: "99",
-        }}
-      >
-        {obs}
-      </p>
+      <Settings
+        ref={settingsRef}
+        obs={obs}
+        setObs={setObs}
+        isOpen={isSettingsOpen}
+      />
     </>
   );
 }

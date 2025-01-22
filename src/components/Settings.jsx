@@ -2,10 +2,11 @@ import { forwardRef, useContext } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Settings.module.css";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Folder, SettingsIcon } from "lucide-react";
+import { Aperture, Folder, SettingsIcon } from "lucide-react";
 import SettingButton from "./SettingButton";
+import { checkOBSStatus, connectOBS } from "../helpers/OBS";
 
-const Settings = forwardRef(({ isOpen }, ref) => {
+const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
   const { settings, setSettings } = useContext(GlobalContext);
 
   const handleSelectDirectory = async () => {
@@ -43,6 +44,17 @@ const Settings = forwardRef(({ isOpen }, ref) => {
     }
   };
 
+  const handleObsClick = async () => {
+    await connectOBS();
+
+    let status = await checkOBSStatus();
+    if (status.connected) {
+      setObs(`Connected to OBS (${status.version})`);
+    } else {
+      setObs("Failed to connect.");
+    }
+  };
+
   const removeGame = async (gameName) => {
     const confirmRemove = await window.confirm(
       `Are you sure you want to remove "${gameName}"?`
@@ -73,7 +85,7 @@ const Settings = forwardRef(({ isOpen }, ref) => {
       <div className={`${styles.settingCategory}`}>
         <div className={styles.title}>
           <Folder />
-          <h3>Clips Storage</h3>
+          <h3>Storage</h3>
         </div>
         <div className={styles.settingIndividual}>
           <div className={styles.subSectionTitle}>
@@ -92,8 +104,15 @@ const Settings = forwardRef(({ isOpen }, ref) => {
       </div>
       <div className={`${styles.settingCategory}`}>
         <div className={styles.title}>
-          <Folder />
-          <h3>OBS Recording</h3>
+          <Aperture />
+          <h3>OBS</h3>
+        </div>
+        <div className={styles.settingIndividual}>
+          <div className={styles.subSectionTitle}>
+            <strong>Websocket Connection</strong>
+            <SettingButton text={"Connect"} func={handleObsClick} />
+          </div>
+          <div className={styles.currentSetting}>{obs}</div>
         </div>
         <div className={styles.settingIndividual}>
           <div className={styles.subSectionTitle}>
