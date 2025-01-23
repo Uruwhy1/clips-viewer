@@ -1,8 +1,8 @@
 import styles from "./SettingButton.module.css";
 
-const SettingButton = ({ func, text }) => {
+const SettingButton = ({ func, text, tabIndex }) => {
   return (
-    <button className={styles.settingButton} onClick={func}>
+    <button tabIndex={tabIndex} className={styles.settingButton} onClick={func}>
       {text}
     </button>
   );

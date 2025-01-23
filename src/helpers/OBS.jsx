@@ -16,11 +16,13 @@ export const connectOBS = async (host, password) => {
   }
 };
 
-export const startRecording = async (currentGame) => {
+export const startRecording = async (currentGame, record) => {
   try {
     await setSceneForGame(currentGame);
 
-    const response = await obs.call("StartRecord");
+    if (record) {
+      const response = await obs.call("StartRecord");
+    }
     const response2 = await obs.call("StartReplayBuffer");
     return { success: true };
   } catch (error) {
@@ -29,9 +31,11 @@ export const startRecording = async (currentGame) => {
   }
 };
 
-export const stopRecording = async () => {
+export const stopRecording = async (record) => {
   try {
-    const response = await obs.call("StopRecord");
+    if (record) {
+      const response = await obs.call("StopRecord");
+    }
     const response2 = await obs.call("StopReplayBuffer");
 
     location.reload();
@@ -59,26 +63,23 @@ export const checkOBSStatus = async () => {
   }
 };
 
-export async function checkGameRunning(gamesToRecord) {
-  const gameProcesses = gamesToRecord;
-
+export async function checkGameRunning(gamesConfig) {
   try {
     const runningProcesses = await invoke("get_running_processes");
-
     const runningProcessesLower = runningProcesses.toLowerCase();
 
     // Check each game in the config
-    for (const [gameName, processNames] of Object.entries(gameProcesses)) {
-      const isGameRunning = processNames.some((processName) =>
+    for (const [gameName, config] of Object.entries(gamesConfig)) {
+      const isGameRunning = config.processes.some((processName) =>
         runningProcessesLower.includes(processName.toLowerCase())
       );
 
       if (isGameRunning) {
-        return gameName;
+        return [gameName, config.record];
       }
     }
 
-    return null;
+    return [null, null];
   } catch (error) {
     console.error("Error checking running processes:", error);
     return null;
@@ -89,14 +90,16 @@ export function startGameDetection(settings) {
   let lastDetectedGame = null;
 
   setInterval(async () => {
-    const currentGame = await checkGameRunning(settings.current.gamesConfig);
+    const [currentGame, record] = await checkGameRunning(
+      settings.current.gamesConfig
+    );
 
     if (currentGame && currentGame !== lastDetectedGame) {
       console.log(`${currentGame} detected! Starting OBS recording.`);
 
       try {
         await setOutputPathForGame(currentGame);
-        startRecording(currentGame);
+        startRecording(currentGame, record);
 
         console.log(`Started recording for ${currentGame}`);
       } catch (error) {
@@ -106,7 +109,7 @@ export function startGameDetection(settings) {
       lastDetectedGame = currentGame;
     } else if (!currentGame && lastDetectedGame) {
       try {
-        stopRecording();
+        stopRecording(record);
         console.log(`Stopped recording for ${lastDetectedGame}`);
       } catch (error) {
         console.error("Failed to stop recording:", error);

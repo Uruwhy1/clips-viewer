@@ -166,7 +166,19 @@
 
 /* add game form */
 
+.addGameForm {
+  --inputsNumber: 3;
+}
+.addWebsocketForm {
+  --inputsNumber: 2;
+}
+
 .form {
+  nav-index: -1;
+
+  --settingButtonHeight: 2.125rem;
+  --inputGroupHeight: 4.1rem;
+
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -183,7 +195,10 @@
   transition: height 0.5s ease;
   &.active {
     margin: 0;
-    height: 11.7rem;
+    height: calc(
+      (var(--inputGroupHeight) + var(--gap-small)) * var(--inputsNumber) +
+        (var(--settingButtonHeight) + 2px)
+    );
   }
 }
 
@@ -192,6 +207,7 @@
   flex-direction: column;
 
   width: 100%;
+  height: var(--inputGroupHeight);
 }
 
 .inputGroup label {
@@ -199,11 +215,44 @@
 }
 
 .inputGroup input {
+  height: 2.625rem;
+
+  width: 99%;
+  margin: auto;
+
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
 
   &:focus-visible {
     outline-color: var(--accent-washed);
+  }
+}
+
+.checkboxInput {
+  appearance: none;
+  cursor: pointer;
+
+  position: relative;
+  &::after {
+    font-weight: 1000;
+    font-size: 1.5rem;
+    color: white;
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    content: "✕";
+    color: gray;
+  }
+
+  &:checked {
+    background-color: var(--accent-washed);
+
+    &::after {
+      color: #fff;
+      content: "✔";
+    }
   }
 }

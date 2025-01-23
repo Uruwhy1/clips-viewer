@@ -8,9 +8,12 @@ import { checkOBSStatus, connectOBS } from "../helpers/OBS";
 
 const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
   const { settings, setSettings } = useContext(GlobalContext);
+
+  const [showAddGameForm, setShowAddGameForm] = useState(false);
   const [gameName, setGameName] = useState("");
   const [processNames, setProcessNames] = useState("");
-  const [showAddGameForm, setShowAddGameForm] = useState(false);
+  const [recordBool, setRecordBool] = useState(false);
+
   const [removingIndex, setRemovingIndex] = useState(null);
 
   const [showObsForm, setShowObsForm] = useState(false);
@@ -38,7 +41,10 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
         ...prevSettings,
         gamesConfig: {
           ...prevSettings.gamesConfig,
-          [gameName]: processArray,
+          [gameName]: {
+            processes: processArray,
+            record: recordBool,
+          },
         },
       }));
       setGameName("");
@@ -61,8 +67,6 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     if (status.connected) {
       setObs(`Connected to OBS (${status.version})`);
       setShowObsForm(false);
-      setObsPort("");
-      setObsPassword("");
 
       const updatedObsConfig = { port: obsPort, password: obsPassword };
 
@@ -74,6 +78,9 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
       });
     } else {
       setObs("Failed to connect.");
+
+      setObsPort("");
+      setObsPassword("");
     }
   };
 
@@ -141,7 +148,11 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
             />
           </div>
           <div className={styles.currentSetting}>{obs}</div>
-          <div className={`${styles.form} ${showObsForm && styles.active}`}>
+          <div
+            className={`${styles.form} ${showObsForm && styles.active} ${
+              styles.addWebsocketForm
+            }`}
+          >
             <div className={styles.inputGroup}>
               <label htmlFor="obsPort">Port</label>
               <input
@@ -151,6 +162,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                 value={obsPort}
                 onChange={(e) => setObsPort(e.target.value)}
                 placeholder="Enter OBS port"
+                tabIndex={showObsForm ? 0 : -1}
               />
             </div>
             <div className={styles.inputGroup}>
@@ -162,9 +174,14 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                 value={obsPassword}
                 onChange={(e) => setObsPassword(e.target.value)}
                 placeholder="Enter OBS password"
+                tabIndex={showObsForm ? 0 : -1}
               />
             </div>
-            <SettingButton func={handleObsClick} text={"Connect"} />
+            <SettingButton
+              tabIndex={showObsForm ? 0 : -1}
+              func={handleObsClick}
+              text={"Connect"}
+            />
           </div>
         </div>
         <div className={styles.settingIndividual}>
@@ -175,7 +192,11 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
               func={() => setShowAddGameForm((prev) => !prev)}
             />
           </div>
-          <div className={`${styles.form} ${showAddGameForm && styles.active}`}>
+          <div
+            className={`${styles.form} ${showAddGameForm && styles.active} ${
+              styles.addGameForm
+            }`}
+          >
             <div className={styles.inputGroup}>
               <label htmlFor="gameName">Game Name</label>
               <input
@@ -185,6 +206,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                 value={gameName}
                 onChange={(e) => setGameName(e.target.value)}
                 placeholder="Enter game name"
+                tabIndex={showAddGameForm ? 0 : -1}
               />
             </div>
             <div className={styles.inputGroup}>
@@ -196,15 +218,32 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                 value={processNames}
                 onChange={(e) => setProcessNames(e.target.value)}
                 placeholder="Enter process names, separated by commas"
+                tabIndex={showAddGameForm ? 0 : -1}
+              />
+            </div>{" "}
+            <div className={styles.inputGroup}>
+              <label htmlFor="recordBool">Record Full Sessions</label>
+              <input
+                autoComplete="off"
+                id="recordBool"
+                type="checkbox"
+                value={recordBool}
+                className={styles.checkboxInput}
+                onChange={(e) => setRecordBool(e.target.checked)}
+                tabIndex={showAddGameForm ? 0 : -1}
               />
             </div>
-            <SettingButton func={handleAddGame} text={"Save Game"} />
+            <SettingButton
+              tabIndex={showAddGameForm ? 0 : -1}
+              func={handleAddGame}
+              text={"Save Game"}
+            />
           </div>
           <div className={styles.gamesContainer}>
             {settings.gamesConfig &&
             Object.keys(settings.gamesConfig).length > 0 ? (
               Object.entries(settings.gamesConfig).map(
-                ([gameName, processes], index) => (
+                ([gameName, config], index) => (
                   <div
                     className={`${styles.gameItem} ${styles.currentSetting} ${
                       index == removingIndex ? styles.remove : ""
@@ -220,7 +259,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                     }
                   >
                     <strong>{gameName}</strong>
-                    <p>{processes.join(", ")}</p>
+                    <p>{config.processes.join(", ")}</p>
                     {index == removingIndex ? (
                       <button onClick={() => removeGame(gameName)}>
                         Remove?
