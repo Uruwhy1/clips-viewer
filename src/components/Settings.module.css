@@ -129,6 +129,7 @@
   flex-direction: column;
 
   height: 3.5rem;
+  border: 1px solid var(--borders);
 
   transition: background 0.5s ease;
   &:hover {
@@ -153,6 +154,7 @@
     font-weight: 500;
     cursor: pointer;
 
+    z-index: 2;
     animation: opacity 0.25s;
   }
 
@@ -165,6 +167,32 @@
 }
 .gameItem.editing {
   background-color: var(--accent-white);
+}
+.gameItem {
+  &::after {
+    content: "Only Clips";
+    position: absolute;
+    right: 2.5%;
+    top: 0;
+
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-washed);
+
+    border: 1px solid var(--borders);
+    border-top: 0;
+
+    z-index: 1;
+    background-color: #fff;
+    border-radius: 0 0 var(--radius-small) var(--radius-small);
+    padding: var(--padding-small);
+  }
+
+  &.recording {
+    &::after {
+      content: "Full Session";
+    }
+  }
 }
 
 @keyframes opacity {

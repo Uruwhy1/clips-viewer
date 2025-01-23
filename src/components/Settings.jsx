@@ -53,7 +53,6 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
         };
       });
 
-      // Reset form states
       setGameName("");
       setProcessNames("");
       setRecordBool(false);
@@ -211,9 +210,11 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
               func={() => {
                 setShowAddGameForm((prev) => !prev);
                 setEditingGame(null);
-                setGameName("");
-                setProcessNames("");
-                setRecordBool(false);
+                setTimeout(() => {
+                  setGameName("");
+                  setProcessNames("");
+                  setRecordBool(false);
+                }, 500);
               }}
             />
           </div>
@@ -272,7 +273,8 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                   <div
                     className={`${styles.gameItem} ${styles.currentSetting} ${
                       index == removingIndex ? styles.remove : ""
-                    } ${gameName == editingGame ? styles.editing : ""}`}
+                    } ${gameName == editingGame ? styles.editing : ""}
+                    ${config.record ? styles.recording : ""}`}
                     key={index}
                     onClick={
                       index == removingIndex
