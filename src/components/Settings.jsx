@@ -4,22 +4,13 @@ import styles from "./Settings.module.css";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Aperture, Folder, SettingsIcon } from "lucide-react";
 import SettingButton from "./SettingButton";
-import { checkOBSStatus, connectOBS } from "../helpers/OBS";
+
+import ObsConnectionForm from "./ObsConnectionForm";
+import GameConfigForm from "./GameConfigForm";
 
 const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
   const { settings, setSettings } = useContext(GlobalContext);
-
-  const [showAddGameForm, setShowAddGameForm] = useState(false);
-  const [gameName, setGameName] = useState("");
-  const [processNames, setProcessNames] = useState("");
-  const [recordBool, setRecordBool] = useState(false);
-
-  const [editingGame, setEditingGame] = useState(null);
   const [removingIndex, setRemovingIndex] = useState(null);
-
-  const [showObsForm, setShowObsForm] = useState(false);
-  const [obsPort, setObsPort] = useState(settings.obs?.port || "");
-  const [obsPassword, setObsPassword] = useState(settings.obs?.password || "");
 
   const handleSelectDirectory = async () => {
     const selectedDir = await open({
@@ -33,90 +24,6 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
         gamesDir: selectedDir,
       }));
     }
-  };
-
-  const handleAddOrEditGame = () => {
-    if (gameName && processNames) {
-      const processArray = processNames.split(",").map((name) => name.trim());
-
-      setSettings((prevSettings) => {
-        const updatedGamesConfig = { ...prevSettings.gamesConfig };
-
-        updatedGamesConfig[gameName] = {
-          processes: processArray,
-          record: recordBool,
-        };
-
-        return {
-          ...prevSettings,
-          gamesConfig: updatedGamesConfig,
-        };
-      });
-
-      setGameName("");
-      setProcessNames("");
-      setRecordBool(false);
-      setShowAddGameForm(false);
-      setEditingGame(null);
-    } else {
-      alert("Both game name and process names are required!");
-    }
-  };
-
-  const startEditGame = (gameName) => {
-    const gameConfig = settings.gamesConfig[gameName];
-
-    setEditingGame(gameName);
-    setGameName(gameName);
-    setProcessNames(gameConfig.processes.join(", "));
-    setRecordBool(gameConfig.record);
-    setShowAddGameForm(true);
-  };
-
-  const handleObsClick = async () => {
-    if (!obsPort || !obsPassword) {
-      alert("Both port and password are required!");
-      return;
-    }
-
-    await connectOBS(obsPort, obsPassword);
-
-    let status = await checkOBSStatus();
-    if (status.connected) {
-      setObs(`Connected to OBS (${status.version})`);
-      setShowObsForm(false);
-
-      const updatedObsConfig = { port: obsPort, password: obsPassword };
-
-      setSettings((prevSettings) => {
-        return {
-          ...prevSettings,
-          obs: updatedObsConfig,
-        };
-      });
-    } else {
-      setObs("Failed to connect.");
-
-      setObsPort("");
-      setObsPassword("");
-    }
-  };
-
-  const handleGameClick = (index) => {
-    setRemovingIndex(index);
-  };
-
-  const removeGame = async (gameName) => {
-    setRemovingIndex(null);
-
-    setSettings((prevSettings) => {
-      const updatedGamesConfig = { ...prevSettings.gamesConfig };
-      delete updatedGamesConfig[gameName];
-      return {
-        ...prevSettings,
-        gamesConfig: updatedGamesConfig,
-      };
-    });
   };
 
   return (
@@ -157,162 +64,24 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
           <Aperture />
           <h3>OBS</h3>
         </div>
-        <div className={styles.settingIndividual}>
-          <div className={styles.subSectionTitle}>
-            <strong>Websocket Connection</strong>
-            <SettingButton
-              text={showObsForm ? "Cancel" : "Connect"}
-              func={() => setShowObsForm((prev) => !prev)}
-            />
-          </div>
-          <div className={styles.currentSetting}>{obs}</div>
-          <div
-            className={`${styles.form} ${showObsForm && styles.active} ${
-              styles.addWebsocketForm
-            }`}
-          >
-            <div className={styles.inputGroup}>
-              <label htmlFor="obsPort">Port</label>
-              <input
-                autoComplete="off"
-                id="obsPort"
-                type="text"
-                value={obsPort}
-                onChange={(e) => setObsPort(e.target.value)}
-                placeholder="Enter OBS port"
-                tabIndex={showObsForm ? 0 : -1}
-              />
-            </div>
-            <div className={styles.inputGroup}>
-              <label htmlFor="obsPassword">Password</label>
-              <input
-                autoComplete="off"
-                id="obsPassword"
-                type="password"
-                value={obsPassword}
-                onChange={(e) => setObsPassword(e.target.value)}
-                placeholder="Enter OBS password"
-                tabIndex={showObsForm ? 0 : -1}
-              />
-            </div>
-            <SettingButton
-              tabIndex={showObsForm ? 0 : -1}
-              func={handleObsClick}
-              text={"Connect"}
-            />
-          </div>
-        </div>
-        <div className={styles.settingIndividual}>
-          <div className={styles.subSectionTitle}>
-            <strong>Game Configurations</strong>
-            <SettingButton
-              text={showAddGameForm ? "Cancel" : "Add Game"}
-              func={() => {
-                setShowAddGameForm((prev) => !prev);
-                setEditingGame(null);
-                setTimeout(() => {
-                  setGameName("");
-                  setProcessNames("");
-                  setRecordBool(false);
-                }, 500);
-              }}
-            />
-          </div>
-          <div
-            className={`${styles.form} ${showAddGameForm && styles.active} ${
-              styles.addGameForm
-            }`}
-          >
-            <div className={styles.inputGroup}>
-              <label htmlFor="gameName">Game Name</label>
-              <input
-                autoComplete="off"
-                id="gameName"
-                type="text"
-                value={gameName}
-                onChange={(e) => setGameName(e.target.value)}
-                placeholder="Enter game name"
-                tabIndex={showAddGameForm ? 0 : -1}
-              />
-            </div>
-            <div className={styles.inputGroup}>
-              <label htmlFor="processNames">Game Processes</label>
-              <input
-                autoComplete="off"
-                id="processNames"
-                type="text"
-                value={processNames}
-                onChange={(e) => setProcessNames(e.target.value)}
-                placeholder="Enter process names, separated by commas"
-                tabIndex={showAddGameForm ? 0 : -1}
-              />
-            </div>
-            <div className={styles.inputGroup}>
-              <label htmlFor="recordBool">Record Full Sessions</label>
-              <input
-                autoComplete="off"
-                id="recordBool"
-                type="checkbox"
-                checked={recordBool}
-                className={styles.checkboxInput}
-                onChange={(e) => setRecordBool(e.target.checked)}
-                tabIndex={showAddGameForm ? 0 : -1}
-              />
-            </div>
-            <SettingButton
-              tabIndex={showAddGameForm ? 0 : -1}
-              func={handleAddOrEditGame}
-              text={editingGame ? "Update Game" : "Save Game"}
-            />
-          </div>
-          <div className={styles.gamesContainer}>
-            {settings.gamesConfig &&
-            Object.keys(settings.gamesConfig).length > 0 ? (
-              Object.entries(settings.gamesConfig).map(
-                ([gameName, config], index) => (
-                  <div
-                    className={`${styles.gameItem} ${styles.currentSetting} ${
-                      index == removingIndex ? styles.remove : ""
-                    } ${gameName == editingGame ? styles.editing : ""}
-                    ${config.record ? styles.recording : ""}`}
-                    key={index}
-                    onClick={
-                      index == removingIndex
-                        ? ""
-                        : (e) => {
-                            e.stopPropagation();
-                            handleGameClick(index);
-                          }
-                    }
-                  >
-                    <strong>{gameName}</strong>
-                    <p>{config.processes.join(", ")}</p>
-                    {index == removingIndex ? (
-                      <>
-                        <button onClick={() => removeGame(gameName)}>
-                          Remove
-                        </button>
-                        <button
-                          className={styles.edit}
-                          onClick={() => {
-                            startEditGame(gameName);
-                            setRemovingIndex(null);
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </>
-                    ) : (
-                      ""
-                    )}
-                  </div>
-                )
-              )
-            ) : (
-              <p>No games added yet.</p>
-            )}
-          </div>
-        </div>
+        <ObsConnectionForm
+          obs={obs}
+          onConnectionFailure={() => {
+            setObs(`Failed to connect.`);
+          }}
+          initialPort={settings.obs?.port || ""}
+          initialPassword={settings.obs?.password || ""}
+          onConnectionSuccess={(obsConfig) => {
+            setObs(`Connected to OBS (${obsConfig.version})`);
+            setSettings((prev) => ({ ...prev, obs: obsConfig }));
+          }}
+        />
+        <GameConfigForm
+          settings={settings}
+          setSettings={setSettings}
+          removingIndex={removingIndex}
+          setRemovingIndex={setRemovingIndex}
+        />
       </div>
     </div>
   );
