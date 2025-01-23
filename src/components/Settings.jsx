@@ -14,6 +14,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
   const [processNames, setProcessNames] = useState("");
   const [recordBool, setRecordBool] = useState(false);
 
+  const [editingGame, setEditingGame] = useState(null);
   const [removingIndex, setRemovingIndex] = useState(null);
 
   const [showObsForm, setShowObsForm] = useState(false);
@@ -34,25 +35,43 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     }
   };
 
-  const handleAddGame = () => {
+  const handleAddOrEditGame = () => {
     if (gameName && processNames) {
       const processArray = processNames.split(",").map((name) => name.trim());
-      setSettings((prevSettings) => ({
-        ...prevSettings,
-        gamesConfig: {
-          ...prevSettings.gamesConfig,
-          [gameName]: {
-            processes: processArray,
-            record: recordBool,
-          },
-        },
-      }));
+
+      setSettings((prevSettings) => {
+        const updatedGamesConfig = { ...prevSettings.gamesConfig };
+
+        updatedGamesConfig[gameName] = {
+          processes: processArray,
+          record: recordBool,
+        };
+
+        return {
+          ...prevSettings,
+          gamesConfig: updatedGamesConfig,
+        };
+      });
+
+      // Reset form states
       setGameName("");
       setProcessNames("");
+      setRecordBool(false);
       setShowAddGameForm(false);
+      setEditingGame(null);
     } else {
       alert("Both game name and process names are required!");
     }
+  };
+
+  const startEditGame = (gameName) => {
+    const gameConfig = settings.gamesConfig[gameName];
+
+    setEditingGame(gameName);
+    setGameName(gameName);
+    setProcessNames(gameConfig.processes.join(", "));
+    setRecordBool(gameConfig.record);
+    setShowAddGameForm(true);
   };
 
   const handleObsClick = async () => {
@@ -189,7 +208,13 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
             <strong>Game Configurations</strong>
             <SettingButton
               text={showAddGameForm ? "Cancel" : "Add Game"}
-              func={() => setShowAddGameForm((prev) => !prev)}
+              func={() => {
+                setShowAddGameForm((prev) => !prev);
+                setEditingGame(null);
+                setGameName("");
+                setProcessNames("");
+                setRecordBool(false);
+              }}
             />
           </div>
           <div
@@ -220,14 +245,14 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                 placeholder="Enter process names, separated by commas"
                 tabIndex={showAddGameForm ? 0 : -1}
               />
-            </div>{" "}
+            </div>
             <div className={styles.inputGroup}>
               <label htmlFor="recordBool">Record Full Sessions</label>
               <input
                 autoComplete="off"
                 id="recordBool"
                 type="checkbox"
-                value={recordBool}
+                checked={recordBool}
                 className={styles.checkboxInput}
                 onChange={(e) => setRecordBool(e.target.checked)}
                 tabIndex={showAddGameForm ? 0 : -1}
@@ -235,8 +260,8 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
             </div>
             <SettingButton
               tabIndex={showAddGameForm ? 0 : -1}
-              func={handleAddGame}
-              text={"Save Game"}
+              func={handleAddOrEditGame}
+              text={editingGame ? "Update Game" : "Save Game"}
             />
           </div>
           <div className={styles.gamesContainer}>
@@ -247,7 +272,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                   <div
                     className={`${styles.gameItem} ${styles.currentSetting} ${
                       index == removingIndex ? styles.remove : ""
-                    }`}
+                    } ${gameName == editingGame ? styles.editing : ""}`}
                     key={index}
                     onClick={
                       index == removingIndex
@@ -261,9 +286,20 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                     <strong>{gameName}</strong>
                     <p>{config.processes.join(", ")}</p>
                     {index == removingIndex ? (
-                      <button onClick={() => removeGame(gameName)}>
-                        Remove?
-                      </button>
+                      <>
+                        <button onClick={() => removeGame(gameName)}>
+                          Remove
+                        </button>
+                        <button
+                          className={styles.edit}
+                          onClick={() => {
+                            startEditGame(gameName);
+                            setRemovingIndex(null);
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </>
                     ) : (
                       ""
                     )}
