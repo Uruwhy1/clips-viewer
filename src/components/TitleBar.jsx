@@ -1,9 +1,9 @@
 import styles from "./TitleBar.module.css";
 import { X, Minus, Square, Copy } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const TitleBar = () => {
+const TitleBar = React.memo(() => {
   Square;
   const currentWindow = getCurrentWindow();
   const [maximized, setMaximized] = useState(null);
@@ -54,6 +54,6 @@ const TitleBar = () => {
       </div>
     </div>
   );
-};
+});
 
 export default TitleBar;

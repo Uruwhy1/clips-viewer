@@ -1,11 +1,11 @@
-import { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Clips.module.css";
 
 import ClipItem from "./ClipItem";
 import { Star, Tv } from "lucide-react";
 
-const Clips = ({ setView }) => {
+const Clips = React.memo(({ setView }) => {
   const { filteredClips, games, filter, updateFilter } =
     useContext(GlobalContext);
   const [showGames, setShowGames] = useState(false);
@@ -88,6 +88,6 @@ const Clips = ({ setView }) => {
       </div>
     </div>
   );
-};
+});
 
 export default Clips;

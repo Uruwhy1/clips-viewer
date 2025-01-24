@@ -24,6 +24,7 @@ export const GlobalProvider = ({ children }) => {
   });
   const [favourites, setFavourites] = useState(new Set());
   const [currentClip, setCurrentClip] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [coverCache, setCoverCache] = useState(new Map());
 
@@ -59,6 +60,8 @@ export const GlobalProvider = ({ children }) => {
         setCurrentClip(initialClips[0]);
         setFavourites(favouritesSet);
         startGameDetection(settingsRef);
+
+        setLoading(false);
       }
     };
     fetchClips();

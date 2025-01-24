@@ -14,7 +14,7 @@ function App() {
   const [view, setView] = useState("clips");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef(null);
-  const { coverCache, settings } = useContext(GlobalContext);
+  const { loading, coverCache, settings } = useContext(GlobalContext);
 
   useEffect(() => {
     const fetchObsStatus = async () => {
