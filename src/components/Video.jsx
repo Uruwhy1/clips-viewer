@@ -1,4 +1,4 @@
-import { useState, forwardRef, useRef, useEffect } from "react";
+import React, { useState, forwardRef, useRef, useEffect } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
@@ -11,6 +11,14 @@ import {
   Videotape,
 } from "lucide-react";
 import styles from "./Video.module.css";
+
+const MemoizedPlay = React.memo(() => <Play size={20} />);
+const MemoizedPause = React.memo(() => <Pause size={20} />);
+const MemoizedVolumeX = React.memo(() => <VolumeX size={20} />);
+const MemoizedVolume2 = React.memo(() => <Volume2 size={20} />);
+const MemoizedMinimize = React.memo(() => <Minimize size={20} />);
+const MemoizedMaximize = React.memo(() => <Maximize size={20} />);
+const MemoizedVideotape = React.memo(() => <Videotape />);
 
 const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
   const [isPlaying, setIsPlaying] = useState(true);
@@ -28,32 +36,38 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
 
   useEffect(() => {
     const handleKeystroke = (e) => {
-      switch (e.key) {
-        case "Escape":
-          if (isFullscreen) {
-            e.stopPropagation();
-            toggleFullscreen();
-          }
-          break;
-        case "ArrowLeft":
-          ref.current.currentTime = ref.current.currentTime - 5;
-          setCurrentTime(ref.current.currentTime);
-          break;
-        case "ArrowRight":
-          ref.current.currentTime = ref.current.currentTime + 5;
-          setCurrentTime(ref.current.currentTime);
-          break;
-        case " ":
-          togglePlayPause();
-          break;
+      if (document.activeElement === ref.current) {
+        switch (e.key) {
+          case "Escape":
+            if (isFullscreen) {
+              toggleFullscreen();
+            }
+            break;
+          case "ArrowLeft":
+            ref.current.currentTime = Math.max(0, ref.current.currentTime - 5);
+            setCurrentTime(ref.current.currentTime);
+            break;
+          case "ArrowRight":
+            ref.current.currentTime = Math.min(
+              ref.current.duration,
+              ref.current.currentTime + 5
+            );
+            setCurrentTime(ref.current.currentTime);
+            break;
+          case " ":
+            togglePlayPause();
+            break;
+        }
       }
     };
+
+    ref.current.tabIndex = 0;
 
     document.addEventListener("keydown", handleKeystroke);
     return () => {
       document.removeEventListener("keydown", handleKeystroke);
     };
-  }, [isFullscreen, isPlaying]);
+  }, [isFullscreen, isPlaying, ref]);
 
   useEffect(() => {
     const handleDoubleClick = () => toggleFullscreen();
@@ -174,7 +188,7 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
       ></video>
       <div className={styles.controls}>
         <button onClick={togglePlayPause} className={styles.controlButton}>
-          {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+          {isPlaying ? <MemoizedPause /> : <MemoizedPlay />}
         </button>
 
         <span className={styles.time}>
@@ -191,9 +205,9 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
         <div className={styles.volumeControl}>
           <button onClick={toggleMute} className={styles.controlButton}>
             {isMuted || volume === 0 ? (
-              <VolumeX size={20} />
+              <MemoizedVolumeX />
             ) : (
-              <Volume2 size={20} />
+              <MemoizedVolume2 />
             )}
           </button>
           <div className={styles.volumeSlider}>
@@ -209,12 +223,12 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
         </div>
 
         <button onClick={toggleFullscreen} className={styles.controlButton}>
-          {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+          {isFullscreen ? <MemoizedMinimize /> : <MemoizedMaximize />}
         </button>
         <button
           className={`${styles.controlButton} ${styles.playbackContainer}`}
         >
-          <Videotape />
+          <MemoizedVideotape />
           {/* prettier-ignore */}
           <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : "" }`}>
             <div className={styles.playback} onClick={() => changePlaybackRate(2)}>2x</div>

@@ -1,12 +1,28 @@
-import { useContext, useState, useRef, useEffect } from "react";
-import { Star, Calendar, Folder, Tv, Edit3Icon, Save } from "lucide-react";
+import React, {
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
+import { Star, Calendar, Folder, Tv, Edit3Icon } from "lucide-react";
+import RenameInput from "./RenameInput";
 import GlobalContext from "../contexts/GlobalContext";
 import VideoComponent from "./Video";
 import EditingControls from "./EditingControls";
 import styles from "./CurrentVideo.module.css";
 import { invoke } from "@tauri-apps/api/core";
 
-const CurrentVideo = () => {
+const MemoizedCalendar = React.memo(() => <Calendar size={15} />);
+const MemoizedFolder = React.memo(() => <Folder size={15} />);
+const MemoizedTv = React.memo(({ ...props }) => <Tv size={15} {...props} />);
+const MemoizedEdit3Icon = React.memo(({ ...props }) => (
+  <Edit3Icon {...props} />
+));
+const MemoizedStar = React.memo(({ ...props }) => <Star {...props} />);
+
+const CurrentVideo = React.memo(() => {
   const { currentClip, toggleFavourite, coverCache, editClip } =
     useContext(GlobalContext);
   const [currentTime, setCurrentTime] = useState(0);
@@ -14,9 +30,7 @@ const CurrentVideo = () => {
   const [editing, setEditing] = useState(false);
   const [cover, setCover] = useState(null);
   const videoRef = useRef(null);
-
   const [renaming, setRenaming] = useState(false);
-  const [title, setTitle] = useState(currentClip.name);
 
   useEffect(() => {
     if (coverCache.has(currentClip.game)) {
@@ -37,15 +51,19 @@ const CurrentVideo = () => {
     setDuration(duration);
   };
 
-  const handleEditClick = () => {
-    setRenaming(!renaming);
-  };
+  const handleEditClick = useCallback(() => {
+    setRenaming((prev) => !prev);
+  }, []);
 
-  const renameClipFile = (clip, title) => {
-    editClip(clip, title);
-    setRenaming(false);
-  };
-
+  const renameClipFile = useCallback(
+    (clip, title) => {
+      if (title !== clip.name) {
+        editClip(clip, title);
+      }
+      setRenaming(false);
+    },
+    [editClip]
+  );
   return (
     <main className={styles.container}>
       <VideoComponent
@@ -57,51 +75,43 @@ const CurrentVideo = () => {
         <div className={styles.infoContainer}>
           <div className={`${styles.clipTitleContainer} ${styles.infoItem}`}>
             {renaming ? (
-              <div>
-                <input
-                  autoFocus
-                  className={styles.titleRename}
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-                <Save
-                  className={styles.titleButton}
-                  onClick={() => renameClipFile(currentClip, title)}
-                />
-              </div>
+              <RenameInput clip={currentClip} onRename={renameClipFile} />
             ) : (
               <h2 className={styles.title}>{currentClip.name}</h2>
             )}
             <div>
-              <Edit3Icon
-                className={styles.titleButton}
+              <div
                 onClick={(e) => {
                   e.stopPropagation();
                   handleEditClick();
                 }}
-              />
-              <Star
-                className={`${styles.titleButton} ${
-                  currentClip.isFavourite && styles.active
-                }`}
+              >
+                <MemoizedEdit3Icon className={styles.titleButton} />
+              </div>
+              <div
                 onClick={(e) => {
                   e.stopPropagation();
                   handleFavouriteClick(currentClip.filePath);
                 }}
-              />
+              >
+                <MemoizedStar
+                  className={`${styles.titleButton} ${
+                    currentClip.isFavourite && styles.active
+                  }`}
+                />
+              </div>
             </div>
           </div>
           <div className={styles.infoItem}>
-            <Tv size={15} />
+            <MemoizedTv />
             <p className={styles.game}>{currentClip.game}</p>
           </div>
           <div className={styles.infoItem}>
-            <Calendar size={15} />
+            <MemoizedCalendar />
             <p className={styles.date}>{currentClip.formattedDate}</p>
           </div>
           <div className={`${styles.infoItem} ${styles.filePath}`}>
-            <Folder size={15} />
+            <MemoizedFolder />
             <p
               className={styles.path}
               onClick={() => handlePathClick(currentClip.filePath)}
@@ -114,16 +124,9 @@ const CurrentVideo = () => {
           <img src={cover} alt={`${currentClip.game} Cover`} />
         </div>
       </div>
-
       {!editing && (
         <div className={styles.editingButton}>
-          <button
-            onClick={() => {
-              setEditing(true);
-            }}
-          >
-            EDITING MODE
-          </button>
+          <button onClick={() => setEditing(true)}>EDITING MODE</button>
         </div>
       )}
       {editing && (
@@ -135,6 +138,6 @@ const CurrentVideo = () => {
       )}
     </main>
   );
-};
+});
 
 export default CurrentVideo;

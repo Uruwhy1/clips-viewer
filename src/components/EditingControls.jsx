@@ -1,10 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import CustomVideoBar from "./CustomVideoBar";
 import styles from "./EditingControls.module.css";
 import GlobalContext from "../contexts/GlobalContext";
 import createClipHandler from "../helpers/createClip";
 
-const EditingControls = ({ duration, currentTime, videoRef }) => {
+const EditingControls = React.memo(({ duration, currentTime, videoRef }) => {
   const { currentClip, addClip } = useContext(GlobalContext);
 
   const [startTime, setStartTime] = useState(null);
@@ -66,6 +66,6 @@ const EditingControls = ({ duration, currentTime, videoRef }) => {
       </div>
     </div>
   );
-};
+});
 
 export default EditingControls;
