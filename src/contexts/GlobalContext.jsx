@@ -5,6 +5,7 @@ import { startGameDetection } from "../helpers/OBS";
 import { loadSettings, saveSettings } from "../helpers/settingsFile";
 import { documentDir, join } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { renameClipFile } from "../helpers/clipEditing";
 
 const GlobalContext = createContext();
 
@@ -144,6 +145,32 @@ export const GlobalProvider = ({ children }) => {
     setCurrentClip(newClip);
   };
 
+  const editClip = async (clip, newTitle) => {
+    const oldPath = clip.filePath;
+    const oldName = clip.name;
+
+    if (!newTitle || newTitle.trim() === "") {
+      alert("Edit canceled or invalid name.");
+      return;
+    }
+
+    try {
+      const { newPath, newName } = await renameClipFile(oldPath, newTitle);
+
+      const updatedClips = allClips.map((c) =>
+        c.filePath === oldPath ? { ...c, filePath: newPath, name: newName } : c
+      );
+
+      setAllClips(updatedClips);
+
+      if (currentClip && currentClip.filePath === oldPath) {
+        setCurrentClip({ ...currentClip, filePath: newPath, name: newName });
+      }
+    } catch (error) {
+      console.error("Error renaming clip:", error);
+    }
+  };
+
   const updateFilter = (newFilter) => {
     setFilter((prev) => ({
       ...prev,
@@ -160,6 +187,7 @@ export const GlobalProvider = ({ children }) => {
       filter,
       updateFilter,
       addClip,
+      editClip,
       setCurrentClip,
       setAllClips,
       toggleFavourite,

@@ -82,14 +82,36 @@
     font-size: inherit;
   }
 
-  .favouriteButton {
+  .titleRename {
+    --clr: var(--gray-color);
+    font-weight: 700;
+
+    color: inherit;
+
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--clr);
+
+    &:focus {
+      --clr: var(--accent-washed);
+      outline: 0;
+    }
+  }
+
+  .titleButton {
     cursor: pointer;
 
-    fill: currentColor;
     stroke: currentColor;
     &.active {
+      fill: currentColor;
       color: gold;
     }
+  }
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-medium);
   }
 }
 

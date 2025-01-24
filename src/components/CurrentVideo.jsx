@@ -1,5 +1,5 @@
 import { useContext, useState, useRef, useEffect } from "react";
-import { Star, Calendar, Folder, Tv } from "lucide-react"; // Import necessary icons
+import { Star, Calendar, Folder, Tv, Edit3Icon, Save } from "lucide-react";
 import GlobalContext from "../contexts/GlobalContext";
 import VideoComponent from "./Video";
 import EditingControls from "./EditingControls";
@@ -7,13 +7,16 @@ import styles from "./CurrentVideo.module.css";
 import { invoke } from "@tauri-apps/api/core";
 
 const CurrentVideo = () => {
-  const { currentClip, toggleFavourite, coverCache } =
+  const { currentClip, toggleFavourite, coverCache, editClip } =
     useContext(GlobalContext);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [editing, setEditing] = useState(false);
   const [cover, setCover] = useState(null);
   const videoRef = useRef(null);
+
+  const [renaming, setRenaming] = useState(false);
+  const [title, setTitle] = useState(currentClip.name);
 
   useEffect(() => {
     if (coverCache.has(currentClip.game)) {
@@ -34,6 +37,15 @@ const CurrentVideo = () => {
     setDuration(duration);
   };
 
+  const handleEditClick = () => {
+    setRenaming(!renaming);
+  };
+
+  const renameClipFile = (clip, title) => {
+    editClip(clip, title);
+    setRenaming(false);
+  };
+
   return (
     <main className={styles.container}>
       <VideoComponent
@@ -44,24 +56,41 @@ const CurrentVideo = () => {
       <div className={styles.info}>
         <div className={styles.infoContainer}>
           <div className={`${styles.clipTitleContainer} ${styles.infoItem}`}>
-            <h2 className={styles.title}>{currentClip.name}</h2>
-            {currentClip.isFavourite ? (
-              <Star
-                className={`${styles.favouriteButton} ${styles.active}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleFavouriteClick(currentClip.filePath);
-                }}
-              />
+            {renaming ? (
+              <div>
+                <input
+                  autoFocus
+                  className={styles.titleRename}
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+                <Save
+                  className={styles.titleButton}
+                  onClick={() => renameClipFile(currentClip, title)}
+                />
+              </div>
             ) : (
+              <h2 className={styles.title}>{currentClip.name}</h2>
+            )}
+            <div>
+              <Edit3Icon
+                className={styles.titleButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditClick();
+                }}
+              />
               <Star
-                className={styles.favouriteButton}
+                className={`${styles.titleButton} ${
+                  currentClip.isFavourite && styles.active
+                }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleFavouriteClick(currentClip.filePath);
                 }}
               />
-            )}
+            </div>
           </div>
           <div className={styles.infoItem}>
             <Tv size={15} />
