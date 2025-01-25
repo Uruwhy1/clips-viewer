@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
 
@@ -10,7 +10,7 @@ const GameConfigForm = React.memo(
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [editingGame, setEditingGame] = useState(null);
 
-    const handleSave = () => {
+    const handleSave = useCallback(() => {
       if (gameName && processNames) {
         const processArray = processNames.split(",").map((name) => name.trim());
 
@@ -36,34 +36,53 @@ const GameConfigForm = React.memo(
       } else {
         alert("Both game name and process names are required!");
       }
-    };
+    }, [gameName, processNames, recordBool, setSettings]);
 
-    const startEditGame = (gameName) => {
-      const gameConfig = settings.gamesConfig[gameName];
+    const startEditGame = useCallback(
+      (gameName) => {
+        const gameConfig = settings.gamesConfig[gameName];
 
-      setEditingGame(gameName);
-      setGameName(gameName);
-      setProcessNames(gameConfig.processes.join(", "));
-      setRecordBool(gameConfig.record);
-      setIsFormVisible(true);
-    };
+        setEditingGame(gameName);
+        setGameName(gameName);
+        setProcessNames(gameConfig.processes.join(", "));
+        setRecordBool(gameConfig.record);
+        setIsFormVisible(true);
+      },
+      [settings.gamesConfig]
+    );
 
-    const handleGameClick = (index) => {
-      setRemovingIndex(index);
-    };
+    const handleGameClick = useCallback(
+      (index) => {
+        setRemovingIndex(index);
+      },
+      [setRemovingIndex]
+    );
 
-    const removeGame = async (gameName) => {
-      setRemovingIndex(null);
+    const removeGame = useCallback(
+      (gameName) => {
+        setRemovingIndex(null);
 
-      setSettings((prevSettings) => {
-        const updatedGamesConfig = { ...prevSettings.gamesConfig };
-        delete updatedGamesConfig[gameName];
-        return {
-          ...prevSettings,
-          gamesConfig: updatedGamesConfig,
-        };
-      });
-    };
+        setSettings((prevSettings) => {
+          const updatedGamesConfig = { ...prevSettings.gamesConfig };
+          delete updatedGamesConfig[gameName];
+          return {
+            ...prevSettings,
+            gamesConfig: updatedGamesConfig,
+          };
+        });
+      },
+      [setSettings]
+    );
+
+    const toggleForm = useCallback(() => {
+      setIsFormVisible((prev) => !prev);
+      setEditingGame(null);
+      setTimeout(() => {
+        setGameName("");
+        setProcessNames("");
+        setRecordBool(false);
+      }, 500);
+    }, []);
 
     return (
       <div className={styles.settingIndividual}>
@@ -71,15 +90,7 @@ const GameConfigForm = React.memo(
           <strong>Game Configurations</strong>
           <SettingButton
             text={isFormVisible ? "Cancel" : "Add Game"}
-            func={() => {
-              setIsFormVisible((prev) => !prev);
-              setEditingGame(null);
-              setTimeout(() => {
-                setGameName("");
-                setProcessNames("");
-                setRecordBool(false);
-              }, 500);
-            }}
+            func={toggleForm}
           />
         </div>
         <div

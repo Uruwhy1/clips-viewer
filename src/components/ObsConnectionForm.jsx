@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { checkOBSStatus, connectOBS } from "../helpers/OBS";
 import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
@@ -15,7 +15,11 @@ const ObsConnectionForm = React.memo(
     const [obsPassword, setObsPassword] = useState(initialPassword);
     const [isFormVisible, setIsFormVisible] = useState(false);
 
-    const handleObsClick = async () => {
+    const toggleFormVisibility = useCallback(() => {
+      setIsFormVisible((prev) => !prev);
+    }, []);
+
+    const handleObsClick = useCallback(async () => {
       if (!obsPort || !obsPassword) {
         alert("Both port and password are required!");
         return;
@@ -23,7 +27,7 @@ const ObsConnectionForm = React.memo(
 
       await connectOBS(obsPort, obsPassword);
 
-      let status = await checkOBSStatus();
+      const status = await checkOBSStatus();
       if (status.connected) {
         onConnectionSuccess({
           port: obsPort,
@@ -35,7 +39,7 @@ const ObsConnectionForm = React.memo(
         onConnectionFailure();
         setIsFormVisible(false);
       }
-    };
+    }, [obsPort, obsPassword, onConnectionSuccess, onConnectionFailure]);
 
     return (
       <div className={styles.settingIndividual}>
@@ -43,7 +47,7 @@ const ObsConnectionForm = React.memo(
           <strong>Websocket Connection</strong>
           <SettingButton
             text={isFormVisible ? "Cancel" : "Connect"}
-            func={() => setIsFormVisible((prev) => !prev)}
+            func={toggleFormVisibility}
           />
         </div>
         <div

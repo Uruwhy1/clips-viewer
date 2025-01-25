@@ -17,6 +17,7 @@ export const connectOBS = async (host, password) => {
 };
 
 export const startRecording = async (currentGame, record) => {
+  console.log(record);
   try {
     await setSceneForGame(currentGame);
 
@@ -32,15 +33,13 @@ export const startRecording = async (currentGame, record) => {
 };
 
 export const stopRecording = async (record) => {
+  console.log(record);
   try {
     if (record) {
+      console.log("Xddd");
       const response = await obs.call("StopRecord");
     }
     const response2 = await obs.call("StopReplayBuffer");
-
-    location.reload();
-    let current = window.getCurrentWindow();
-    current.show();
 
     return { success: true };
   } catch (error) {
@@ -87,6 +86,7 @@ export async function checkGameRunning(gamesConfig) {
 }
 
 export function startGameDetection(settings) {
+  let lastDetectedRecord = null;
   let lastDetectedGame = null;
 
   setInterval(async () => {
@@ -107,9 +107,10 @@ export function startGameDetection(settings) {
       }
 
       lastDetectedGame = currentGame;
+      lastDetectedRecord = record;
     } else if (!currentGame && lastDetectedGame) {
       try {
-        stopRecording(record);
+        stopRecording(lastDetectedRecord);
         console.log(`Stopped recording for ${lastDetectedGame}`);
       } catch (error) {
         console.error("Failed to stop recording:", error);

@@ -3,7 +3,6 @@ import React, {
   useState,
   useRef,
   useEffect,
-  useMemo,
   useCallback,
 } from "react";
 import { Star, Calendar, Folder, Tv, Edit3Icon } from "lucide-react";
