@@ -1,4 +1,4 @@
-use filetime::{set_file_mtime, FileTime};
+use filetime::{ set_file_mtime, FileTime };
 use std::fs;
 use std::process::Command;
 use std::time::UNIX_EPOCH;
@@ -11,7 +11,8 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    tauri::Builder
+        ::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             /* system tray setup */
@@ -19,31 +20,30 @@ pub fn run() {
             let quit = MenuItemBuilder::new("Quit").id("quit").build(app).unwrap();
             let hide = MenuItemBuilder::new("Hide").id("hide").build(app).unwrap();
             let show = MenuItemBuilder::new("Show").id("show").build(app).unwrap();
-            let menu = MenuBuilder::new(app)
-                .items(&[&quit, &hide, &show])
-                .build()
-                .unwrap();
+            let menu = MenuBuilder::new(app).items(&[&quit, &hide, &show]).build().unwrap();
 
-            let window = app.get_webview_window("main").unwrap();
+            let _window = app.get_webview_window("main").unwrap();
 
             let _ = TrayIconBuilder::new()
                 .tooltip("Gaming Viewer")
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&menu)
                 // events handling here
-                .on_menu_event(|app, event| match event.id().as_ref() {
-                    "quit" => app.exit(0),
-                    "hide" => {
-                        dbg!("menu item hide clicked");
-                        let window = app.get_webview_window("main").unwrap();
-                        window.hide().unwrap();
+                .on_menu_event(|app, event| {
+                    match event.id().as_ref() {
+                        "quit" => app.exit(0),
+                        "hide" => {
+                            dbg!("menu item hide clicked");
+                            let window = app.get_webview_window("main").unwrap();
+                            window.hide().unwrap();
+                        }
+                        "show" => {
+                            dbg!("menu item show clicked");
+                            let window = app.get_webview_window("main").unwrap();
+                            window.show().unwrap();
+                        }
+                        _ => {}
                     }
-                    "show" => {
-                        dbg!("menu item show clicked");
-                        let window = app.get_webview_window("main").unwrap();
-                        window.show().unwrap();
-                    }
-                    _ => {}
                 })
                 .build(app);
 
@@ -51,11 +51,9 @@ pub fn run() {
         })
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![
-            create_clip,
-            get_running_processes,
-            open_file_explorer
-        ])
+        .invoke_handler(
+            tauri::generate_handler![create_clip, get_running_processes, open_file_explorer]
+        )
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -92,7 +90,7 @@ async fn create_clip(
     input_file: String,
     start_time: String,
     end_time: String,
-    output_file: String,
+    output_file: String
 ) -> Result<String, String> {
     // Retrieve original mtime
     let original_metadata = fs::metadata(&input_file).map_err(|e| e.to_string())?;
@@ -117,8 +115,9 @@ async fn create_clip(
         let mtime_unix = original_mtime.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
 
         // Set mtime of the new clip to match the original
-        set_file_mtime(&output_file, FileTime::from_unix_time(mtime_unix, 0))
-            .map_err(|e| e.to_string())?;
+        set_file_mtime(&output_file, FileTime::from_unix_time(mtime_unix, 0)).map_err(|e|
+            e.to_string()
+        )?;
 
         Ok("Clip created successfully".to_string())
     } else {
