@@ -7,9 +7,9 @@ const MemoizedSave = React.memo(({ ...props }) => <Save {...props} />);
 const RenameInput = memo(({ clip, onRename }) => {
   const [title, setTitle] = useState(clip.name);
 
-  const handleSave = useCallback(() => {
+  const handleSave = () => {
     onRename(clip, title);
-  }, [clip, onRename]);
+  };
 
   return (
     <div>
@@ -18,7 +18,10 @@ const RenameInput = memo(({ clip, onRename }) => {
         className={styles.titleRename}
         type="text"
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e) => {
+          console.log(title);
+          setTitle(e.target.value);
+        }}
       />
       <MemoizedSave className={styles.titleButton} onClick={handleSave} />
     </div>

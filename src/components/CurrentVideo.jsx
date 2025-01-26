@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { Star, Calendar, Folder, Tv, Edit3Icon } from "lucide-react";
+import { Star, Calendar, Folder, Tv, Edit3Icon, Trash2 } from "lucide-react";
 import RenameInput from "./RenameInput";
 import GlobalContext from "../contexts/GlobalContext";
 import VideoComponent from "./Video";
@@ -15,14 +15,15 @@ import { invoke } from "@tauri-apps/api/core";
 
 const MemoizedCalendar = React.memo(() => <Calendar size={15} />);
 const MemoizedFolder = React.memo(() => <Folder size={15} />);
+
 const MemoizedTv = React.memo(({ ...props }) => <Tv size={15} {...props} />);
-const MemoizedEdit3Icon = React.memo(({ ...props }) => (
-  <Edit3Icon {...props} />
-));
+// prettier-ignore
+const MemoizedEdit3Icon = React.memo(({ ...props }) => (<Edit3Icon {...props} />));
 const MemoizedStar = React.memo(({ ...props }) => <Star {...props} />);
+const MemoizedTrash2 = React.memo(({ ...props }) => <Trash2 {...props} />);
 
 const CurrentVideo = React.memo(() => {
-  const { currentClip, toggleFavourite, coverCache, editClip } =
+  const { currentClip, deleteClip, toggleFavourite, coverCache, editClip } =
     useContext(GlobalContext);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -53,6 +54,15 @@ const CurrentVideo = React.memo(() => {
   const handleEditClick = useCallback(() => {
     setRenaming((prev) => !prev);
   }, []);
+
+  const handleDeleteClick = useCallback(async () => {
+    const confirmDelete = await window.confirm(
+      "Are you sure you want to delete this clip?"
+    );
+    if (confirmDelete) {
+      deleteClip(currentClip.filePath);
+    }
+  }, [currentClip, deleteClip]);
 
   const renameClipFile = useCallback(
     (clip, title) => {
@@ -86,6 +96,14 @@ const CurrentVideo = React.memo(() => {
                 }}
               >
                 <MemoizedEdit3Icon className={styles.titleButton} />
+              </div>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteClick();
+                }}
+              >
+                <MemoizedTrash2 className={styles.titleButton} />
               </div>
               <div
                 onClick={(e) => {

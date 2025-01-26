@@ -79,6 +79,7 @@
   color: #fff;
 
   .title {
+    border-bottom: 1px solid transparent;
     font-size: inherit;
   }
 

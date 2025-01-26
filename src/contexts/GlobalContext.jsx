@@ -1,11 +1,21 @@
-import { createContext, useState, useMemo, useEffect, useRef } from "react";
+import {
+  createContext,
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import { getAllClips } from "../helpers/readFilesFromDirectory";
-import { saveFavourites } from "../helpers/externalFiles";
+import {
+  deleteClipFile,
+  saveFavourites,
+  renameClipFile,
+} from "../helpers/externalFiles";
 import { startGameDetection } from "../helpers/OBS";
 import { loadSettings, saveSettings } from "../helpers/settingsFile";
 import { documentDir, join } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { renameClipFile } from "../helpers/clipEditing";
 
 const GlobalContext = createContext();
 
@@ -24,6 +34,7 @@ export const GlobalProvider = ({ children }) => {
   });
   const [favourites, setFavourites] = useState(new Set());
   const [currentClip, setCurrentClip] = useState(null);
+  const currentClipRef = useRef(currentClip);
   const [loading, setLoading] = useState(true);
 
   const [coverCache, setCoverCache] = useState(new Map());
@@ -152,6 +163,8 @@ export const GlobalProvider = ({ children }) => {
     const oldPath = clip.filePath;
     const oldName = clip.name;
 
+    console.log("Xddd");
+
     if (!newTitle || newTitle.trim() === "") {
       alert("Edit canceled or invalid name.");
       return;
@@ -174,6 +187,23 @@ export const GlobalProvider = ({ children }) => {
     }
   };
 
+  const deleteClip = useCallback(async (clipPath) => {
+    const success = await deleteClipFile(clipPath);
+    if (!success) {
+      console.error("Failed to delete clip file.");
+      return;
+    }
+
+    setAllClips((prevClips) => {
+      const newClips = prevClips.filter((clip) => clip.filePath !== clipPath);
+
+      const newCurrentClip = newClips[0] || null;
+      setCurrentClip(newCurrentClip);
+
+      return newClips;
+    });
+  }, []);
+
   const updateFilter = (newFilter) => {
     setFilter((prev) => ({
       ...prev,
@@ -188,6 +218,7 @@ export const GlobalProvider = ({ children }) => {
       filteredClips,
       games,
       filter,
+      deleteClip,
       updateFilter,
       addClip,
       editClip,
