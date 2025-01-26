@@ -17,7 +17,6 @@ export const connectOBS = async (host, password) => {
 };
 
 export const startRecording = async (currentGame, record) => {
-  console.log(record);
   try {
     await setSceneForGame(currentGame);
 
@@ -25,6 +24,7 @@ export const startRecording = async (currentGame, record) => {
       const response = await obs.call("StartRecord");
     }
     const response2 = await obs.call("StartReplayBuffer");
+
     return { success: true };
   } catch (error) {
     console.error("OBS Recording Start Error:", error);
@@ -33,13 +33,15 @@ export const startRecording = async (currentGame, record) => {
 };
 
 export const stopRecording = async (record) => {
-  console.log(record);
   try {
     if (record) {
-      console.log("Xddd");
       const response = await obs.call("StopRecord");
     }
     const response2 = await obs.call("StopReplayBuffer");
+
+    location.reload();
+    let current = window.getCurrentWindow();
+    current.show();
 
     return { success: true };
   } catch (error) {
