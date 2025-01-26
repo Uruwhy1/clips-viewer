@@ -148,6 +148,7 @@ const CurrentVideo = React.memo(() => {
       )}
       {editing && (
         <EditingControls
+          setCurrentTime={setCurrentTime}
           duration={duration}
           currentTime={currentTime}
           videoRef={videoRef}

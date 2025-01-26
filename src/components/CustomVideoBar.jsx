@@ -5,6 +5,7 @@ import GlobalContext from "../contexts/GlobalContext";
 const CustomVideoBar = ({
   duration,
   currentTime,
+  setCurrentTime,
   startTime,
   endTime,
   formatTime,
@@ -18,6 +19,7 @@ const CustomVideoBar = ({
       const newTime =
         (event.nativeEvent.offsetX / event.target.offsetWidth) * duration;
       videoRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
     }
   };
 
