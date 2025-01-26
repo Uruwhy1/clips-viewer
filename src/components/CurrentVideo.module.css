@@ -93,6 +93,7 @@
     border: 0;
     border-bottom: 1px solid var(--clr);
 
+    padding: 0;
     &:focus {
       --clr: var(--accent-washed);
       outline: 0;

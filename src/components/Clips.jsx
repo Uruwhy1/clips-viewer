@@ -1,14 +1,24 @@
 import React, { useState, useContext, useEffect } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Clips.module.css";
-
 import ClipItem from "./ClipItem";
-import { Star, Tv } from "lucide-react";
+import { Star, Tv, ChevronLeft, ChevronRight } from "lucide-react";
 
 const Clips = React.memo(({ setView }) => {
   const { filteredClips, games, filter, updateFilter } =
     useContext(GlobalContext);
   const [showGames, setShowGames] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const clipsPerPage = 36;
+  const indexOfLastClip = currentPage * clipsPerPage;
+  const indexOfFirstClip = indexOfLastClip - clipsPerPage;
+  const currentClips = filteredClips.slice(indexOfFirstClip, indexOfLastClip);
+  const totalPages = Math.ceil(filteredClips.length / clipsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
 
   const handleFilterClick = () => {
     setShowGames(!showGames);
@@ -21,11 +31,42 @@ const Clips = React.memo(({ setView }) => {
     setShowGames(false);
   };
 
+  const handlePageChange = (newPage) => {
+    localStorage.setItem("page", JSON.stringify(newPage));
+    setCurrentPage(Math.max(1, Math.min(newPage, totalPages)));
+  };
+
+  const PaginationControls = () => (
+    <div className={styles.pagination}>
+      <button
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        <ChevronLeft size={16} />
+      </button>
+
+      <span>
+        {currentPage} / {totalPages}
+      </span>
+
+      <button
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        <ChevronRight size={16} />
+      </button>
+    </div>
+  );
+
   useEffect(() => {
     const storedPosition = localStorage.getItem("position");
+    const storedPage = localStorage.getItem("page");
 
     if (storedPosition) {
       document.documentElement.scrollTop = JSON.parse(storedPosition);
+    }
+    if (storedPage) {
+      setCurrentPage(+storedPage);
     }
 
     const handleScroll = () => {
@@ -76,7 +117,7 @@ const Clips = React.memo(({ setView }) => {
       </div>
 
       <div className={styles.clipGrid}>
-        {filteredClips.map((clip) => (
+        {currentClips.map((clip) => (
           <ClipItem key={clip.filePath} clip={clip} setView={setView} />
         ))}
 
@@ -86,6 +127,8 @@ const Clips = React.memo(({ setView }) => {
           </div>
         )}
       </div>
+
+      {filteredClips.length > clipsPerPage && <PaginationControls />}
     </div>
   );
 });
