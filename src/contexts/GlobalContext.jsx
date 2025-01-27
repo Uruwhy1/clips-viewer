@@ -229,7 +229,16 @@ export const GlobalProvider = ({ children }) => {
       settings,
       coverCache,
     }),
-    [allClips, currentClip, filteredClips, games, filter, settings, favourites]
+    [
+      allClips,
+      coverCache,
+      currentClip,
+      filteredClips,
+      games,
+      filter,
+      settings,
+      favourites,
+    ]
   );
 
   return (

@@ -28,7 +28,8 @@ const CurrentVideo = React.memo(() => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [editing, setEditing] = useState(false);
-  const [cover, setCover] = useState(null);
+  const [cover, setCover] = useState("");
+  const [imageError, setImageError] = useState(false);
   const videoRef = useRef(null);
   const [renaming, setRenaming] = useState(false);
 
@@ -73,6 +74,11 @@ const CurrentVideo = React.memo(() => {
     },
     [editClip]
   );
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
     <main className={styles.container}>
       <VideoComponent
@@ -138,7 +144,13 @@ const CurrentVideo = React.memo(() => {
           </div>
         </div>
         <div className={styles.imageDiv}>
-          <img src={cover} alt={`${currentClip.game} Cover`} />
+          {!imageError && cover && (
+            <img
+              src={cover}
+              alt={`${currentClip.game} Cover`}
+              onError={handleImageError}
+            />
+          )}
         </div>
       </div>
       {!editing && (
