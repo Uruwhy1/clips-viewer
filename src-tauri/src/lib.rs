@@ -3,6 +3,7 @@ use std::fs;
 use std::process::Command;
 use std::time::UNIX_EPOCH;
 
+use std::collections::HashSet;
 use std::os::windows::process::CommandExt;
 use tauri::menu::MenuBuilder;
 use tauri::menu::MenuItemBuilder;
@@ -59,8 +60,13 @@ pub fn run() {
 }
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
+#[derive(serde::Serialize)]
+struct ProcessInfo {
+    running_processes: HashSet<String>,
+}
+
 #[tauri::command]
-fn get_running_processes() -> Result<String, String> {
+fn get_running_processes() -> Result<ProcessInfo, String> {
     let output = Command::new("tasklist")
         .creation_flags(CREATE_NO_WINDOW)
         .output()
@@ -71,7 +77,19 @@ fn get_running_processes() -> Result<String, String> {
     }
 
     let processes = String::from_utf8_lossy(&output.stdout);
-    Ok(processes.to_string())
+    let process_set: HashSet<String> = processes
+        .lines()
+        .skip(3)
+        .filter_map(|line| {
+            line.split_whitespace()
+                .next()
+                .map(|name| name.to_lowercase())
+        })
+        .collect();
+
+    Ok(ProcessInfo {
+        running_processes: process_set,
+    })
 }
 
 #[tauri::command]

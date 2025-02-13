@@ -69,24 +69,29 @@ export const checkOBSStatus = async () => {
 export async function checkGameRunning(gamesConfig) {
   if (!obsConnected) return [null, null];
   try {
-    const runningProcesses = await invoke("get_running_processes");
-    const runningProcessesLower = runningProcesses.toLowerCase();
+    const { running_processes } = await invoke("get_running_processes");
 
-    // Check each game in the config
+    const processGameMap = new Map();
     for (const [gameName, config] of Object.entries(gamesConfig)) {
-      const isGameRunning = config.processes.some((processName) =>
-        runningProcessesLower.includes(processName.toLowerCase())
-      );
+      for (const processName of config.processes) {
+        processGameMap.set(processName.toLowerCase(), [
+          gameName,
+          config.record,
+        ]);
+      }
+    }
 
-      if (isGameRunning) {
-        return [gameName, config.record];
+    for (const process of running_processes) {
+      const gameInfo = processGameMap.get(process);
+      if (gameInfo) {
+        return gameInfo;
       }
     }
 
     return [null, null];
   } catch (error) {
     console.error("Error checking running processes:", error);
-    return null;
+    return [null, null];
   }
 }
 
@@ -99,29 +104,27 @@ export function startGameDetection(settings) {
       settings.current.gamesConfig
     );
 
-    if (currentGame && currentGame !== lastDetectedGame) {
-      console.log(`${currentGame} detected! Starting OBS recording.`);
-
-      try {
-        await setOutputPathForGame(currentGame);
-        startRecording(currentGame, record);
-
-        console.log(`Started recording for ${currentGame}`);
-      } catch (error) {
-        console.error("Failed to start recording:", error);
+    if (currentGame !== lastDetectedGame) {
+      if (currentGame) {
+        console.log(`${currentGame} detected! Starting OBS recording.`);
+        try {
+          await setOutputPathForGame(currentGame);
+          await startRecording(currentGame, record);
+          console.log(`Started recording for ${currentGame}`);
+        } catch (error) {
+          console.error("Failed to start recording:", error);
+        }
+      } else if (lastDetectedGame) {
+        try {
+          await stopRecording(lastDetectedRecord);
+          console.log(`Stopped recording for ${lastDetectedGame}`);
+        } catch (error) {
+          console.error("Failed to stop recording:", error);
+        }
       }
 
       lastDetectedGame = currentGame;
       lastDetectedRecord = record;
-    } else if (!currentGame && lastDetectedGame) {
-      try {
-        stopRecording(lastDetectedRecord);
-        console.log(`Stopped recording for ${lastDetectedGame}`);
-      } catch (error) {
-        console.error("Failed to stop recording:", error);
-      }
-
-      lastDetectedGame = null;
     }
   }, 2500);
 }
