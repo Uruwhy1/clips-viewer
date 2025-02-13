@@ -25,10 +25,14 @@ function App() {
               setView("clips");
               break;
             case "clips":
-              window.scrollTo({
-                top: 0,
-                behavior: "smooth",
-              });
+              if (document.body.scrollHeight > window.innerHeight) {
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                });
+              } else {
+                setIsSettingsOpen(true);
+              }
               break;
             default:
               break;
