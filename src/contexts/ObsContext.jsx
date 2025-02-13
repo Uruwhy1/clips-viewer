@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useRef } from "react";
 import OBSWebSocket from "obs-websocket-js";
 import { loadSettings } from "../helpers/settingsFile";
 import GlobalContext from "./GlobalContext";
@@ -17,6 +17,50 @@ export const OBSProvider = ({ children }) => {
     error: null,
   });
   const [obsSetting, setObsSetting] = useState({ port: null, password: null });
+
+  const gameDetectionInterval = useRef();
+
+  const clearGameDetectionInterval = () => {
+    if (gameDetectionInterval) {
+      console.log("Clearing interval:", gameDetectionInterval);
+      clearInterval(gameDetectionInterval.current);
+      gameDetectionInterval.current = null;
+    }
+  };
+
+  useEffect(() => {
+    const handleConnectionClosed = (data) => {
+      console.log("OBS WebSocket disconnected:", data);
+
+      clearGameDetectionInterval();
+
+      setConnection({
+        status: "disconnected",
+        version: null,
+        error: data?.message || "Connection closed",
+      });
+    };
+
+    const handleConnectionError = (error) => {
+      console.error("OBS WebSocket error:", error);
+
+      clearGameDetectionInterval();
+
+      setConnection({
+        status: "error",
+        version: null,
+        error: error.message,
+      });
+    };
+
+    obs.on("ConnectionClosed", handleConnectionClosed);
+    obs.on("ConnectionError", handleConnectionError);
+
+    return () => {
+      obs.off("ConnectionClosed", handleConnectionClosed);
+      obs.off("ConnectionError", handleConnectionError);
+    };
+  }, [obs]);
 
   useEffect(() => {
     const start = async () => {
@@ -43,6 +87,8 @@ export const OBSProvider = ({ children }) => {
 
   useEffect(() => {
     if (connection.status == "connected" && loadedSettings) {
+      clearGameDetectionInterval();
+
       startGameDetection(settings);
     }
   }, [connection, settings]);
@@ -137,7 +183,8 @@ export const OBSProvider = ({ children }) => {
     let lastDetectedRecord = null;
     let lastDetectedGame = null;
 
-    setInterval(async () => {
+    let interval = setInterval(async () => {
+      console.log(gameDetectionInterval);
       const [currentGame, record] = await checkGameRunning(
         settings.gamesConfig
       );
@@ -165,6 +212,13 @@ export const OBSProvider = ({ children }) => {
         lastDetectedRecord = record;
       }
     }, 2500);
+
+    console.log("Setting here", interval);
+    gameDetectionInterval.current = interval;
+
+    return () => {
+      clearInterval(interval);
+    };
   }
 
   async function setOutputPathForGame(gameName) {
