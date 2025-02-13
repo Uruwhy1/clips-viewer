@@ -5,10 +5,12 @@ import { join } from "@tauri-apps/api/path";
 import { window } from "@tauri-apps/api";
 
 const obs = new OBSWebSocket();
+let obsConnected = false;
 
 export const connectOBS = async (host, password) => {
   try {
     await obs.connect(`ws://localhost:${host}`, password);
+    obsConnected = true;
     return { connected: true, message: "Successfully connected to OBS" };
   } catch (error) {
     console.error("OBS Connection Error:", error);
@@ -65,6 +67,7 @@ export const checkOBSStatus = async () => {
 };
 
 export async function checkGameRunning(gamesConfig) {
+  if (!obsConnected) return [null, null];
   try {
     const runningProcesses = await invoke("get_running_processes");
     const runningProcessesLower = runningProcesses.toLowerCase();

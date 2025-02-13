@@ -8,6 +8,7 @@ import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
 import Settings from "./components/Settings";
 import GlobalContext from "./contexts/GlobalContext";
+import { listen } from "@tauri-apps/api/event";
 
 function App() {
   const [obs, setObs] = useState(null);
