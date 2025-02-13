@@ -2,36 +2,17 @@ import { useEffect, useState, useRef, useContext } from "react";
 import "./reset.css";
 import "./App.css";
 import CurrentVideo from "./components/CurrentVideo";
-import { checkOBSStatus, connectOBS } from "./helpers/OBS";
 import Clips from "./components/Clips";
 import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
 import Settings from "./components/Settings";
 import GlobalContext from "./contexts/GlobalContext";
-import { listen } from "@tauri-apps/api/event";
 
 function App() {
-  const [obs, setObs] = useState(null);
   const [view, setView] = useState("clips");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef(null);
-  const { loading, coverCache, settings } = useContext(GlobalContext);
-
-  useEffect(() => {
-    const fetchObsStatus = async () => {
-      const obsSettings = settings.obs;
-
-      await connectOBS(obsSettings.port, obsSettings.password);
-      const obsStatus = await checkOBSStatus();
-      if (obsStatus.connected) {
-        setObs(`Connected to OBS (${obsStatus.version})`);
-      } else {
-        setObs("Disconnected.");
-      }
-    };
-
-    fetchObsStatus();
-  }, []);
+  const { coverCache, settings } = useContext(GlobalContext);
 
   useEffect(() => {
     const handleEscapeKey = (event) => {
@@ -122,12 +103,7 @@ function App() {
         openSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
       {currentView()}
-      <Settings
-        ref={settingsRef}
-        obs={obs}
-        setObs={setObs}
-        isOpen={isSettingsOpen}
-      />
+      <Settings ref={settingsRef} isOpen={isSettingsOpen} />
     </>
   );
 }

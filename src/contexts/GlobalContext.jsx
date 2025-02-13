@@ -12,7 +12,6 @@ import {
   saveFavourites,
   renameClipFile,
 } from "../helpers/externalFiles";
-import { startGameDetection } from "../helpers/OBS";
 import { loadSettings, saveSettings } from "../helpers/settingsFile";
 import { documentDir, join } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/core";
@@ -23,7 +22,6 @@ export const GlobalProvider = ({ children }) => {
   const [settings, setSettings] = useState({
     gamesDir: null,
     gamesConfig: {},
-    obs: { port: 4455, password: "bolso02" },
   });
   const settingsRef = useRef(settings); // Create a mutable reference for settings
   const [loadedSettings, setLoadedSettings] = useState(false);
@@ -34,8 +32,6 @@ export const GlobalProvider = ({ children }) => {
   });
   const [favourites, setFavourites] = useState(new Set());
   const [currentClip, setCurrentClip] = useState(null);
-  const currentClipRef = useRef(currentClip);
-  const [loading, setLoading] = useState(true);
 
   const [coverCache, setCoverCache] = useState(new Map());
 
@@ -70,9 +66,6 @@ export const GlobalProvider = ({ children }) => {
         setAllClips(initialClips);
         setCurrentClip(initialClips[0]);
         setFavourites(favouritesSet);
-        startGameDetection(settingsRef);
-
-        setLoading(false);
       }
     };
     fetchClips();
@@ -227,6 +220,7 @@ export const GlobalProvider = ({ children }) => {
       toggleFavourite,
       setSettings,
       settings,
+      loadedSettings,
       coverCache,
     }),
     [
@@ -237,6 +231,7 @@ export const GlobalProvider = ({ children }) => {
       games,
       filter,
       settings,
+      loadedSettings,
       favourites,
     ]
   );

@@ -6,8 +6,14 @@ export const loadSettings = async (setSettings) => {
 
   try {
     const settingsData = await readTextFile(settingsPath);
-    setSettings(JSON.parse(settingsData));
-    await saveSettings(JSON.parse(settingsData));
+    const settings = JSON.parse(settingsData);
+
+    if (setSettings) {
+      setSettings(settings);
+    }
+    await saveSettings(settings);
+
+    return settings;
   } catch (error) {
     console.log(error);
     if (error.includes("The system cannot find the file")) {
