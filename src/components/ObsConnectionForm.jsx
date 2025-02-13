@@ -1,5 +1,5 @@
 import { useOBS } from "../contexts/ObsContext";
-import React, { useState, useCallback, useContext } from "react";
+import React, { useState, useCallback, useContext, useEffect } from "react";
 import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
 
@@ -8,6 +8,11 @@ const ObsConnectionForm = React.memo(() => {
   const [obsPort, setObsPort] = useState("");
   const [obsPassword, setObsPassword] = useState("");
   const [isFormVisible, setIsFormVisible] = useState(false);
+
+  useEffect(() => {
+    setObsPassword(obsSetting.password);
+    setObsPort(obsSetting.port);
+  }, [obsSetting]);
 
   const toggleFormVisibility = useCallback(() => {
     setIsFormVisible((prev) => !prev);
@@ -72,10 +77,10 @@ const ObsConnectionForm = React.memo(() => {
           <input
             autoComplete="off"
             id="obsPassword"
-            type="text"
+            type="password"
+            placeholder="Password here..."
             value={obsPassword}
             onChange={(e) => setObsPassword(e.target.value)}
-            placeholder={obsSetting.password}
             tabIndex={isFormVisible ? 0 : -1}
           />
         </div>
