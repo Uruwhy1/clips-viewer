@@ -64,7 +64,7 @@ async function processFile(item, dirPath, game, favouritesSet) {
 
   if (!item.isDirectory) {
     const stat1 = await stat(fullPath);
-    const name = item.name.match(/[\sA-Za-z0-9]+/)?.[0] || item.name;
+    const name = item.name.match(/[\sA-Za-z0-9']+/)?.[0] || item.name;
 
     return [
       {
