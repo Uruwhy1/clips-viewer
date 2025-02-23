@@ -22,7 +22,6 @@ export const OBSProvider = ({ children }) => {
 
   const clearGameDetectionInterval = () => {
     if (gameDetectionInterval) {
-      console.log("Clearing interval:", gameDetectionInterval);
       clearInterval(gameDetectionInterval.current);
       gameDetectionInterval.current = null;
     }
@@ -72,7 +71,6 @@ export const OBSProvider = ({ children }) => {
 
   useEffect(() => {
     const initialize = async () => {
-      console.log(obsSetting);
       try {
         if (obsSetting && obsSetting.port && obsSetting.password) {
           await connect(obsSetting.port, obsSetting.password);
@@ -184,7 +182,6 @@ export const OBSProvider = ({ children }) => {
     let lastDetectedGame = null;
 
     let interval = setInterval(async () => {
-      console.log(gameDetectionInterval);
       const [currentGame, record] = await checkGameRunning(
         settings.gamesConfig
       );
@@ -213,7 +210,6 @@ export const OBSProvider = ({ children }) => {
       }
     }, 2500);
 
-    console.log("Setting here", interval);
     gameDetectionInterval.current = interval;
 
     return () => {

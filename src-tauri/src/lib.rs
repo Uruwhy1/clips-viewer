@@ -81,9 +81,12 @@ fn get_running_processes() -> Result<ProcessInfo, String> {
         .lines()
         .skip(3)
         .filter_map(|line| {
-            line.split_whitespace()
-                .next()
-                .map(|name| name.to_lowercase())
+            let name = line
+                .get(0..=24)?
+                .trim()
+                .to_lowercase();
+
+            Some(name)
         })
         .collect();
 
