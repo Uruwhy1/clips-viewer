@@ -3,6 +3,7 @@ import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Clips.module.css";
 import ClipItem from "./ClipItem";
 import { Star, Tv, ChevronLeft, ChevronRight } from "lucide-react";
+import ClipsSkeleton from "../skeletons/ClipsSkeleton";
 
 const Clips = React.memo(({ setView }) => {
   const { filteredClips, games, filter, updateFilter } =
@@ -135,17 +136,26 @@ const Clips = React.memo(({ setView }) => {
         </button>
       </div>
 
-      <div className={styles.clipGrid}>
-        {currentClips.map((clip) => (
-          <ClipItem key={clip.filePath} clip={clip} setView={setView} />
-        ))}
+      {games.length > 0 && (
+        <div className={styles.clipGrid}>
+          {currentClips.map((clip) => (
+            <ClipItem key={clip.filePath} clip={clip} setView={setView} />
+          ))}
 
-        {filteredClips.length === 0 && (
-          <div className={styles.noClips}>
-            No clips found. Try adjusting your filters.
-          </div>
-        )}
-      </div>
+          {filteredClips.length === 0 && (
+            <div className={styles.noClips}>
+              No clips found. Try adjusting your filters.
+            </div>
+          )}
+        </div>
+      )}
+      {games.length === 0 && (
+        <div className={styles.clipGrid}>
+          {Array.from({ length: 10 }).map((_, index) => (
+            <ClipsSkeleton index={index} key={index} />
+          ))}
+        </div>
+      )}
 
       {filteredClips.length > clipsPerPage && <PaginationControls />}
     </div>
