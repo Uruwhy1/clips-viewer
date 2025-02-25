@@ -20,6 +20,25 @@ const Clips = React.memo(({ setView }) => {
     setCurrentPage(1);
   }, [filter]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const tagName = document.activeElement.tagName.toLowerCase();
+      if (tagName === "input" || tagName === "textarea") return;
+
+      if (e.key === "ArrowLeft" && currentPage > 1) {
+        handlePageChange(currentPage - 1);
+      } else if (e.key === "ArrowRight" && currentPage < totalPages) {
+        handlePageChange(currentPage + 1);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentPage, totalPages]);
+
   const handleFilterClick = () => {
     setShowGames(!showGames);
   };

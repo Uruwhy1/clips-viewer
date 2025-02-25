@@ -31,7 +31,7 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
   const divRef = useRef();
 
   useEffect(() => {
-    document.documentElement.style.setProperty("--value", 0);
+    document.documentElement.style.setProperty("--volume", 0);
   }, []);
 
   useEffect(() => {
@@ -40,6 +40,7 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
         switch (e.key) {
           case "Escape":
             if (isFullscreen) {
+              e.stopPropagation();
               toggleFullscreen();
             }
             break;
@@ -84,14 +85,31 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
     };
   }, [isFullscreen]);
 
+  // focus video after control interaction
+  useEffect(() => {
+    const controlsElement = document.querySelector(`.${styles.controls}`);
+
+    const handleControlsInteraction = () => {
+      if (ref.current) ref.current.focus();
+    };
+
+    if (controlsElement) {
+      controlsElement.addEventListener("click", handleControlsInteraction);
+      return () => {
+        controlsElement.removeEventListener("click", handleControlsInteraction);
+      };
+    }
+  }, [ref]);
+
   const toggleFullscreen = async () => {
     const window = getCurrentWindow();
     if (!isFullscreen) {
       divRef.current.requestFullscreen();
+      // window.setFullscreen(true); // there is an issue with fullscreen and decorations: false;
     } else {
       document.exitFullscreen();
+      window.setFullscreen(false);
     }
-    window.setFullscreen(!isFullscreen);
     setIsFullscreen(!isFullscreen);
   };
 
@@ -171,7 +189,7 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
     ref.current.volume = value;
     const percentage = value / max;
 
-    document.documentElement.style.setProperty("--value", percentage);
+    document.documentElement.style.setProperty("--volume", percentage);
   };
 
   return (
