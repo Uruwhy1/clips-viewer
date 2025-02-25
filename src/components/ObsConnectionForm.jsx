@@ -10,8 +10,8 @@ const ObsConnectionForm = React.memo(() => {
   const [isFormVisible, setIsFormVisible] = useState(false);
 
   useEffect(() => {
-    setObsPassword(obsSetting.password);
-    setObsPort(obsSetting.port);
+    setObsPassword(obsSetting.password || "");
+    setObsPort(obsSetting.port || "");
   }, [obsSetting]);
 
   const toggleFormVisibility = useCallback(() => {

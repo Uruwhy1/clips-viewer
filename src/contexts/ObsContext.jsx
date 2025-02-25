@@ -18,12 +18,12 @@ export const OBSProvider = ({ children }) => {
   });
   const [obsSetting, setObsSetting] = useState({ port: null, password: null });
 
-  const gameDetectionInterval = useRef();
+  let gameDetectionInterval = false;
 
   const clearGameDetectionInterval = () => {
     if (gameDetectionInterval) {
-      clearInterval(gameDetectionInterval.current);
-      gameDetectionInterval.current = null;
+      clearInterval(gameDetectionInterval);
+      gameDetectionInterval = null;
     }
   };
 
@@ -210,7 +210,7 @@ export const OBSProvider = ({ children }) => {
       }
     }, 2500);
 
-    gameDetectionInterval.current = interval;
+    gameDetectionInterval = interval;
 
     return () => {
       clearInterval(interval);
