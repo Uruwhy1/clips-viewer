@@ -103,7 +103,9 @@ function App() {
       )}
       <TitleBar />
       <Sidebar
+        view={view}
         setView={setView}
+        settingsState={isSettingsOpen}
         openSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
       {currentView()}

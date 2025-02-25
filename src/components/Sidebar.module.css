@@ -32,8 +32,19 @@
   &:hover {
     background-color: var(--sidebar-hover);
   }
+
+  &.active {
+    background-color: #000;
+  }
 }
 
 .settings {
   margin-top: auto;
+
+  > svg {
+    transition: transform 0.5s ease;
+  }
+  &.activeSettings > svg {
+    transform: rotate(360deg);
+  }
 }
