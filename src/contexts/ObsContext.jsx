@@ -5,6 +5,7 @@ import GlobalContext from "./GlobalContext";
 import { invoke } from "@tauri-apps/api/core";
 import { join } from "@tauri-apps/api/path";
 import { mkdir } from "@tauri-apps/plugin-fs";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const OBSContext = createContext();
 
@@ -138,8 +139,7 @@ export const OBSProvider = ({ children }) => {
       const response2 = await obs.call("StopReplayBuffer");
 
       location.reload();
-      let current = window.getCurrentWindow();
-      current.show();
+      await getCurrentWindow().show();
 
       return { success: true };
     } catch (error) {

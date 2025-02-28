@@ -59,15 +59,22 @@ const EditingControls = React.memo(
             onChange={(e) => setNewName(e.target.value)}
           />
           <button
-            onClick={() =>
-              createClipHandler(
+            onClick={async () => {
+              let create = await createClipHandler(
                 newName,
                 startTime,
                 endTime,
                 currentClip,
                 addClip
-              )
-            }
+              );
+
+              console.log(create);
+              if (create) {
+                setStartTime(null);
+                setEndTime(null);
+                setNewName("");
+              }
+            }}
           >
             Create Clip
           </button>

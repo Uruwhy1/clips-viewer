@@ -29,6 +29,7 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
   const [duration, setDuration] = useState(0);
   const [playback, setPlayback] = useState(null);
   const divRef = useRef();
+  const animationFrameRef = useRef();
 
   useEffect(() => {
     document.documentElement.style.setProperty("--volume", 0);
@@ -101,6 +102,26 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
     }
   }, [ref]);
 
+  useEffect(() => {
+    const updateProgressBar = () => {
+      if (ref.current && isPlaying) {
+        setCurrentTime(ref.current.currentTime);
+        onTimeUpdate(ref.current.currentTime, ref.current.duration);
+      }
+      animationFrameRef.current = requestAnimationFrame(updateProgressBar);
+    };
+
+    if (isPlaying) {
+      animationFrameRef.current = requestAnimationFrame(updateProgressBar);
+    }
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isPlaying, onTimeUpdate]);
+
   const toggleFullscreen = async () => {
     const window = getCurrentWindow();
     if (!isFullscreen) {
@@ -146,9 +167,7 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
 
   const handleTimeUpdate = () => {
     if (ref.current) {
-      setCurrentTime(ref.current.currentTime);
       setDuration(ref.current.duration);
-      onTimeUpdate(ref.current.currentTime, ref.current.duration);
     }
   };
 

@@ -10,12 +10,12 @@ async function createClipHandler(
 ) {
   if (startTime >= endTime) {
     alert("The start is after the end! D:");
-    return;
+    return false;
   }
 
-  if (newName.match(/[^A-Za-z0-9]/)) {
+  if (newName.match(/[^A-Za-z0-9\s]/)) {
     alert("Invalid name input... idiot.");
-    return;
+    return false;
   }
 
   if (startTime !== null && endTime !== null && currentClip) {
@@ -48,12 +48,17 @@ async function createClipHandler(
       };
 
       addClip(newClip);
+
+      return true;
     } catch (error) {
       alert(`Error creating clip: ${error}`);
       console.error(error);
+
+      return false;
     }
   } else {
     alert("Please mark both start and end times first.");
+    return false;
   }
 }
 

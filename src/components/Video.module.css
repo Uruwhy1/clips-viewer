@@ -79,6 +79,8 @@ video {
 
   margin: 0 10px;
   cursor: pointer;
+
+  overflow: hidden;
 }
 
 .progress {
@@ -199,8 +201,8 @@ video {
   background: linear-gradient(
     to right,
     var(--accent-washed) 0%,
-    var(--accent-washed) calc(var(--value) * 100%),
-    var(--accent-white) calc(var(--value) * 100%),
+    var(--accent-washed) calc(var(--volume) * 100%),
+    var(--accent-white) calc(var(--volume) * 100%),
     var(--accent-white) 100%
   );
 }

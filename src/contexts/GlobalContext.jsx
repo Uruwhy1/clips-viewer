@@ -149,7 +149,6 @@ export const GlobalProvider = ({ children }) => {
 
   const addClip = (newClip) => {
     setAllClips((prevClips) => [newClip, ...prevClips]);
-    setCurrentClip(newClip);
   };
 
   const editClip = async (clip, newTitle) => {
