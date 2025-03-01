@@ -28,7 +28,6 @@
 
   border-radius: var(--radius-small);
 
-  transition: background 0.15s;
   &:hover {
     background-color: var(--sidebar-hover);
   }
@@ -46,5 +45,23 @@
   }
   &.activeSettings > svg {
     transform: rotate(360deg);
+  }
+}
+
+.clips.active path {
+  animation: video 0.5s ease 1;
+}
+@keyframes video {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  51% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
   }
 }

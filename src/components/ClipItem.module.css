@@ -42,8 +42,23 @@
   fill: none;
 
   &.active {
+    animation: favourite 0.5s 1 ease;
+
     stroke: gold;
     fill: gold;
+  }
+}
+
+@keyframes favourite {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 

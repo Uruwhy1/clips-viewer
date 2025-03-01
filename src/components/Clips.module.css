@@ -70,9 +70,23 @@
     border-color: var(--accent-washed);
 
     > svg {
+      animation: favourite 0.5s 1 ease;
       --star: yellow;
       fill: var(--star);
     }
+  }
+}
+
+@keyframes favourite {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
@@ -151,6 +165,41 @@
   border-radius: 4px;
   background: white;
   cursor: pointer;
+
+  position: relative;
+  &::before {
+    position: absolute;
+    content: "";
+
+    width: 0;
+    height: 1px;
+    background-color: #000;
+
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+
+    transition: width 0.1s;
+  }
+
+  &:hover {
+    &:first-child {
+      --width: -0.25rem;
+    }
+    --width: 0.25rem;
+
+    svg {
+      transform: translateX(var(--width));
+    }
+
+    &::before {
+      width: 0.75rem;
+    }
+  }
+}
+
+.pagination svg {
+  transition: transform 0.1s;
 }
 
 .pagination button:disabled {
