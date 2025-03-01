@@ -12,6 +12,7 @@ import VideoComponent from "./Video";
 import EditingControls from "./EditingControls";
 import styles from "./CurrentVideo.module.css";
 import { invoke } from "@tauri-apps/api/core";
+import StarButton from "./icons/StarButton";
 
 const MemoizedCalendar = React.memo(() => <Calendar size={15} />);
 const MemoizedFolder = React.memo(() => <Folder size={15} />);
@@ -117,11 +118,7 @@ const CurrentVideo = React.memo(() => {
                   handleFavouriteClick(currentClip.filePath);
                 }}
               >
-                <MemoizedStar
-                  className={`${styles.titleButton} ${
-                    currentClip.isFavourite && styles.active
-                  }`}
-                />
+                <StarButton active={currentClip.isFavourite} />
               </div>
             </div>
           </div>

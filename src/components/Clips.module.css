@@ -70,23 +70,9 @@
     border-color: var(--accent-washed);
 
     > svg {
-      animation: favourite 0.5s 1 ease;
-      --star: yellow;
-      fill: var(--star);
+      stroke: #fff;
+      fill: #fff;
     }
-  }
-}
-
-@keyframes favourite {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.25);
-  }
-  100% {
-    transform: scale(1);
   }
 }
 
@@ -205,6 +191,10 @@
 .pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+
+  &::before {
+    opacity: 0.5;
+  }
 }
 
 .pagination span {

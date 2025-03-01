@@ -102,12 +102,6 @@
 
   .titleButton {
     cursor: pointer;
-
-    stroke: currentColor;
-    &.active {
-      fill: currentColor;
-      color: gold;
-    }
   }
 
   > div {

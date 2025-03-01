@@ -1,9 +1,10 @@
 import React, { useContext } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./ClipItem.module.css";
-import { Calendar, Star, Tv } from "lucide-react";
+import { Calendar, Tv } from "lucide-react";
 
-const MemoizedStar = React.memo(({ ...props }) => <Star {...props} />);
+import FavouriteButton from "./icons/StarButton.jsx";
+
 const MemoizedTv = React.memo(({ ...props }) => <Tv {...props} />);
 const MemoizedCalendar = React.memo(({ ...props }) => <Calendar {...props} />);
 
@@ -29,12 +30,7 @@ const ClipItem = React.memo(({ clip, setView }) => {
             handleFavouriteClick(clip.filePath);
           }}
         >
-          <MemoizedStar
-            size={18}
-            className={`${styles.favouriteButton} ${
-              clip.isFavourite ? styles.active : ""
-            }`}
-          />
+          <FavouriteButton size={18} active={clip.isFavourite} />
         </div>
       </div>
       <div className={styles.clipMeta}>

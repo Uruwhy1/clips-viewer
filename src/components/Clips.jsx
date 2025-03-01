@@ -2,8 +2,10 @@ import React, { useState, useContext, useEffect } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Clips.module.css";
 import ClipItem from "./ClipItem";
-import { Star, Tv, ChevronLeft, ChevronRight } from "lucide-react";
+import { Tv, ChevronLeft, ChevronRight } from "lucide-react";
 import ClipsSkeleton from "../skeletons/ClipsSkeleton";
+
+import FavouriteButton from "./icons/StarButton.jsx";
 
 const Clips = React.memo(({ setView }) => {
   const { filteredClips, games, filter, updateFilter } =
@@ -131,7 +133,7 @@ const Clips = React.memo(({ setView }) => {
             })
           }
         >
-          <Star size={18} className={styles.favouritesButton} />
+          <FavouriteButton active={filter.showFavourites} size={18} />
           <p>Show Favourites</p>
         </button>
       </div>
