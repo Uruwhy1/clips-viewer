@@ -13,6 +13,7 @@ import EditingControls from "./EditingControls";
 import styles from "./CurrentVideo.module.css";
 import { invoke } from "@tauri-apps/api/core";
 import StarButton from "./icons/StarButton";
+import { usePopup } from "../contexts/PopupContext";
 
 const MemoizedCalendar = React.memo(() => <Calendar size={15} />);
 const MemoizedFolder = React.memo(() => <Folder size={15} />);
@@ -26,6 +27,7 @@ const MemoizedTrash2 = React.memo(({ ...props }) => <Trash2 {...props} />);
 const CurrentVideo = React.memo(() => {
   const { currentClip, deleteClip, toggleFavourite, coverCache, editClip } =
     useContext(GlobalContext);
+  const { showPopup } = usePopup();
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [editing, setEditing] = useState(false);
@@ -62,14 +64,23 @@ const CurrentVideo = React.memo(() => {
       "Are you sure you want to delete this clip?"
     );
     if (confirmDelete) {
-      deleteClip(currentClip.filePath);
+      let response = await deleteClip(currentClip.filePath);
+      if (response) showPopup("Clip deleted!", true);
+      else {
+        showPopup("Failed to delete clip.", false);
+      }
     }
   }, [currentClip, deleteClip]);
 
   const renameClipFile = useCallback(
-    (clip, title) => {
+    async (clip, title) => {
       if (title !== clip.name) {
-        editClip(clip, title);
+        let response = await editClip(clip, title);
+
+        if (response) showPopup("Clip renamed!", true);
+        else {
+          showPopup("Failed to rename.", false);
+        }
       }
       setRenaming(false);
     },

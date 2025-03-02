@@ -1,0 +1,80 @@
+:root {
+  --success: #1aed67;
+  --success-text: #ffffff;
+
+  --error: #ff6b52;
+  --error-text: #ffffff;
+
+  --background: #1e1e1e;
+  --border-radius: 4px;
+}
+
+.popup {
+  position: fixed;
+  bottom: -6rem;
+  right: 1rem;
+
+  font-size: 0.9rem;
+  background-color: var(--background);
+
+  transition: all 0.4s;
+  z-index: 1000;
+
+  border: 1px solid #333333;
+  border-radius: var(--border-radius);
+  padding: 1rem 1.2rem;
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  &.active {
+    animation: 3s ease-out popup;
+  }
+
+  &.success {
+    border-left: 4px solid var(--success);
+    color: var(--success-text);
+    font-weight: normal;
+
+    > p::before {
+      content: "Success:";
+      font-weight: bold;
+      margin-right: 5px;
+      color: var(--success);
+    }
+  }
+
+  &.failure {
+    border-left: 4px solid var(--error);
+    color: var(--error-text);
+    font-weight: normal;
+
+    > p::before {
+      content: "Failure:";
+      font-weight: bold;
+      margin-right: 5px;
+      color: var(--error);
+    }
+  }
+}
+
+.popup svg {
+  height: 20px;
+  width: 20px;
+}
+
+@keyframes popup {
+  0% {
+    bottom: -6rem;
+  }
+  10% {
+    bottom: 1rem;
+  }
+  90% {
+    bottom: 1rem;
+  }
+  100% {
+    bottom: -6rem;
+  }
+}

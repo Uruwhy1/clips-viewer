@@ -3,10 +3,12 @@ import CustomVideoBar from "./CustomVideoBar";
 import styles from "./EditingControls.module.css";
 import GlobalContext from "../contexts/GlobalContext";
 import createClipHandler from "../helpers/createClip";
+import { usePopup } from "../contexts/PopupContext";
 
 const EditingControls = React.memo(
   ({ duration, setCurrentTime, currentTime, videoRef }) => {
     const { currentClip, addClip } = useContext(GlobalContext);
+    const { showPopup } = usePopup();
 
     const [startTime, setStartTime] = useState(null);
     const [endTime, setEndTime] = useState(null);
@@ -68,11 +70,14 @@ const EditingControls = React.memo(
                 addClip
               );
 
-              console.log(create);
-              if (create) {
+              if (create.response) {
                 setStartTime(null);
                 setEndTime(null);
                 setNewName("");
+
+                showPopup("Created clip!", true);
+              } else {
+                showPopup(create.error, false);
               }
             }}
           >
