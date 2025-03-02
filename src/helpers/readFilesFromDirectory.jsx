@@ -8,12 +8,7 @@ export async function getAllClips(dirPath) {
   const allClips = [];
 
   try {
-    const items = await readDir(dirPath);
-    const clipPromises = items.map((item) =>
-      processItem(item, dirPath, favouritesSet)
-    );
-    const processedClips = await Promise.all(clipPromises);
-    allClips.push(...processedClips.flat());
+    await processDirectory(dirPath, null, favouritesSet, allClips);
   } catch (error) {
     console.error("Error reading clips directory:", error);
   }
@@ -24,57 +19,33 @@ export async function getAllClips(dirPath) {
   ];
 }
 
-async function processItem(item, dirPath, favouritesSet) {
-  const fullPath = await join(dirPath, item.name);
-
-  if (item.isDirectory) {
-    return getClipsFromDirectoryWithMetadata(
-      fullPath,
-      item.name,
-      favouritesSet
-    );
-  }
-
-  return [];
-}
-
-async function getClipsFromDirectoryWithMetadata(dirPath, game, favouritesSet) {
-  const clipFiles = [];
-
+async function processDirectory(dirPath, game, favouritesSet, allClips) {
   try {
     const items = await readDir(dirPath);
-    const filePromises = items.map((item) =>
-      processFile(item, dirPath, game, favouritesSet)
-    );
-    const processedFiles = await Promise.all(filePromises);
-    clipFiles.push(...processedFiles.flat());
+
+    const processPromises = items.map(async (item) => {
+      const fullPath = await join(dirPath, item.name);
+
+      if (item.isDirectory) {
+        const currentGame = game || item.name;
+        await processDirectory(fullPath, currentGame, favouritesSet, allClips);
+      } else if (game) {
+        const statInfo = await stat(fullPath);
+        const name = item.name.match(/[\sA-Za-z0-9']+/)?.[0] || item.name;
+
+        allClips.push({
+          game,
+          name,
+          filePath: fullPath,
+          formattedDate: formatDate(statInfo.mtime),
+          date: new Date(statInfo.mtime),
+          isFavourite: favouritesSet.has(fullPath),
+        });
+      }
+    });
+
+    await Promise.all(processPromises);
   } catch (error) {
     console.error(`Error reading directory ${dirPath}:`, error);
-  }
-
-  return clipFiles;
-}
-
-async function processFile(item, dirPath, game, favouritesSet) {
-  const fullPath = await join(dirPath, item.name);
-
-  if (item.isDirectory) {
-    return getClipsFromDirectoryWithMetadata(fullPath, game, favouritesSet); // Recursively process subdirectories
-  }
-
-  if (!item.isDirectory) {
-    const stat1 = await stat(fullPath);
-    const name = item.name.match(/[\sA-Za-z0-9']+/)?.[0] || item.name;
-
-    return [
-      {
-        game,
-        name,
-        filePath: fullPath,
-        formattedDate: formatDate(stat1.mtime),
-        date: new Date(stat1.mtime),
-        isFavourite: favouritesSet.has(fullPath),
-      },
-    ];
   }
 }
