@@ -174,8 +174,11 @@ export const GlobalProvider = ({ children }) => {
       if (currentClip && currentClip.filePath === oldPath) {
         setCurrentClip({ ...currentClip, filePath: newPath, name: newName });
       }
+
+      return true;
     } catch (error) {
       console.error("Error renaming clip:", error);
+      return false;
     }
   };
 
@@ -183,7 +186,7 @@ export const GlobalProvider = ({ children }) => {
     const success = await deleteClipFile(clipPath);
     if (!success) {
       console.error("Failed to delete clip file.");
-      return;
+      return false;
     }
 
     setAllClips((prevClips) => {
@@ -194,6 +197,8 @@ export const GlobalProvider = ({ children }) => {
 
       return newClips;
     });
+
+    return true;
   }, []);
 
   const updateFilter = (newFilter) => {
