@@ -143,7 +143,7 @@
     left: 0;
     top: 0;
 
-    background-color: rgb(255, 194, 194);
+    color: red;
     border: 0;
 
     border-radius: 0;
@@ -159,7 +159,9 @@
   }
 
   > button.edit {
-    background-color: rgb(255, 255, 194);
+    color: rgb(17, 0, 252);
+
+    border-left: 1px solid var(--borders);
 
     left: 70%;
     width: 30%;
