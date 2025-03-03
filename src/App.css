@@ -4,6 +4,40 @@ body {
   scroll-behavior: smooth;
 }
 
+body.hide-scroll {
+  &&::-webkit-scrollbar {
+    display: none;
+  }
+
+  * {
+    &&::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+* {
+  &&::-webkit-scrollbar {
+    width: 10px !important;
+  }
+
+  &&::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  &&::-webkit-scrollbar-thumb {
+    background-color: #999;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  &&::-webkit-scrollbar-thumb:hover {
+    width: 10px !important;
+    background-color: var(--accent-washed);
+  }
+}
+
 #root {
   margin-left: 50px;
 }

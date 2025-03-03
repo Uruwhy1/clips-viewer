@@ -46,6 +46,12 @@ export const GlobalProvider = ({ children }) => {
 
   useEffect(() => {
     settingsRef.current = settings;
+
+    if (settings.scrollbarOff) {
+      document.body.classList.add("hide-scroll");
+    } else {
+      document.body.classList.remove("hide-scroll");
+    }
   }, [settings]);
 
   useEffect(() => {

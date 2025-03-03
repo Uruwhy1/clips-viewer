@@ -2,7 +2,7 @@ import { forwardRef, useContext, useState } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./Settings.module.css";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Aperture, Folder, SettingsIcon } from "lucide-react";
+import { Aperture, Folder, LucideSettings2, SettingsIcon } from "lucide-react";
 import SettingButton from "./SettingButton";
 
 import ObsConnectionForm from "./ObsConnectionForm";
@@ -26,6 +26,13 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     }
   };
 
+  const handleToggleBorders = () => {
+    setSettings((prevSettings) => ({
+      ...prevSettings,
+      scrollbarOff: !prevSettings.scrollbarOff,
+    }));
+  };
+
   return (
     <div
       className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
@@ -35,10 +42,6 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
         setRemovingIndex(null);
       }}
     >
-      <div className={`${styles.title} ${styles.mainTitle}`}>
-        <SettingsIcon size={30} />
-        <h1>Settings</h1>
-      </div>
       <div className={`${styles.settingCategory}`}>
         <div className={styles.title}>
           <Folder />
@@ -82,6 +85,21 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
           removingIndex={removingIndex}
           setRemovingIndex={setRemovingIndex}
         />
+      </div>
+      <div className={`${styles.settingCategory}`}>
+        <div className={styles.title}>
+          <LucideSettings2 />
+          <h3>UI Tweaks</h3>
+        </div>
+        <div className={styles.settingIndividual}>
+          <div className={styles.subSectionTitle}>
+            <strong>Visible Scrollbars</strong>
+            <SettingButton
+              text={settings.scrollbarOff ? "Off" : "On"}
+              func={handleToggleBorders}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

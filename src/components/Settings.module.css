@@ -27,25 +27,6 @@
 
   user-select: none;
   scrollbar-gutter: stable;
-
-  &&::-webkit-scrollbar {
-    width: 10px !important;
-  }
-
-  &&::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-
-  &&::-webkit-scrollbar-thumb {
-    background-color: #999;
-    border-radius: 20px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
-
-  &&::-webkit-scrollbar-thumb:hover {
-    background-color: var(--accent-washed);
-  }
 }
 
 .closed {
@@ -98,6 +79,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  > strong {
+    font-weight: 500;
+  }
 }
 
 .currentSetting {
