@@ -151,15 +151,15 @@ const CurrentVideo = React.memo(() => {
             </p>
           </div>
         </div>
-        <div className={styles.imageDiv}>
-          {!imageError && cover && (
+        {!imageError && cover && (
+          <div className={styles.imageDiv}>
             <img
               src={cover}
               alt={`${currentClip.game} Cover`}
               onError={handleImageError}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
       {!editing && (
         <div className={styles.editingButton}>

@@ -172,9 +172,33 @@
 
   .infoContainer {
     margin-top: 0;
+    max-width: 100%;
+
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .info {
+    padding: 0 var(--padding-medium);
+
+    flex-direction: row-reverse;
+    justify-content: start;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .imageDiv {
+    flex-shrink: 0;
+  }
+  .imageDiv::after {
     display: none;
+  }
+  .imageDiv img {
+    height: 120px;
+    width: auto;
+    background-color: gray;
+
+    flex-shrink: 0;
+    border-radius: 5px;
   }
 }
