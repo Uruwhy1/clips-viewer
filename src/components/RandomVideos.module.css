@@ -1,0 +1,105 @@
+.container {
+  padding: var(--padding-medium);
+  background-color: var(--card-bg);
+  overflow-y: auto;
+  max-height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clipsList {
+  flex-grow: 1;
+  height: 100%;
+
+  display: grid;
+  place-content: center;
+  grid-template-columns: repeat(auto-fit, 32%);
+  grid-template-rows: repeat(auto-fit, 45%);
+
+  gap: var(--gap-medium);
+}
+
+.clipItem {
+  display: flex;
+  align-items: start;
+  gap: var(--gap-small);
+
+  flex-grow: 1;
+  height: 100%;
+
+  padding: var(--padding-small);
+  border-radius: var(--radius-small);
+
+  background-color: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clipItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.thumbnailContainer {
+  width: 50%;
+  height: 100%;
+
+  background-color: var(--current-bg);
+  border-radius: var(--radius-small);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+
+  flex-shrink: 0;
+}
+
+.playIcon {
+  position: absolute;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.clipItem:hover .playIcon {
+  opacity: 1;
+  color: var(--accent-washed);
+}
+
+.clipInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.clipName {
+  font-weight: 500;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clipGame {
+  font-size: 0.85em;
+  color: #ccc;
+}
+
+.noClips {
+  padding: var(--padding-medium);
+  background-color: var(--card-bg);
+  color: #ccc;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-style: italic;
+}

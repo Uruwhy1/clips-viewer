@@ -9,7 +9,7 @@ import { Calendar, Folder, Tv, Edit3Icon, Trash2 } from "lucide-react";
 import RenameInput from "./RenameInput";
 import GlobalContext from "../contexts/GlobalContext";
 import VideoComponent from "./Video";
-import EditingControls from "./EditingControls";
+import RandomVideos from "./RandomVideos";
 import styles from "./CurrentVideo.module.css";
 import { invoke } from "@tauri-apps/api/core";
 import StarButton from "./icons/StarButton";
@@ -160,19 +160,7 @@ const CurrentVideo = React.memo(() => {
           </div>
         )}
       </div>
-      {!editing && (
-        <div className={styles.editingButton}>
-          <button onClick={() => setEditing(true)}>EDITING MODE</button>
-        </div>
-      )}
-      {editing && (
-        <EditingControls
-          setCurrentTime={setCurrentTime}
-          duration={duration}
-          currentTime={currentTime}
-          videoRef={videoRef}
-        />
-      )}
+      <RandomVideos />
     </main>
   );
 });

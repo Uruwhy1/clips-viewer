@@ -52,6 +52,9 @@ body.hide-scroll {
   --sidebar-color: #fff;
   --sidebar-hover: #00000026;
 
+  /* settings */
+  --settings-bg: #1e1e1e;
+
   /* currentvideo view */
   --current-bg: #1e1e1e;
 
