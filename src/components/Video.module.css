@@ -22,26 +22,39 @@ video {
 }
 .controls {
   position: absolute;
-  bottom: 10px;
-  left: 10px;
-  right: 10px;
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
 
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--gap-small);
+  flex-direction: column;
 
-  border: 1px solid #ffffff4b;
   color: white;
-  background-color: rgb(0, 0, 0);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
 
   padding: 10px;
-  border-radius: 8px;
 
   opacity: 0;
   transition: opacity 0.1s;
 
   user-select: none;
+
+  > div {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-smallest);
+  }
+
+  * svg {
+    fill: currentColor;
+  }
 }
 
 .time {
@@ -49,7 +62,7 @@ video {
   white-space: nowrap;
 
   min-width: 100px;
-  margin: auto;
+  margin-right: auto;
   text-align: center;
 }
 
@@ -71,13 +84,10 @@ video {
 
 .progressBarContainer {
   position: relative;
-  flex: 1;
-  height: 6px;
+  height: 5px;
 
-  border-radius: 5px;
   background: #333;
 
-  margin: 0 10px;
   cursor: pointer;
 
   overflow: hidden;
@@ -89,7 +99,6 @@ video {
   width: 0%;
 
   background: var(--accent-washed);
-  border-radius: 5px 0 0 5px;
   pointer-events: none;
 
   display: flex;
@@ -99,6 +108,10 @@ video {
 
 .playbackActive {
   stroke: var(--accent-washed);
+}
+
+.playbackContainer {
+  position: relative;
 }
 
 .playbackOptions {

@@ -8,7 +8,7 @@ import {
   VolumeX,
   Maximize,
   Minimize,
-  Videotape,
+  Settings2,
 } from "lucide-react";
 import styles from "./Video.module.css";
 
@@ -18,7 +18,7 @@ const MemoizedVolumeX = React.memo(() => <VolumeX size={20} />);
 const MemoizedVolume2 = React.memo(() => <Volume2 size={20} />);
 const MemoizedMinimize = React.memo(() => <Minimize size={20} />);
 const MemoizedMaximize = React.memo(() => <Maximize size={20} />);
-const MemoizedVideotape = React.memo(() => <Videotape />);
+const MemoizedVideotape = React.memo(() => <Settings2 size={20} />);
 
 const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
   const [isPlaying, setIsPlaying] = useState(true);
@@ -224,14 +224,6 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
         autoPlay
       ></video>
       <div className={styles.controls}>
-        <button onClick={togglePlayPause} className={styles.controlButton}>
-          {isPlaying ? <MemoizedPause /> : <MemoizedPlay />}
-        </button>
-
-        <span className={styles.time}>
-          {formatTime(currentTime)} / {formatTime(duration)}
-        </span>
-
         <div className={styles.progressBarContainer} onClick={handleSeek}>
           <div
             className={styles.progress}
@@ -239,42 +231,53 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
           ></div>
         </div>
 
-        <div className={styles.volumeControl}>
-          <button onClick={toggleMute} className={styles.controlButton}>
-            {isMuted || volume === 0 ? (
-              <MemoizedVolumeX />
-            ) : (
-              <MemoizedVolume2 />
-            )}
+        <div>
+          <button onClick={togglePlayPause} className={styles.controlButton}>
+            {isPlaying ? <MemoizedPause /> : <MemoizedPlay />}
           </button>
-          <div className={styles.volumeSlider}>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={isMuted ? 0 : volume}
-              onChange={handleVolumeChange}
-            />
-          </div>
-        </div>
 
-        <button onClick={toggleFullscreen} className={styles.controlButton}>
-          {isFullscreen ? <MemoizedMinimize /> : <MemoizedMaximize />}
-        </button>
-        <button
-          className={`${styles.controlButton} ${styles.playbackContainer}`}
-        >
-          <MemoizedVideotape />
-          {/* prettier-ignore */}
-          <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : "" }`}>
+          <div className={styles.volumeControl}>
+            <button onClick={toggleMute} className={styles.controlButton}>
+              {isMuted || volume === 0 ? (
+                <MemoizedVolumeX />
+              ) : (
+                <MemoizedVolume2 />
+              )}
+            </button>
+            <div className={styles.volumeSlider}>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={isMuted ? 0 : volume}
+                onChange={handleVolumeChange}
+              />
+            </div>
+          </div>
+
+          <span className={styles.time}>
+            {formatTime(currentTime)} / {formatTime(duration)}
+          </span>
+
+          <button
+            className={`${styles.controlButton} ${styles.playbackContainer}`}
+          >
+            <MemoizedVideotape />
+            {/* prettier-ignore */}
+            <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : "" }`}>
             <div className={styles.playback} onClick={() => changePlaybackRate(2)}>2x</div>
             <div className={styles.playback} onClick={() => changePlaybackRate(1.5)}>1.5x</div>
             <div className={styles.playback} onClick={() => changePlaybackRate(1)}>1x</div>
             <div className={styles.playback} onClick={() => changePlaybackRate(0.5)}>0.5x</div>
             <div className={styles.playback} onClick={() => changePlaybackRate(0.25)}>0.25x</div>
           </div>
-        </button>
+          </button>
+
+          <button onClick={toggleFullscreen} className={styles.controlButton}>
+            {isFullscreen ? <MemoizedMinimize /> : <MemoizedMaximize />}
+          </button>
+        </div>
       </div>
     </div>
   );
