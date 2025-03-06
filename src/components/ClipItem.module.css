@@ -5,9 +5,6 @@
 
   padding: var(--inline-padding);
 
-  background-color: var(--page-bg);
-  color: var(--page-bg-opposite);
-
   display: flex;
   justify-content: space-between;
   flex-direction: column;
@@ -25,8 +22,9 @@
   transition: all 0.15s;
   &:hover {
     transform: scale(1.02);
-    border-color: var(--clip-hover);
-    box-shadow: 0 4px 0 var(--clip-hover);
+
+    border-color: var(--accent-washed);
+    box-shadow: 0 4px 0 var(--accent-washed);
   }
 }
 

@@ -2,6 +2,8 @@
   margin-top: var(--title-bar-height);
   padding: var(--page-padding);
 
+  background-color: var(--clips-bg);
+
   display: flex;
   flex-direction: column;
   gap: var(--gap-medium);
@@ -33,7 +35,7 @@
 
   gap: var(--inline-gap);
 
-  background: #fff;
+  background: var(--clips-filters-bg);
   border: 1px solid var(--borders);
 
   padding: var(--button-padding);
@@ -82,7 +84,7 @@
 
   top: 110%;
 
-  background-color: #fff;
+  background-color: var(--clips-filters-bg);
   width: 100%;
 
   display: flex;
@@ -98,7 +100,7 @@
 
     &:hover {
       box-shadow: none;
-      background-color: var(--clip-hover-bg);
+      background-color: var(--accent-white);
     }
 
     &.active {

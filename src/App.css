@@ -46,18 +46,26 @@ body.hide-scroll {
   --page-bg: #fff;
   --page-bg-opposite: #000;
 
-  --title-bar-height: 32px;
-
+  /* sidebar */
   --sidebar-width: 50px;
   --sidebar-bg: var(--accent-washed);
   --sidebar-color: #fff;
   --sidebar-hover: #00000026;
 
-  --card-bg: #1e1e1e;
-  --card-bg-color: #fff;
+  /* currentvideo view */
+  --current-bg: #1e1e1e;
 
+  /* titlebar */
+  --title-bar-bg: #1e1e1e;
+  --title-bar-color: #fff;
+  --title-bar-height: 32px;
+
+  /* clips view */
+  --clips-filters-bg: var(--page-bg);
+  --clips-bg: var(--page-bg);
+
+  /* --- */
   --gray-color: #666;
-
   --page-cover: #0000006f;
 
   --borders: #e0e0e0;
@@ -71,9 +79,6 @@ body.hide-scroll {
 
   --value: 0;
   --curent-game-cover: "";
-
-  --clip-hover: var(--accent-washed);
-  --clip-hover-bg: var(--accent-white);
 
   --button-padding: 10px;
   --radius-big: 8px;

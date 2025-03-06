@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { Star, Calendar, Folder, Tv, Edit3Icon, Trash2 } from "lucide-react";
+import { Calendar, Folder, Tv, Edit3Icon, Trash2 } from "lucide-react";
 import RenameInput from "./RenameInput";
 import GlobalContext from "../contexts/GlobalContext";
 import VideoComponent from "./Video";
@@ -21,7 +21,6 @@ const MemoizedFolder = React.memo(() => <Folder size={15} />);
 const MemoizedTv = React.memo(({ ...props }) => <Tv size={15} {...props} />);
 // prettier-ignore
 const MemoizedEdit3Icon = React.memo(({ ...props }) => (<Edit3Icon {...props} />));
-const MemoizedStar = React.memo(({ ...props }) => <Star {...props} />);
 const MemoizedTrash2 = React.memo(({ ...props }) => <Trash2 {...props} />);
 
 const CurrentVideo = React.memo(() => {
@@ -118,18 +117,18 @@ const CurrentVideo = React.memo(() => {
               <div
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDeleteClick();
-                }}
-              >
-                <MemoizedTrash2 className={styles.titleButton} />
-              </div>
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
                   handleFavouriteClick(currentClip.filePath);
                 }}
               >
                 <StarButton active={currentClip.isFavourite} />
+              </div>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteClick();
+                }}
+              >
+                <MemoizedTrash2 className={styles.titleButton} />
               </div>
             </div>
           </div>

@@ -2,8 +2,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--card-bg);
-  color: #fff;
+
+  background-color: var(--title-bar-bg);
+  color: var(--title-bar-color);
+
   height: var(--title-bar-height);
   user-select: none;
 
@@ -27,7 +29,6 @@
 }
 
 .controlButton {
-  color: #fff;
   cursor: pointer;
 
   border: none;
@@ -49,5 +50,5 @@
 }
 
 .closeButton:hover {
-  background: #ff0015; /* Red for close button */
+  background: #ff0015;
 }

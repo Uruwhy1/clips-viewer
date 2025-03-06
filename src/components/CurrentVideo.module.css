@@ -9,6 +9,7 @@
     "video info"
     "edit info";
 
+  background-color: var(--current-bg);
   > div {
     overflow: hidden;
   }
@@ -18,7 +19,6 @@
   grid-area: info;
 
   user-select: none;
-  background-color: var(--card-bg);
 
   display: flex;
   justify-content: space-between;
@@ -119,7 +119,7 @@
     top: 0;
     left: 0;
     content: "";
-    background: linear-gradient(var(--card-bg) 0%, transparent 130%);
+    background: linear-gradient(var(--current-bg) 0%, transparent 130%);
     width: 100%;
     height: 110%;
   }

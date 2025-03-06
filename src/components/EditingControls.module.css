@@ -1,15 +1,17 @@
 .editing {
   grid-area: edit;
 
-  background-color: var(--card-bg);
-
   padding: var(--padding-big);
 
   display: flex;
   justify-content: center;
   flex-direction: column-reverse;
-  gap: 2rem;
+  gap: var(--gap-smallest);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  > * {
+    flex-grow: 1;
+  }
 }
 
 .clipControls {
