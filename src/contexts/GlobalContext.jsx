@@ -161,8 +161,6 @@ export const GlobalProvider = ({ children }) => {
     const oldPath = clip.filePath;
     const oldName = clip.name;
 
-    console.log("Xddd");
-
     if (!newTitle || newTitle.trim() === "") {
       alert("Edit canceled or invalid name.");
       return;

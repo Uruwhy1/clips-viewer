@@ -51,35 +51,31 @@ export async function saveFavourites(favourites) {
 }
 
 export const renameClipFile = async (oldPath, newTitle) => {
-  console.log("Xd");
-
   const oldFileName = oldPath.split("\\").pop();
   const fileParts = oldFileName.match(
-    /^(.+?)_(\d{2}-\d{2}-\d{4}_\d{2}-\d{2}-\d{2})\.mp4$/
+    /^(.+?)_([\d-]+_[\d-]+(?:\.?\d*)?)\.mp4$/
   );
 
   if (!fileParts) {
-    alert("File name format is invalid. Expected format: TITLE_DATE_TIME.mp4");
-    return;
+    throw new Error(
+      "File name format is invalid. Expected format: TITLE_DATE_TIME.mp4"
+    );
   }
 
-  const [_, title, dateTime] = fileParts;
+  const [_, title, dateTimePart] = fileParts;
 
   if (!newTitle || newTitle.trim() === "") {
-    alert("Rename canceled or invalid name.");
-    return;
+    throw new Error("Rename canceled or invalid name.");
   }
 
-  const newFileName = `${newTitle}_${dateTime}.mp4`;
+  const newFileName = `${newTitle}_${dateTimePart}.mp4`;
   const newPath = oldPath.replace(oldFileName, newFileName);
 
   try {
     await rename(oldPath, newPath);
-
     return { newPath, newName: newTitle };
   } catch (error) {
     console.error("Error renaming file:", error);
-    return null;
   }
 };
 
