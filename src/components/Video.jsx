@@ -11,6 +11,7 @@ import {
   Settings2,
 } from "lucide-react";
 import styles from "./Video.module.css";
+import EditingControls from "./EditingControls";
 
 const MemoizedPlay = React.memo(() => <Play size={20} />);
 const MemoizedPause = React.memo(() => <Pause size={20} />);
@@ -30,6 +31,10 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
   const [playback, setPlayback] = useState(null);
   const divRef = useRef();
   const animationFrameRef = useRef();
+
+  // Add state for markers
+  const [startMarker, setStartMarker] = useState(null);
+  const [endMarker, setEndMarker] = useState(null);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--volume", 0);
@@ -211,6 +216,24 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
     document.documentElement.style.setProperty("--volume", percentage);
   };
 
+  const getStartMarkerPosition = () => {
+    if (startMarker === null || duration === 0) return null;
+    return (startMarker / duration) * 100;
+  };
+
+  const getEndMarkerPosition = () => {
+    if (endMarker === null || duration === 0) return null;
+    return (endMarker / duration) * 100;
+  };
+
+  const startMarkerPos = getStartMarkerPosition();
+  const endMarkerPos = getEndMarkerPosition();
+
+  const handleMarkerUpdate = (start, end) => {
+    setStartMarker(start);
+    setEndMarker(end);
+  };
+
   return (
     <div className={styles.videoContainer} ref={divRef}>
       <video
@@ -229,6 +252,34 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
             className={styles.progress}
             style={{ width: `${(currentTime / duration) * 100}%` }}
           ></div>
+
+          {startMarkerPos !== null && (
+            <div
+              className={styles.marker}
+              style={{ left: `${startMarkerPos}%` }}
+              title={`Start: ${formatTime(startMarker)}`}
+            />
+          )}
+
+          {endMarkerPos !== null && (
+            <div
+              className={styles.marker}
+              style={{ left: `${endMarkerPos}%` }}
+              title={`End: ${formatTime(endMarker)}`}
+            />
+          )}
+
+          {startMarkerPos !== null &&
+            endMarkerPos !== null &&
+            startMarkerPos < endMarkerPos && (
+              <div
+                className={styles.selectedRange}
+                style={{
+                  left: `${startMarkerPos}%`,
+                  width: `${endMarkerPos - startMarkerPos}%`,
+                }}
+              />
+            )}
         </div>
 
         <div>
@@ -259,6 +310,12 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
           <span className={styles.time}>
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
+
+          <EditingControls
+            videoRef={ref}
+            onMarkersUpdate={handleMarkerUpdate}
+            duration={duration}
+          />
 
           <button
             className={`${styles.controlButton} ${styles.playbackContainer}`}

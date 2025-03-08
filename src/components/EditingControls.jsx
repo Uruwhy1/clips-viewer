@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import CustomVideoBar from "./CustomVideoBar";
 import styles from "./EditingControls.module.css";
 import GlobalContext from "../contexts/GlobalContext";
 import createClipHandler from "../helpers/createClip";
 import { usePopup } from "../contexts/PopupContext";
+import { Plus, Flag, FlagTriangleRight, FlagTriangleLeft } from "lucide-react";
 
 const EditingControls = React.memo(
-  ({ duration, setCurrentTime, currentTime, videoRef }) => {
+  ({ videoRef, onMarkersUpdate, duration }) => {
     const { currentClip, addClip } = useContext(GlobalContext);
     const { showPopup } = usePopup();
 
@@ -24,66 +24,51 @@ const EditingControls = React.memo(
 
     const markEnd = () => setEndTime(videoRef.current.currentTime);
 
-    const formatTime = (seconds) => {
-      const mins = Math.floor(seconds / 60)
-        .toString()
-        .padStart(2, "0");
-      const secs = Math.floor(seconds % 60)
-        .toString()
-        .padStart(2, "0");
-      return `${mins}:${secs}`;
-    };
-
     useEffect(() => {
       setStartTime(null);
       setEndTime(null);
       setNewName("");
     }, [currentClip]);
 
+    useEffect(() => {
+      if (onMarkersUpdate) {
+        onMarkersUpdate(startTime, endTime);
+      }
+    }, [startTime, endTime, onMarkersUpdate]);
+
     return (
-      <div className={styles.editing}>
-        <CustomVideoBar
-          duration={duration}
-          setCurrentTime={setCurrentTime}
-          currentTime={currentTime}
-          startTime={startTime}
-          endTime={endTime}
-          formatTime={formatTime}
-          videoRef={videoRef}
-        />
-        <div className={styles.clipControls}>
-          <button onClick={markStart}>Start</button>
-          <button onClick={markEnd}>End</button>
-          <input
-            type="text"
-            placeholder="New clip name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-          />
-          <button
-            onClick={async () => {
-              let create = await createClipHandler(
-                newName,
-                startTime,
-                endTime,
-                currentClip,
-                addClip
-              );
+      <div className={styles.clipControls}>
+        <button onClick={markStart} title="Mark Start">
+          <FlagTriangleLeft size={20} />
+        </button>
+        <button onClick={markEnd} title="Mark End">
+          <FlagTriangleRight size={20} />
+        </button>
 
-              if (create.response) {
-                setStartTime(null);
-                setEndTime(null);
-                setNewName("");
+        <button
+          onClick={async () => {
+            let create = await createClipHandler(
+              newName,
+              startTime,
+              endTime,
+              currentClip,
+              addClip
+            );
 
-                showPopup("Created clip!", true);
-              } else {
-                showPopup(create.error, false);
-              }
-            }}
-          >
-            Create Clip
-          </button>
-        </div>
+            if (create.response) {
+              setStartTime(null);
+              setEndTime(null);
+              setNewName("");
+
+              showPopup("Created clip!", true);
+            } else {
+              showPopup(create.error, false);
+            }
+          }}
+          title="Create Clip"
+        >
+          <Plus />
+        </button>
       </div>
     );
   }
