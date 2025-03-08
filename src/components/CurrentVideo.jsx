@@ -27,9 +27,6 @@ const CurrentVideo = React.memo(() => {
   const { currentClip, deleteClip, toggleFavourite, coverCache, editClip } =
     useContext(GlobalContext);
   const { showPopup } = usePopup();
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [editing, setEditing] = useState(false);
   const [cover, setCover] = useState("");
   const [imageError, setImageError] = useState(false);
   const videoRef = useRef(null);
@@ -48,11 +45,6 @@ const CurrentVideo = React.memo(() => {
   const handleFavouriteClick = (path) => toggleFavourite(path);
 
   const handlePathClick = (path) => invoke("open_file_explorer", { path });
-
-  const handleTimeUpdate = (currentTime, duration) => {
-    setCurrentTime(currentTime);
-    setDuration(duration);
-  };
 
   const handleEditClick = useCallback(() => {
     setRenaming((prev) => !prev);
@@ -92,11 +84,7 @@ const CurrentVideo = React.memo(() => {
 
   return (
     <main className={styles.container}>
-      <VideoComponent
-        currentClip={currentClip}
-        onTimeUpdate={handleTimeUpdate}
-        ref={videoRef}
-      />
+      <VideoComponent currentClip={currentClip} ref={videoRef} />
       <div className={styles.info}>
         <div className={styles.infoContainer}>
           <div className={`${styles.clipTitleContainer} ${styles.infoItem}`}>

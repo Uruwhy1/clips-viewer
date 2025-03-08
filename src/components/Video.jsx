@@ -21,7 +21,7 @@ const MemoizedMinimize = React.memo(() => <Minimize size={20} />);
 const MemoizedMaximize = React.memo(() => <Maximize size={20} />);
 const MemoizedVideotape = React.memo(() => <Settings2 size={20} />);
 
-const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
+const Video = forwardRef(({ currentClip }, ref) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [volume, setVolume] = useState(1);
@@ -32,7 +32,6 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
   const divRef = useRef();
   const animationFrameRef = useRef();
 
-  // Add state for markers
   const [startMarker, setStartMarker] = useState(null);
   const [endMarker, setEndMarker] = useState(null);
 
@@ -111,7 +110,6 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
     const updateProgressBar = () => {
       if (ref.current && isPlaying) {
         setCurrentTime(ref.current.currentTime);
-        onTimeUpdate(ref.current.currentTime, ref.current.duration);
       }
       animationFrameRef.current = requestAnimationFrame(updateProgressBar);
     };
@@ -125,7 +123,7 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isPlaying, onTimeUpdate]);
+  }, [isPlaying]);
 
   const toggleFullscreen = async () => {
     const window = getCurrentWindow();
@@ -163,11 +161,18 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
   };
 
   const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
     const seconds = Math.floor(time % 60)
       .toString()
       .padStart(2, "0");
-    return `${minutes}:${seconds}`;
+
+    let string =
+      hours > 0 ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
+
+    return string;
   };
 
   const handleTimeUpdate = () => {
@@ -308,7 +313,7 @@ const Video = forwardRef(({ currentClip, onTimeUpdate }, ref) => {
           </div>
 
           <span className={styles.time}>
-            {formatTime(currentTime)} / {formatTime(duration)}
+            {formatTime(currentTime)} / {formatTime(duration | 0)}
           </span>
 
           <EditingControls
