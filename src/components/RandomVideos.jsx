@@ -1,10 +1,23 @@
-import React, { useContext, useMemo, useCallback } from "react";
+import React, {
+  useContext,
+  useMemo,
+  useCallback,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import { Play } from "lucide-react";
+import { convertFileSrc } from "@tauri-apps/api/core";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./RandomVideos.module.css";
 
 const RandomVideos = () => {
   const { allClips, setCurrentClip, currentClip } = useContext(GlobalContext);
+  const [preloadedVideos, setPreloadedVideos] = useState([]);
+
+  useEffect(() => {
+    setPreloadedVideos([]);
+  }, [currentClip]);
 
   const randomClips = useMemo(() => {
     if (!allClips.length || !currentClip) return [];
@@ -17,7 +30,6 @@ const RandomVideos = () => {
 
     const randomSelected = [];
     const maxClips = Math.min(6, availableClips.length);
-
     const clipsCopy = [...availableClips];
 
     for (let i = 0; i < maxClips; i++) {
@@ -36,6 +48,19 @@ const RandomVideos = () => {
     [setCurrentClip]
   );
 
+  const handleClipHover = useCallback((clip) => {
+    setPreloadedVideos((prevPreloadedVideos) => {
+      if (!prevPreloadedVideos.includes(clip.filePath)) {
+        const videoElement = document.createElement("video");
+        videoElement.preload = "auto";
+        videoElement.src = convertFileSrc(clip.filePath);
+
+        return [...prevPreloadedVideos, clip.filePath];
+      }
+      return prevPreloadedVideos;
+    });
+  }, []);
+
   if (randomClips.length === 0) {
     return <div className={styles.noClips}>No other clips available</div>;
   }
@@ -48,6 +73,7 @@ const RandomVideos = () => {
             key={clip.filePath}
             className={styles.clipItem}
             onClick={() => handleClipClick(clip)}
+            onMouseEnter={() => handleClipHover(clip)}
           >
             <div className={styles.thumbnailContainer}>
               <div className={styles.playIcon}>
