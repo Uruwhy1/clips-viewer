@@ -1,10 +1,9 @@
 import React, {
   useContext,
   useMemo,
-  useCallback,
-  useRef,
   useState,
   useEffect,
+  useCallback,
 } from "react";
 import { Play } from "lucide-react";
 import { convertFileSrc } from "@tauri-apps/api/core";
@@ -13,11 +12,61 @@ import styles from "./RandomVideos.module.css";
 
 const RandomVideos = () => {
   const { allClips, setCurrentClip, currentClip } = useContext(GlobalContext);
-  const [preloadedVideos, setPreloadedVideos] = useState([]);
 
-  useEffect(() => {
-    setPreloadedVideos([]);
-  }, [currentClip]);
+  const [thumbnails, setThumbnails] = useState({});
+  const [processingVideos, setProcessingVideos] = useState(new Set());
+
+  // this also caches/preloads the videos
+  const generateThumbnail = async (videoPath) => {
+    if (processingVideos.has(videoPath)) return;
+
+    setProcessingVideos((prev) => new Set(prev).add(videoPath));
+
+    try {
+      const video = document.createElement("video");
+      video.crossOrigin = "anonymous";
+      video.src = convertFileSrc(videoPath);
+
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = () => {
+          // 20% or 5 seconds
+          const seekTime = Math.min(video.duration * 0.2, 5);
+          video.currentTime = seekTime;
+
+          video.onseeked = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+              const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+              setThumbnails((prev) => ({ ...prev, [videoPath]: dataUrl }));
+
+              resolve();
+            } catch (e) {
+              reject(e);
+            }
+          };
+
+          video.onerror = reject;
+        };
+
+        video.onerror = reject;
+        video.load();
+      });
+    } catch (error) {
+      console.error("Failed to generate thumbnail for:", videoPath, error);
+    } finally {
+      setProcessingVideos((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(videoPath);
+        return newSet;
+      });
+    }
+  };
 
   const randomClips = useMemo(() => {
     if (!allClips.length || !currentClip) return [];
@@ -41,25 +90,22 @@ const RandomVideos = () => {
     return randomSelected;
   }, [allClips, currentClip]);
 
+  useEffect(() => {
+    if (randomClips.length === 0) return;
+
+    randomClips.forEach((clip) => {
+      if (!thumbnails[clip.filePath]) {
+        generateThumbnail(clip.filePath);
+      }
+    });
+  }, [randomClips]);
+
   const handleClipClick = useCallback(
     (clip) => {
       setCurrentClip(clip);
     },
     [setCurrentClip]
   );
-
-  const handleClipHover = useCallback((clip) => {
-    setPreloadedVideos((prevPreloadedVideos) => {
-      if (!prevPreloadedVideos.includes(clip.filePath)) {
-        const videoElement = document.createElement("video");
-        videoElement.preload = "auto";
-        videoElement.src = convertFileSrc(clip.filePath);
-
-        return [...prevPreloadedVideos, clip.filePath];
-      }
-      return prevPreloadedVideos;
-    });
-  }, []);
 
   if (randomClips.length === 0) {
     return <div className={styles.noClips}>No other clips available</div>;
@@ -73,9 +119,19 @@ const RandomVideos = () => {
             key={clip.filePath}
             className={styles.clipItem}
             onClick={() => handleClipClick(clip)}
-            onMouseEnter={() => handleClipHover(clip)}
           >
-            <div className={styles.thumbnailContainer}>
+            <div
+              className={styles.thumbnailContainer}
+              style={
+                thumbnails[clip.filePath]
+                  ? {
+                      backgroundImage: `url(${thumbnails[clip.filePath]})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }
+                  : {}
+              }
+            >
               <div className={styles.playIcon}>
                 <Play size={24} />
               </div>

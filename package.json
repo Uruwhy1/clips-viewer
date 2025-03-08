@@ -11,6 +11,7 @@
     "react-devtools": "react-devtools"
   },
   "dependencies": {
+    "@rajesh896/video-thumbnails-generator": "^2.3.9",
     "@tauri-apps/plugin-dialog": "^2.2.0",
     "@tauri-apps/plugin-fs": "^2.0.2",
     "@tauri-apps/plugin-shell": "^2",

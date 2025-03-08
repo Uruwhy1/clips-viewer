@@ -36,8 +36,8 @@ const Video = forwardRef(({ currentClip }, ref) => {
   const [endMarker, setEndMarker] = useState(null);
 
   useEffect(() => {
-    document.documentElement.style.setProperty("--volume", 0);
-  }, []);
+    setIsPlaying(true);
+  }, [currentClip]);
 
   useEffect(() => {
     const handleKeystroke = (e) => {
