@@ -179,6 +179,11 @@ const Video = forwardRef(({ currentClip }, ref) => {
     if (ref.current) {
       setDuration(ref.current.duration);
     }
+
+    if (ref.current.currentTime == duration) {
+      console.log("Xd");
+      setIsPlaying(false);
+    }
   };
 
   const handleSeek = (event) => {
