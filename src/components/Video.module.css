@@ -47,9 +47,14 @@ video {
 
   > div {
     width: 100%;
-    display: flex;
-    align-items: center;
-    gap: var(--gap-small);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    > div {
+      display: flex;
+      color: white;
+      flex-grow: 1;
+    }
   }
 
   * svg {
@@ -57,8 +62,11 @@ video {
   }
 }
 
+.rightControls {
+  justify-content: end;
+}
+
 .time {
-  color: white;
   white-space: nowrap;
 
   min-width: 100px;
@@ -69,7 +77,6 @@ video {
   background: none;
   border: none;
 
-  color: white;
   cursor: pointer;
 
   display: flex;

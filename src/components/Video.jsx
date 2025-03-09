@@ -284,45 +284,47 @@ const Video = forwardRef(({ currentClip }, ref) => {
         </div>
 
         <div>
-          <button onClick={togglePlayPause} className={styles.controlButton}>
-            {isPlaying ? <MemoizedPause /> : <MemoizedPlay />}
-          </button>
-
-          <div className={styles.volumeControl}>
-            <button onClick={toggleMute} className={styles.controlButton}>
-              {isMuted || volume === 0 ? (
-                <MemoizedVolumeX />
-              ) : (
-                <MemoizedVolume2 />
-              )}
+          <div>
+            <button onClick={togglePlayPause} className={styles.controlButton}>
+              {isPlaying ? <MemoizedPause /> : <MemoizedPlay />}
             </button>
-            <div className={styles.volumeSlider}>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={isMuted ? 0 : volume}
-                onChange={handleVolumeChange}
-              />
+
+            <div className={styles.volumeControl}>
+              <button onClick={toggleMute} className={styles.controlButton}>
+                {isMuted || volume === 0 ? (
+                  <MemoizedVolumeX />
+                ) : (
+                  <MemoizedVolume2 />
+                )}
+              </button>
+              <div className={styles.volumeSlider}>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={isMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                />
+              </div>
             </div>
+
+            <span className={styles.time}>
+              {formatTime(currentTime)} / {formatTime(duration | 0)}
+            </span>
           </div>
-
-          <span className={styles.time}>
-            {formatTime(currentTime)} / {formatTime(duration | 0)}
-          </span>
-
           <EditingControls
             videoRef={ref}
             onMarkersUpdate={handleMarkerUpdate}
             duration={duration}
           />
 
-          <button
-            className={`${styles.controlButton} ${styles.playbackContainer}`}
-          >
-            {/* prettier-ignore */}
-            <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : "" }`}>
+          <div className={styles.rightControls}>
+            <button
+              className={`${styles.controlButton} ${styles.playbackContainer}`}
+            >
+              {/* prettier-ignore */}
+              <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : "" }`}>
               <div className={styles.playback} onClick={() => changePlaybackRate(0.5)}>
                 <LucideTriangle size={16} />
               </div>
@@ -336,12 +338,13 @@ const Video = forwardRef(({ currentClip }, ref) => {
               </div>
            </div>
 
-            <MemoizedVideotape />
-          </button>
+              <MemoizedVideotape />
+            </button>
 
-          <button onClick={toggleFullscreen} className={styles.controlButton}>
-            {isFullscreen ? <MemoizedMinimize /> : <MemoizedMaximize />}
-          </button>
+            <button onClick={toggleFullscreen} className={styles.controlButton}>
+              {isFullscreen ? <MemoizedMinimize /> : <MemoizedMaximize />}
+            </button>
+          </div>
         </div>
       </div>
     </div>
