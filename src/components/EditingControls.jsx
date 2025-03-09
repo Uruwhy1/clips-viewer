@@ -3,75 +3,75 @@ import styles from "./EditingControls.module.css";
 import GlobalContext from "../contexts/GlobalContext";
 import createClipHandler from "../helpers/createClip";
 import { usePopup } from "../contexts/PopupContext";
-import { Plus, Flag, FlagTriangleRight, FlagTriangleLeft } from "lucide-react";
+import { Plus, FlagTriangleRight, FlagTriangleLeft } from "lucide-react";
 
-const EditingControls = React.memo(
-  ({ videoRef, onMarkersUpdate, duration }) => {
-    const { currentClip, addClip } = useContext(GlobalContext);
-    const { showPopup } = usePopup();
+const MemoizedPlus = React.memo(() => <Plus size={20} />);
+// prettier-ignore
+const MemoizedFlagTriangleRight = React.memo(() => <FlagTriangleRight size={20} />);
+// prettier-ignore
+const MemoizedFlagTriangleLeft = React.memo(() => <FlagTriangleLeft size={20} />);
 
-    const [startTime, setStartTime] = useState(null);
-    const [endTime, setEndTime] = useState(null);
-    const [newName, setNewName] = useState("");
+const EditingControls = React.memo(({ videoRef, onMarkersUpdate }) => {
+  const { currentClip, addClip } = useContext(GlobalContext);
+  const { showPopup } = usePopup();
 
-    const markStart = () => {
-      if (videoRef.current.currentTime !== 0) {
-        setStartTime(videoRef.current.currentTime);
-      } else {
-        setStartTime(1);
-      }
-    };
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
 
-    const markEnd = () => setEndTime(videoRef.current.currentTime);
+  const markStart = () => {
+    if (videoRef.current.currentTime !== 0) {
+      setStartTime(videoRef.current.currentTime);
+    } else {
+      setStartTime(1);
+    }
+  };
 
-    useEffect(() => {
-      setStartTime(null);
-      setEndTime(null);
-      setNewName("");
-    }, [currentClip]);
+  const markEnd = () => setEndTime(videoRef.current.currentTime);
 
-    useEffect(() => {
-      if (onMarkersUpdate) {
-        onMarkersUpdate(startTime, endTime);
-      }
-    }, [startTime, endTime, onMarkersUpdate]);
+  useEffect(() => {
+    setStartTime(null);
+    setEndTime(null);
+  }, [currentClip]);
 
-    return (
-      <div className={styles.clipControls}>
-        <button onClick={markStart} title="Mark Start">
-          <FlagTriangleLeft size={20} />
-        </button>
-        <button onClick={markEnd} title="Mark End">
-          <FlagTriangleRight size={20} />
-        </button>
+  useEffect(() => {
+    if (onMarkersUpdate) {
+      onMarkersUpdate(startTime, endTime);
+    }
+  }, [startTime, endTime, onMarkersUpdate]);
 
-        <button
-          onClick={async () => {
-            let create = await createClipHandler(
-              newName,
-              startTime,
-              endTime,
-              currentClip,
-              addClip
-            );
+  return (
+    <div className={styles.clipControls}>
+      <button onClick={markStart} title="Mark Start">
+        <MemoizedFlagTriangleLeft />
+      </button>
+      <button onClick={markEnd} title="Mark End">
+        <MemoizedFlagTriangleRight />
+      </button>
 
-            if (create.response) {
-              setStartTime(null);
-              setEndTime(null);
-              setNewName("");
+      <button
+        onClick={async () => {
+          let create = await createClipHandler(
+            startTime,
+            endTime,
+            currentClip,
+            addClip
+          );
 
-              showPopup("Created clip!", true);
-            } else {
-              showPopup(create.error, false);
-            }
-          }}
-          title="Create Clip"
-        >
-          <Plus />
-        </button>
-      </div>
-    );
-  }
-);
+          if (create.response) {
+            setStartTime(null);
+            setEndTime(null);
+
+            showPopup("Created clip!", true);
+          } else {
+            showPopup(create.error, false);
+          }
+        }}
+        title="Create Clip"
+      >
+        <MemoizedPlus />
+      </button>
+    </div>
+  );
+});
 
 export default EditingControls;
