@@ -9,6 +9,10 @@ import {
   Maximize,
   Minimize,
   Settings2,
+  ChevronUp,
+  Minus,
+  ChevronDown,
+  LucideTriangle,
 } from "lucide-react";
 import styles from "./Video.module.css";
 import EditingControls from "./EditingControls";
@@ -74,21 +78,6 @@ const Video = forwardRef(({ currentClip }, ref) => {
       document.removeEventListener("keydown", handleKeystroke);
     };
   }, [isFullscreen, isPlaying, ref]);
-
-  useEffect(() => {
-    const handleDoubleClick = () => toggleFullscreen();
-    const currentDiv = divRef.current;
-
-    if (currentDiv) {
-      currentDiv.addEventListener("dblclick", handleDoubleClick);
-    }
-
-    return () => {
-      if (currentDiv) {
-        currentDiv.removeEventListener("dblclick", handleDoubleClick);
-      }
-    };
-  }, [isFullscreen]);
 
   // focus video after control interaction
   useEffect(() => {
@@ -196,10 +185,12 @@ const Video = forwardRef(({ currentClip }, ref) => {
   };
 
   const changePlaybackRate = (rate) => {
-    if (ref.current) {
-      ref.current.playbackRate = rate;
-      setPlayback(rate);
+    if (!rate) {
+      ref.current.playbackRate = 1;
+    } else if (ref.current) {
+      ref.current.playbackRate += rate;
     }
+    setPlayback(ref.current.playbackRate);
   };
 
   const handleVolumeChange = (e) => {
@@ -330,15 +321,22 @@ const Video = forwardRef(({ currentClip }, ref) => {
           <button
             className={`${styles.controlButton} ${styles.playbackContainer}`}
           >
-            <MemoizedVideotape />
             {/* prettier-ignore */}
             <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : "" }`}>
-            <div className={styles.playback} onClick={() => changePlaybackRate(2)}>2x</div>
-            <div className={styles.playback} onClick={() => changePlaybackRate(1.5)}>1.5x</div>
-            <div className={styles.playback} onClick={() => changePlaybackRate(1)}>1x</div>
-            <div className={styles.playback} onClick={() => changePlaybackRate(0.5)}>0.5x</div>
-            <div className={styles.playback} onClick={() => changePlaybackRate(0.25)}>0.25x</div>
-          </div>
+              <div className={styles.playback} onClick={() => changePlaybackRate(0.5)}>
+                <LucideTriangle size={16} />
+              </div>
+              <div className={styles.playback} onClick={() => changePlaybackRate()}>
+                <Minus size={16} />
+              </div>
+              <div className={styles.playback} onClick={() => changePlaybackRate(-0.25)}>
+
+                <LucideTriangle size={16} style={{rotate: '180deg'}} />
+
+              </div>
+           </div>
+
+            <MemoizedVideotape />
           </button>
 
           <button onClick={toggleFullscreen} className={styles.controlButton}>

@@ -49,7 +49,7 @@ video {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: var(--gap-smallest);
+    gap: var(--gap-small);
   }
 
   * svg {
@@ -62,7 +62,6 @@ video {
   white-space: nowrap;
 
   min-width: 100px;
-  margin-right: auto;
   text-align: center;
 }
 
@@ -131,36 +130,28 @@ video {
 }
 
 .playbackContainer {
-  position: relative;
+  --size: 100px;
+  display: grid;
+  grid-template-columns: 0 auto;
+  gap: var(--gap-smallest);
+
+  transition: 0.35s ease;
 }
 
 .playbackOptions {
-  display: none;
-}
-
-.playbackContainer:hover .playbackOptions {
-  position: absolute;
-  bottom: 80%;
-  padding-bottom: 10px;
-  right: 0px;
-  z-index: 1;
-
-  display: flex;
-  flex-direction: column;
-
-  background-color: #000;
-  border-radius: var(--radius-big);
   overflow: hidden;
 
-  animation: fade 0.25s 1 forwards;
+  display: grid;
+  grid-template-columns: repeat(3, calc(var(--size) / 3));
+}
+
+.playbackContainer:hover {
+  grid-template-columns: var(--size) auto;
 }
 
 .playback {
   background-color: transparent;
   color: #fff;
-
-  padding: var(--padding-medium) var(--padding-big);
-  border: none;
 
   cursor: pointer;
 
@@ -169,43 +160,31 @@ video {
   }
 }
 
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .volumeControl {
-  position: relative;
+  display: flex;
+  gap: var(--gap-smallest);
 }
 
 .volumeSlider {
-  display: none;
-}
-
-.volumeControl:hover .volumeSlider {
   display: flex;
   justify-content: center;
   align-items: center;
 
-  position: absolute;
-  bottom: 360%;
-  left: -200%;
+  width: 0px;
+  overflow: hidden;
 
-  padding: 1rem;
-  background-color: #000;
-  border-radius: 8px;
-  z-index: 10;
+  transition: width 0.15s ease;
+}
 
-  transform: rotate(270deg);
+.volumeControl:hover .volumeSlider {
+  width: 70px;
 }
 
 .volumeSlider input {
   -webkit-appearance: none;
-  height: 10px;
+  height: 3px;
+
+  width: 70px;
 
   background: linear-gradient(
     to right,
@@ -214,16 +193,16 @@ video {
     var(--accent-white) 50%
   );
 
-  border-radius: 4px;
+  border-radius: var();
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.15s ease;
 }
 
 .volumeSlider input::-webkit-slider-thumb {
   -webkit-appearance: none;
 
-  width: 16px;
-  height: 16px;
+  width: 10px;
+  height: 10px;
   background-color: var(--accent-washed);
 
   border-radius: 50%;
