@@ -1,15 +1,16 @@
-import React, { useContext } from "react";
+import React, { useContext, useRef, useState } from "react";
 import GlobalContext from "../contexts/GlobalContext";
 import styles from "./ClipItem.module.css";
 import { Calendar, Tv } from "lucide-react";
-
 import FavouriteButton from "./icons/StarButton.jsx";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 const MemoizedTv = React.memo(({ ...props }) => <Tv {...props} />);
 const MemoizedCalendar = React.memo(({ ...props }) => <Calendar {...props} />);
 
 const ClipItem = React.memo(({ clip, setView }) => {
   const { setCurrentClip, toggleFavourite } = useContext(GlobalContext);
+  const [preloaded, setPreloaded] = useState(false);
 
   const handleClick = () => {
     setCurrentClip(clip);
@@ -20,8 +21,16 @@ const ClipItem = React.memo(({ clip, setView }) => {
     toggleFavourite(path);
   };
 
+  const handleMouseEnter = () => {
+    setPreloaded(true);
+  };
+
   return (
-    <div className={styles.clipCard} onClick={(e) => handleClick(clip)}>
+    <div
+      className={styles.clipCard}
+      onClick={(e) => handleClick(clip)}
+      onMouseEnter={handleMouseEnter}
+    >
       <div className={styles.header}>
         <h3>{clip.name}</h3>
         <div
@@ -43,6 +52,12 @@ const ClipItem = React.memo(({ clip, setView }) => {
           <span> {clip.formattedDate}</span>
         </div>
       </div>
+
+      <video
+        src={preloaded ? clip.filePath : ""}
+        preload="auto"
+        style={{ display: "none" }}
+      />
     </div>
   );
 });
