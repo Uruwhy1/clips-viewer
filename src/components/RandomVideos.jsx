@@ -27,7 +27,7 @@ const RandomVideos = () => {
       video.crossOrigin = "anonymous";
       video.src = convertFileSrc(videoPath);
 
-      await new Promise((resolve, reject) => {
+      new Promise((resolve, reject) => {
         video.onloadedmetadata = () => {
           // 20% or 5 seconds
           const seekTime = Math.min(video.duration * 0.2, 5);
