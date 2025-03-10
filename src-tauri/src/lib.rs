@@ -1,8 +1,9 @@
+mod clips;
+
 use filetime::{ set_file_mtime, FileTime };
 use std::fs;
 use std::process::Command;
 use std::time::UNIX_EPOCH;
-
 use std::collections::HashSet;
 use std::os::windows::process::CommandExt;
 use tauri::menu::MenuBuilder;
@@ -10,54 +11,8 @@ use tauri::menu::MenuItemBuilder;
 use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    tauri::Builder
-        ::default()
-        .plugin(tauri_plugin_dialog::init())
-        .setup(|app| {
-            /* system tray setup */
+pub use clips::get_all_clips;
 
-            let quit = MenuItemBuilder::new("Quit").id("quit").build(app).unwrap();
-            let hide = MenuItemBuilder::new("Hide").id("hide").build(app).unwrap();
-            let show = MenuItemBuilder::new("Show").id("show").build(app).unwrap();
-            let menu = MenuBuilder::new(app).items(&[&quit, &hide, &show]).build().unwrap();
-
-            let _window = app.get_webview_window("main").unwrap();
-
-            let _ = TrayIconBuilder::new()
-                .tooltip("Gaming Viewer")
-                .icon(app.default_window_icon().unwrap().clone())
-                .menu(&menu)
-                // events handling here
-                .on_menu_event(|app, event| {
-                    match event.id().as_ref() {
-                        "quit" => app.exit(0),
-                        "hide" => {
-                            dbg!("menu item hide clicked");
-                            let window = app.get_webview_window("main").unwrap();
-                            window.hide().unwrap();
-                        }
-                        "show" => {
-                            dbg!("menu item show clicked");
-                            let window = app.get_webview_window("main").unwrap();
-                            window.show().unwrap();
-                        }
-                        _ => {}
-                    }
-                })
-                .build(app);
-
-            Ok(())
-        })
-        .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_shell::init())
-        .invoke_handler(
-            tauri::generate_handler![create_clip, get_running_processes, open_file_explorer]
-        )
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
-}
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[derive(serde::Serialize)]
@@ -144,4 +99,58 @@ async fn create_clip(
     } else {
         Err(String::from_utf8_lossy(&output.stderr).to_string())
     }
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder
+        ::default()
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            /* system tray setup */
+
+            let quit = MenuItemBuilder::new("Quit").id("quit").build(app).unwrap();
+            let hide = MenuItemBuilder::new("Hide").id("hide").build(app).unwrap();
+            let show = MenuItemBuilder::new("Show").id("show").build(app).unwrap();
+            let menu = MenuBuilder::new(app).items(&[&quit, &hide, &show]).build().unwrap();
+
+            let _window = app.get_webview_window("main").unwrap();
+
+            let _ = TrayIconBuilder::new()
+                .tooltip("Gaming Viewer")
+                .icon(app.default_window_icon().unwrap().clone())
+                .menu(&menu)
+                // events handling here
+                .on_menu_event(|app, event| {
+                    match event.id().as_ref() {
+                        "quit" => app.exit(0),
+                        "hide" => {
+                            dbg!("menu item hide clicked");
+                            let window = app.get_webview_window("main").unwrap();
+                            window.hide().unwrap();
+                        }
+                        "show" => {
+                            dbg!("menu item show clicked");
+                            let window = app.get_webview_window("main").unwrap();
+                            window.show().unwrap();
+                        }
+                        _ => {}
+                    }
+                })
+                .build(app);
+
+            Ok(())
+        })
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_shell::init())
+        .invoke_handler(
+            tauri::generate_handler![
+                get_all_clips,
+                create_clip,
+                get_running_processes,
+                open_file_explorer
+            ]
+        )
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }

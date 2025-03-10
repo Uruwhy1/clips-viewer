@@ -42,7 +42,7 @@ const RandomVideos = () => {
               const ctx = canvas.getContext("2d");
               ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-              const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+              const dataUrl = canvas.toDataURL("image/jpeg", 0.35);
               setThumbnails((prev) => ({ ...prev, [videoPath]: dataUrl }));
 
               resolve();
@@ -88,16 +88,18 @@ const RandomVideos = () => {
     }
 
     return randomSelected;
-  }, [allClips, currentClip]);
+  }, [currentClip.filePath]);
 
   useEffect(() => {
     if (randomClips.length === 0) return;
 
-    randomClips.forEach((clip) => {
-      if (!thumbnails[clip.filePath]) {
-        generateThumbnail(clip.filePath);
-      }
-    });
+    setTimeout(() => {
+      randomClips.forEach((clip) => {
+        if (!thumbnails[clip.filePath]) {
+          generateThumbnail(clip.filePath);
+        }
+      });
+    }, 1000);
   }, [randomClips]);
 
   const handleClipClick = useCallback(

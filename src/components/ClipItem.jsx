@@ -10,7 +10,6 @@ const MemoizedCalendar = React.memo(({ ...props }) => <Calendar {...props} />);
 
 const ClipItem = React.memo(({ clip, setView }) => {
   const { setCurrentClip, toggleFavourite } = useContext(GlobalContext);
-  const [preloaded, setPreloaded] = useState(false);
 
   const handleClick = () => {
     setCurrentClip(clip);
@@ -21,16 +20,8 @@ const ClipItem = React.memo(({ clip, setView }) => {
     toggleFavourite(path);
   };
 
-  const handleMouseEnter = () => {
-    setPreloaded(true);
-  };
-
   return (
-    <div
-      className={styles.clipCard}
-      onClick={(e) => handleClick(clip)}
-      onMouseEnter={handleMouseEnter}
-    >
+    <div className={styles.clipCard} onClick={(e) => handleClick(clip)}>
       <div className={styles.header}>
         <h3>{clip.name}</h3>
         <div
@@ -52,12 +43,6 @@ const ClipItem = React.memo(({ clip, setView }) => {
           <span> {clip.formattedDate}</span>
         </div>
       </div>
-
-      <video
-        src={preloaded ? clip.filePath : ""}
-        preload="auto"
-        style={{ display: "none" }}
-      />
     </div>
   );
 });
