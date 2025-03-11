@@ -4,7 +4,7 @@ use std::fs;
 use std::path::Path;
 use dirs;
 use std::time::{ SystemTime, UNIX_EPOCH };
-use chrono::{ DateTime, Utc };
+use chrono::{ DateTime, Utc, NaiveDateTime };
 use std::path::PathBuf;
 
 #[derive(Debug, Serialize)]
@@ -31,6 +31,59 @@ struct Favourites(Vec<String>);
 fn format_date(timestamp: SystemTime) -> String {
     let datetime: DateTime<Utc> = timestamp.into();
     datetime.format("%d %b %Y, %H:%M").to_string()
+}
+
+fn format_date_from_timestamp(timestamp: i64) -> String {
+    let datetime = DateTime::<Utc>::from_utc(
+        NaiveDateTime::from_timestamp_opt(timestamp, 0).unwrap_or_default(),
+        Utc
+    );
+    datetime.format("%d %b %Y, %H:%M").to_string()
+}
+
+fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
+    // separate TITLE from DATE_TIME
+    let parts: Vec<&str> = filename.split('_').collect();
+    if parts.len() < 2 {
+        return Err(format!("Failed to parse date from '{}': No date part found", filename));
+    }
+
+    let date_part = parts[parts.len() - 2];
+    let time_part = parts[parts.len() - 1].split('.').next().unwrap_or("");
+
+    let time_parts: Vec<&str> = time_part.split('-').collect();
+    let time_format: String;
+    let datetime_str: String;
+
+    if time_parts.len() <= 3 {
+        // MM-DD-YYYY_HH-MM-SS
+        time_format = "%d-%m-%Y_%H-%M-%S".to_string();
+        datetime_str = format!("{}_{}", date_part, time_part);
+    } else if time_parts.len() == 4 {
+        // MM-DD-YYYY_HH-MM-SS-MMM
+        time_format = "%d-%m-%Y_%H-%M-%S".to_string();
+        datetime_str = format!(
+            "{}_{}-{}-{}",
+            date_part,
+            time_parts[0],
+            time_parts[1],
+            time_parts[2]
+        );
+    } else {
+        return Err(format!("Failed to parse date from '{}': Invalid time format", filename));
+    }
+
+    match NaiveDateTime::parse_from_str(&datetime_str, &time_format) {
+        Ok(dt) => Ok(dt.timestamp()),
+        Err(e) => Err(format!("Failed to parse date time from filename: {}", e)),
+    }
+}
+
+fn extract_title_from_filename(filename: &str) -> String {
+    match filename.split('_').next() {
+        Some(title) => title.to_string(),
+        None => filename.to_string(),
+    }
 }
 
 fn load_favourites() -> Result<HashSet<String>, String> {
@@ -80,38 +133,38 @@ fn process_directory(
             let current_game = game.clone().unwrap_or_else(|| file_name.clone());
             process_directory(&path, Some(current_game), favourites_set, all_clips)?;
         } else if let Some(current_game) = &game {
-            let metadata = fs
-                ::metadata(&path)
-                .map_err(|e| format!("Error getting metadata for {}: {}", path.display(), e))?;
-
-            let mtime = metadata
-                .modified()
-                .map_err(|e| format!("Error getting modification time: {}", e))?;
-
-            // Extract name - using simple truncation (see comment below)
-            let name = file_name
-                .chars()
-                .take_while(|c| (c.is_alphanumeric() || c.is_whitespace() || *c == '\''))
-                .collect::<String>();
-            // **Note:** Filename extraction is simplified to truncate at the first invalid character
-            // for alphanumeric, whitespace, or apostrophe. Consider if more robust extraction is needed.
-
             let file_path_str = path.to_string_lossy().to_string();
 
-            let unix_timestamp = mtime
-                .duration_since(UNIX_EPOCH)
-                .map_err(|_| "Error calculating timestamp".to_string())?
-                .as_secs() as i64;
+            let name = extract_title_from_filename(&file_name);
+
+            let (unix_timestamp, formatted_date) = match parse_date_from_filename(&file_name) {
+                Ok(timestamp) => (timestamp, format_date_from_timestamp(timestamp)),
+                Err(_) => {
+                    // fallback to file modification time if date parsing fails
+                    let metadata = fs
+                        ::metadata(&path)
+                        .map_err(|e|
+                            format!("Error getting metadata for {}: {}", path.display(), e)
+                        )?;
+
+                    let mtime = metadata
+                        .modified()
+                        .map_err(|e| format!("Error getting modification time: {}", e))?;
+
+                    let unix_ts = mtime
+                        .duration_since(UNIX_EPOCH)
+                        .map_err(|_| "Error calculating timestamp".to_string())?
+                        .as_secs() as i64;
+
+                    (unix_ts, format_date(mtime))
+                }
+            };
 
             all_clips.push(ClipInfo {
                 game: current_game.clone(),
-                name: if name.is_empty() {
-                    file_name
-                } else {
-                    name
-                },
+                name,
                 file_path: file_path_str.clone(),
-                formatted_date: format_date(mtime),
+                formatted_date,
                 date: unix_timestamp,
                 is_favourite: favourites_set.contains(&file_path_str),
             });
