@@ -36,9 +36,12 @@
   padding: var(--padding-small);
   border-radius: var(--radius-small);
 
+  color: #fff;
   background-color: rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition: all 0.2s;
+
+  will-change: auto;
 }
 
 .clipItem:hover {
@@ -90,7 +93,6 @@
 
 .clipName {
   font-weight: 500;
-  color: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -99,6 +101,18 @@
 .clipGame {
   font-size: 0.85em;
   color: #ccc;
+}
+
+.active {
+  background-color: var(--accent-washed) !important;
+
+  .clipGame {
+    color: #ebebeb;
+  }
+
+  .playIcon {
+    display: none;
+  }
 }
 
 .noClips {

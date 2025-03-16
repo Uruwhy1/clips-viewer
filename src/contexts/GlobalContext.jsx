@@ -32,8 +32,11 @@ export const GlobalProvider = ({ children }) => {
   });
   const [favourites, setFavourites] = useState(new Set());
   const [currentClip, setCurrentClip] = useState(null);
-
   const [coverCache, setCoverCache] = useState(new Map());
+
+  // Add thumbnail state and processing state
+  const [thumbnails, setThumbnails] = useState({});
+  const [processingVideos, setProcessingVideos] = useState(new Set());
 
   useEffect(() => {
     const load = async () => {
@@ -101,9 +104,96 @@ export const GlobalProvider = ({ children }) => {
 
     setCoverCache(newCache);
   };
+
   useEffect(() => {
     cacheCovers();
   }, [allClips, settings.gamesDir]);
+
+  const generateThumbnail = useCallback(async (videoPath) => {
+    if (processingVideos.has(videoPath)) return;
+
+    setProcessingVideos((prev) => new Set(prev).add(videoPath));
+
+    try {
+      const video = document.createElement("video");
+      video.crossOrigin = "anonymous";
+      video.src = convertFileSrc(videoPath);
+
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = () => {
+          // 20% or 5 seconds
+          const seekTime = Math.min(video.duration * 0.2, 5);
+          video.currentTime = seekTime;
+
+          video.onseeked = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+              const dataUrl = canvas.toDataURL("image/jpeg", 0.35);
+              setThumbnails((prev) => ({ ...prev, [videoPath]: dataUrl }));
+
+              resolve();
+            } catch (e) {
+              reject(e);
+            }
+          };
+
+          video.onerror = reject;
+        };
+
+        video.onerror = reject;
+        video.load();
+      });
+    } catch (error) {
+      console.error("Failed to generate thumbnail for:", videoPath, error);
+    } finally {
+      setProcessingVideos((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(videoPath);
+        return newSet;
+      });
+    }
+  }, []);
+
+  const randomClips = useMemo(() => {
+    if (!allClips.length || !currentClip) return [];
+
+    const availableClips = allClips.filter(
+      (clip) => clip.filePath !== currentClip?.filePath && clip.isFavourite
+    );
+
+    if (availableClips.length === 0) return [];
+
+    const randomSelected = [];
+    const maxClips = Math.min(6, availableClips.length);
+    const clipsCopy = [...availableClips];
+
+    for (let i = 0; i < maxClips; i++) {
+      const randomIndex = Math.floor(Math.random() * clipsCopy.length);
+      randomSelected.push(clipsCopy[randomIndex]);
+      clipsCopy.splice(randomIndex, 1);
+    }
+
+    return randomSelected;
+  }, [allClips]);
+
+  // Generate thumbnails for random clips
+  useEffect(() => {
+    if (randomClips.length === 0) return;
+
+    setTimeout(() => {
+      randomClips.forEach((clip) => {
+        if (!thumbnails[clip.filePath]) {
+          generateThumbnail(clip.filePath);
+        }
+      });
+    }, 1000);
+  }, [randomClips]);
 
   // filtered clips (this is what the clips view should use)
   const filteredClips = useMemo(() => {
@@ -230,6 +320,10 @@ export const GlobalProvider = ({ children }) => {
       settings,
       loadedSettings,
       coverCache,
+      // Add new thumbnail-related values to context
+      thumbnails,
+      generateThumbnail,
+      randomClips,
     }),
     [
       allClips,
@@ -241,6 +335,10 @@ export const GlobalProvider = ({ children }) => {
       settings,
       loadedSettings,
       favourites,
+      // Add dependencies for new thumbnail-related values
+      thumbnails,
+      generateThumbnail,
+      randomClips,
     ]
   );
 
