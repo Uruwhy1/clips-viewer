@@ -15,7 +15,6 @@ import {
 import { loadSettings, saveSettings } from "../helpers/settingsFile";
 import { documentDir, join } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { checkAndDeleteOldClips } from "../helpers/automaticClipDeletion";
 
 const GlobalContext = createContext();
 
@@ -39,7 +38,6 @@ export const GlobalProvider = ({ children }) => {
   const [thumbnails, setThumbnails] = useState({});
   const [processingVideos, setProcessingVideos] = useState(new Set());
 
-  const firstLoadRef = useRef(true);
   const loadedClips = useRef(false);
 
   useEffect(() => {
@@ -114,13 +112,6 @@ export const GlobalProvider = ({ children }) => {
   useEffect(() => {
     cacheCovers();
   }, [allClips, settings.gamesDir]);
-
-  useEffect(() => {
-    if (firstLoadRef.current && settings.clipDeletion && allClips.length) {
-      checkAndDeleteOldClips(settings, allClips, setAllClips);
-      firstLoadRef.current = false;
-    }
-  }, [settings.clipDeletion, allClips.length]);
 
   const generateThumbnail = useCallback(async (videoPath) => {
     if (processingVideos.has(videoPath)) return;

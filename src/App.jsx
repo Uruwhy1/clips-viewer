@@ -8,11 +8,33 @@ import Sidebar from "./components/Sidebar";
 import Settings from "./components/Settings";
 import GlobalContext from "./contexts/GlobalContext";
 
+import { usePopup } from "./contexts/PopupContext.jsx";
+import { checkAndDeleteOldClips } from "./helpers/automaticClipDeletion";
+
 function App() {
   const [view, setView] = useState("clips");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef(null);
-  const { coverCache, settings } = useContext(GlobalContext);
+  const { coverCache, settings, allClips, setAllClips } =
+    useContext(GlobalContext);
+
+  const firstLoadRef = useRef(true);
+  const { showPopup } = usePopup();
+
+  useEffect(() => {
+    (async () => {
+      if (firstLoadRef.current && settings.clipDeletion && allClips.length) {
+        let result = await checkAndDeleteOldClips(
+          settings,
+          allClips,
+          setAllClips
+        );
+        firstLoadRef.current = false;
+
+        showPopup(result[1], result[0]);
+      }
+    })();
+  }, [settings.clipDeletion, allClips.length]);
 
   useEffect(() => {
     const handleEscapeKey = (event) => {

@@ -16,24 +16,68 @@ import GameConfigForm from "./GameConfigForm";
 
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { usePopup } from "../contexts/PopupContext";
 
 const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
   const { settings, setSettings } = useContext(GlobalContext);
   const [removingIndex, setRemovingIndex] = useState(null);
   const [tempThreshold, setTempThreshold] = useState(
-    settings.clipsDeleteThreshold
+    settings.clipsDeleteThreshold | 9999999
   );
 
   const [isBackingUp, setIsBackingUp] = useState(false);
-  const [backupStatus, setBackupStatus] = useState(null);
-  const [backupProgress, setBackupProgress] = useState(null);
+  const {
+    showPopup,
+    showPersistentNotification,
+    removePersistentNotification,
+  } = usePopup();
 
   useEffect(() => {
     let unlisten;
 
     async function setupListener() {
       unlisten = await listen("backup-progress", (event) => {
-        setBackupProgress(event.payload);
+        const payload = event.payload;
+        const {
+          status,
+          current,
+          total,
+          success_count,
+          failed_count,
+          current_file,
+        } = payload;
+
+        const percent = total > 0 ? Math.floor((current / total) * 100) : 0;
+        const backupId = "backup-process";
+
+        // Update persistent notification with progress
+        showPersistentNotification(backupId, {
+          mainText: status,
+          progressText: [
+            `${current} of ${total} (${success_count} succeeded, ${failed_count} failed)`,
+            `${current_file ? `Current: ${current_file}` : ""}`,
+          ],
+          progress: percent,
+          isComplete: percent === 100,
+        });
+
+        // When complete, update the notification after a delay
+        if (percent === 100) {
+          setTimeout(() => {
+            const finalText =
+              failed_count === 0
+                ? `Backup completed successfully! ${success_count} files backed up.`
+                : `Backup completed with issues. ${success_count} succeeded, ${failed_count} failed.`;
+
+            showPersistentNotification(backupId, {
+              text: finalText,
+              progress: 100,
+              isComplete: true,
+            });
+
+            setIsBackingUp(false);
+          }, 1000);
+        }
       });
     }
 
@@ -42,7 +86,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     return () => {
       if (unlisten) unlisten();
     };
-  }, []);
+  }, [showPersistentNotification]);
 
   function debounce(func, wait) {
     let timeout;
@@ -69,7 +113,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
   };
 
   useEffect(() => {
-    setTempThreshold(settings.clipsDeleteThreshold);
+    setTempThreshold(settings.clipsDeleteThreshold || 99999999);
   }, [settings.clipsDeleteThreshold]);
 
   const handleSelectDirectory = async () => {
@@ -83,6 +127,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
         ...prevSettings,
         gamesDir: selectedDir,
       }));
+      showPopup(`Directory changed to ${selectedDir}`, true);
     }
   };
 
@@ -91,6 +136,10 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
       ...prevSettings,
       scrollbarOff: !prevSettings.scrollbarOff,
     }));
+    showPopup(
+      `Scrollbars turned ${settings.scrollbarOff ? "on" : "off"}`,
+      true
+    );
   };
 
   const handleToggleClipDeletion = () => {
@@ -98,183 +147,156 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
       ...prevSettings,
       clipDeletion: !prevSettings.clipDeletion,
     }));
+    showPopup(
+      `Automatic clip deletion turned ${!settings.clipDeletion ? "on" : "off"}`,
+      true
+    );
   };
 
   const handleBackup = async () => {
     try {
+      const backupId = "backup-process";
+
+      // Remove any existing backup notification
+      removePersistentNotification(backupId);
+
       setIsBackingUp(true);
-      setBackupStatus(null);
-      setBackupProgress(null);
 
       const selectedPath = await open({
         directory: true,
         multiple: false,
         title: "Select Backup Destination Folder",
       });
+
       if (!selectedPath) {
         setIsBackingUp(false);
         return;
       }
 
-      const result = await invoke("backup_favourite_clips", {
-        backupDir: selectedPath,
+      // Create initial notification
+      showPersistentNotification(backupId, {
+        text: "Starting backup process...",
+        progress: 0,
       });
-      setBackupStatus(result);
 
-      setTimeout(() => {
-        setBackupProgress(null);
-      }, 5000);
+      // Start the backup process
+      invoke("backup_favourite_clips", {
+        backupDir: selectedPath,
+      }).catch((err) => {
+        console.error("Backup failed:", err);
+        showPersistentNotification(backupId, {
+          text: `Backup failed: ${err}`,
+          progress: 100,
+          isComplete: true,
+        });
+        setIsBackingUp(false);
+      });
     } catch (err) {
-      console.error("Backup failed:", err);
-      setBackupStatus(`Backup failed: ${err}`);
-    } finally {
+      console.error("Backup process error:", err);
+      showPopup(`Backup process error: ${err}`, false);
       setIsBackingUp(false);
     }
   };
 
-  const renderBackupStatus = () => {
-    if (!backupProgress && !backupStatus) {
-      return null;
-    }
-
-    if (backupProgress) {
-      const {
-        status,
-        current,
-        total,
-        success_count,
-        failed_count,
-        current_file,
-      } = backupProgress;
-      const percent = total > 0 ? Math.floor((current / total) * 100) : 0;
-
-      return (
-        <div className={styles.backingUp}>
-          <h4>{status}</h4>
-          <div className={styles.progressBarContainer}>
-            <div
-              className={styles.progressBar}
-              style={{ width: `${percent}%` }}
-            ></div>
-          </div>
-          <p>
-            {current} of {total} files ({percent}%)
-            {current_file && <span> - Current: {current_file}</span>}
-          </p>
-          <p>
-            Success: {success_count} | Failed: {failed_count}
-          </p>
-        </div>
-      );
-    }
-
-    return (
-      <div className={styles.backingUp}>
-        <p>{backupStatus}</p>
-      </div>
-    );
-  };
-
   return (
-    <>
-      {isBackingUp ? renderBackupStatus() : ""}
-      <div
-        className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
-        ref={ref}
-        onClick={(e) => {
-          e.stopPropagation();
-          setRemovingIndex(null);
-        }}
-      >
-        <div className={`${styles.settingCategory}`}>
-          <div className={styles.title}>
-            <Folder />
-            <h3>Storage</h3>
+    <div
+      className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
+      ref={ref}
+      onClick={(e) => {
+        e.stopPropagation();
+        setRemovingIndex(null);
+      }}
+    >
+      <div className={`${styles.settingCategory}`}>
+        <div className={styles.title}>
+          <Folder />
+          <h3>Storage</h3>
+          <SettingButton
+            text={isBackingUp ? "Backing Up..." : "Backup Favourites"}
+            func={handleBackup}
+            disabled={isBackingUp}
+          />
+        </div>
+        <div className={styles.settingIndividual}>
+          <div className={styles.subSectionTitle}>
+            <strong>Clips Directory</strong>
             <SettingButton
-              text={isBackingUp ? "Backing Up..." : "Backup Favourites"}
-              func={handleBackup}
-              disabled={isBackingUp}
+              func={handleSelectDirectory}
+              text={"Change Directory"}
             />
           </div>
-          <div className={styles.settingIndividual}>
-            <div className={styles.subSectionTitle}>
-              <strong>Clips Directory</strong>
-              <SettingButton
-                func={handleSelectDirectory}
-                text={"Change Directory"}
-              />
-            </div>
-            <div
-              className={`${styles.currentSetting} ${styles.currentDirectory}`}
-            >
-              <p>{settings.gamesDir}</p>
-            </div>
-          </div>
-          <div className={styles.settingIndividual}>
-            <div className={styles.subSectionTitle}>
-              <strong>Automatic Clips Deletion</strong>
-              <SettingButton
-                text={!settings.clipDeletion ? "Off" : "On"}
-                func={handleToggleClipDeletion}
-              />
-            </div>
-            <div
-              className={`${styles.currentSetting} ${
-                !settings.clipDeletion ? styles.inactive : ""
-              } `}
-            >
-              <input
-                type="range"
-                min={1}
-                max={5000}
-                value={tempThreshold}
-                onChange={handleRangeChange}
-              />
-              <span className={styles.rangeValue}>{tempThreshold} GB</span>
-            </div>
+          <div
+            className={`${styles.currentSetting} ${styles.currentDirectory}`}
+          >
+            <p>{settings.gamesDir}</p>
           </div>
         </div>
-        <div className={`${styles.settingCategory}`}>
-          <div className={styles.title}>
-            <Aperture />
-            <h3>OBS</h3>
+        <div className={styles.settingIndividual}>
+          <div className={styles.subSectionTitle}>
+            <strong>Automatic Clips Deletion</strong>
+            <SettingButton
+              text={!settings.clipDeletion ? "Off" : "On"}
+              func={handleToggleClipDeletion}
+            />
           </div>
-          <ObsConnectionForm
-            obs={obs}
-            onConnectionFailure={() => {
-              setObs(`Failed to connect.`);
-            }}
-            initialPort={settings.obs?.port || ""}
-            initialPassword={settings.obs?.password || ""}
-            onConnectionSuccess={(obsConfig) => {
-              setObs(`Connected to OBS (${obsConfig.version})`);
-              setSettings((prev) => ({ ...prev, obs: obsConfig }));
-            }}
-          />
-          <GameConfigForm
-            settings={settings}
-            setSettings={setSettings}
-            removingIndex={removingIndex}
-            setRemovingIndex={setRemovingIndex}
-          />
-        </div>
-        <div className={`${styles.settingCategory}`}>
-          <div className={styles.title}>
-            <LucideSettings2 />
-            <h3>UI Tweaks</h3>
-          </div>
-          <div className={styles.settingIndividual}>
-            <div className={styles.subSectionTitle}>
-              <strong>Visible Scrollbars</strong>
-              <SettingButton
-                text={settings.scrollbarOff ? "Off" : "On"}
-                func={handleToggleBorders}
-              />
-            </div>
+          <div
+            className={`${styles.currentSetting} ${
+              !settings.clipDeletion ? styles.inactive : ""
+            } `}
+          >
+            <input
+              type="range"
+              min={1}
+              max={5000}
+              value={tempThreshold}
+              onChange={handleRangeChange}
+            />
+            <span className={styles.rangeValue}>{tempThreshold} GB</span>
           </div>
         </div>
       </div>
-    </>
+      <div className={`${styles.settingCategory}`}>
+        <div className={styles.title}>
+          <Aperture />
+          <h3>OBS</h3>
+        </div>
+        <ObsConnectionForm
+          obs={obs}
+          onConnectionFailure={() => {
+            setObs(`Failed to connect.`);
+            showPopup("Failed to connect to OBS", false);
+          }}
+          initialPort={settings.obs?.port || ""}
+          initialPassword={settings.obs?.password || ""}
+          onConnectionSuccess={(obsConfig) => {
+            setObs(`Connected to OBS (${obsConfig.version})`);
+            setSettings((prev) => ({ ...prev, obs: obsConfig }));
+            showPopup(`Connected to OBS (${obsConfig.version})`, true);
+          }}
+        />
+        <GameConfigForm
+          settings={settings}
+          setSettings={setSettings}
+          removingIndex={removingIndex}
+          setRemovingIndex={setRemovingIndex}
+        />
+      </div>
+      <div className={`${styles.settingCategory}`}>
+        <div className={styles.title}>
+          <LucideSettings2 />
+          <h3>UI Tweaks</h3>
+        </div>
+        <div className={styles.settingIndividual}>
+          <div className={styles.subSectionTitle}>
+            <strong>Visible Scrollbars</strong>
+            <SettingButton
+              text={settings.scrollbarOff ? "Off" : "On"}
+              func={handleToggleBorders}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 });
 

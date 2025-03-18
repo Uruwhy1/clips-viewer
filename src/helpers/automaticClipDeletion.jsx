@@ -12,6 +12,7 @@ export const checkAndDeleteOldClips = async (
   ) {
     return;
   }
+
   try {
     const result = await invoke("delete_older_clips", {
       clips: allClips,
@@ -23,20 +24,22 @@ export const checkAndDeleteOldClips = async (
       setAllClips((prevClips) =>
         prevClips.filter((clip) => !result.deletedPaths.includes(clip.filePath))
       );
-      console.log(
+
+      return [
+        true,
         `Deleted ${
           result.deletedCount
         } clips. Freed ${result.freedSpaceGb.toFixed(
           2
-        )} GB. New total: ${result.totalSizeGb.toFixed(2)} GB`
-      );
-      console.log(result.deletedPaths);
+        )} GB. New total: ${result.totalSizeGb.toFixed(2)} GB`,
+      ];
     } else {
-      console.log(
+      return [
+        true,
         `No clips deleted. Total size: ${result.totalSizeGb.toFixed(
           2
-        )} GB is under threshold of ${settings.clipsDeleteThreshold} GB`
-      );
+        )} GB is under threshold of ${settings.clipsDeleteThreshold} GB`,
+      ];
     }
   } catch (error) {
     console.error("Error in clip deletion:", error);
