@@ -1,4 +1,6 @@
 mod clips;
+mod delete;
+mod backup;
 
 use filetime::{ set_file_mtime, FileTime };
 use std::fs;
@@ -12,6 +14,7 @@ use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
 
 pub use clips::get_all_clips;
+pub use backup::backup_favourite_clips;
 
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
@@ -148,7 +151,10 @@ pub fn run() {
                 get_all_clips,
                 create_clip,
                 get_running_processes,
-                open_file_explorer
+                open_file_explorer,
+                delete::calculate_total_size,
+                delete::delete_older_clips,
+                backup_favourite_clips
             ]
         )
         .run(tauri::generate_context!())

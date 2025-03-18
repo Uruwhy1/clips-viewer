@@ -24,8 +24,14 @@ const MemoizedEdit3Icon = React.memo(({ ...props }) => (<Edit3Icon {...props} />
 const MemoizedTrash2 = React.memo(({ ...props }) => <Trash2 {...props} />);
 
 const CurrentVideo = React.memo(() => {
-  const { currentClip, deleteClip, toggleFavourite, coverCache, editClip } =
-    useContext(GlobalContext);
+  const {
+    currentClip,
+    deleteClip,
+    toggleFavourite,
+    coverCache,
+    editClip,
+    favourites,
+  } = useContext(GlobalContext);
   const { showPopup } = usePopup();
   const [cover, setCover] = useState("");
   const [imageError, setImageError] = useState(false);
@@ -56,8 +62,12 @@ const CurrentVideo = React.memo(() => {
     );
     if (confirmDelete) {
       let response = await deleteClip(currentClip.filePath);
-      if (response) showPopup("Clip deleted!", true);
-      else {
+      if (response) {
+        showPopup("Clip deleted!", true);
+        if (currentClip.isFavourite()) {
+          toggleFavourite();
+        }
+      } else {
         showPopup("Failed to delete clip.", false);
       }
     }

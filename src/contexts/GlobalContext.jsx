@@ -15,6 +15,7 @@ import {
 import { loadSettings, saveSettings } from "../helpers/settingsFile";
 import { documentDir, join } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { checkAndDeleteOldClips } from "../helpers/automaticClipDeletion";
 
 const GlobalContext = createContext();
 
@@ -37,6 +38,9 @@ export const GlobalProvider = ({ children }) => {
   // Add thumbnail state and processing state
   const [thumbnails, setThumbnails] = useState({});
   const [processingVideos, setProcessingVideos] = useState(new Set());
+
+  const firstLoadRef = useRef(true);
+  const loadedClips = useRef(false);
 
   useEffect(() => {
     const load = async () => {
@@ -75,6 +79,8 @@ export const GlobalProvider = ({ children }) => {
         setAllClips(initialClips);
         setCurrentClip(initialClips[0]);
         setFavourites(favouritesSet);
+
+        loadedClips.current = true;
       }
     };
     fetchClips();
@@ -108,6 +114,13 @@ export const GlobalProvider = ({ children }) => {
   useEffect(() => {
     cacheCovers();
   }, [allClips, settings.gamesDir]);
+
+  useEffect(() => {
+    if (firstLoadRef.current && settings.clipDeletion && allClips.length) {
+      checkAndDeleteOldClips(settings, allClips, setAllClips);
+      firstLoadRef.current = false;
+    }
+  }, [settings.clipDeletion, allClips.length]);
 
   const generateThumbnail = useCallback(async (videoPath) => {
     if (processingVideos.has(videoPath)) return;
@@ -180,7 +193,7 @@ export const GlobalProvider = ({ children }) => {
     }
 
     return randomSelected;
-  }, [allClips]);
+  }, [loadedClips.current]);
 
   // Generate thumbnails for random clips
   useEffect(() => {
@@ -320,7 +333,6 @@ export const GlobalProvider = ({ children }) => {
       settings,
       loadedSettings,
       coverCache,
-      // Add new thumbnail-related values to context
       thumbnails,
       generateThumbnail,
       randomClips,
@@ -335,7 +347,6 @@ export const GlobalProvider = ({ children }) => {
       settings,
       loadedSettings,
       favourites,
-      // Add dependencies for new thumbnail-related values
       thumbnails,
       generateThumbnail,
       randomClips,

@@ -3,7 +3,6 @@ import { invoke } from "@tauri-apps/api/core";
 export async function getAllClips(dirPath) {
   try {
     const result = await invoke("get_all_clips", { dirPath });
-    console.log(result);
     const processedClips = result.allClips;
 
     const favouritesSet = new Set(result.favouritesSet);

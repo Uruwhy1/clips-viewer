@@ -1,24 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
 import { formatTime } from "./formatTime";
 
-async function createClipHandler(
-  newName,
-  startTime,
-  endTime,
-  currentClip,
-  addClip
-) {
+async function createClipHandler(startTime, endTime, currentClip, addClip) {
   if (!startTime || !endTime) {
     return { response: false, error: "Missing start or end time." };
   }
   if (startTime >= endTime) {
     return { response: false, error: "Start time is after end time." };
   }
-
-  if (newName.match(/[^A-Za-z0-9\s]/)) {
-    return { response: false, error: "Invalid characters in name." };
-  }
-
   if (startTime !== null && endTime !== null && currentClip) {
     const startFormatted = formatTime(startTime);
     const endFormatted = formatTime(endTime);
@@ -26,7 +15,7 @@ async function createClipHandler(
     const parts = currentClip.filePath.split("\\");
     const clipName = parts.pop().split("_");
 
-    clipName[0] = newName ? newName : clipName[0] + " Clip";
+    clipName[0] = clipName[0] + " Clip";
 
     parts.push(clipName.join("_"));
 
@@ -42,7 +31,7 @@ async function createClipHandler(
 
       const newClip = {
         filePath: outputFilePath,
-        name: newName ? newName : `${currentClip.name} Clip`,
+        name: `${currentClip.name} Clip`,
         game: currentClip.game,
         formattedDate: currentClip.formattedDate,
         isFavourite: false,
