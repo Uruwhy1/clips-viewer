@@ -6,7 +6,10 @@ import Clips from "./components/Clips";
 import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
 import Settings from "./components/Settings";
-import GlobalContext from "./contexts/GlobalContext";
+
+import { useSettings } from "./contexts/SettingsContext";
+import { useClips } from "./contexts/ClipsContext";
+import { useMedia } from "./contexts/MediaContext";
 
 import { usePopup } from "./contexts/PopupContext.jsx";
 import { checkAndDeleteOldClips } from "./helpers/automaticClipDeletion";
@@ -15,8 +18,10 @@ function App() {
   const [view, setView] = useState("clips");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef(null);
-  const { coverCache, settings, allClips, setAllClips } =
-    useContext(GlobalContext);
+
+  const { coverCache } = useMedia();
+  const { settings } = useSettings();
+  const { allClips, setAllClips } = useClips();
 
   const firstLoadRef = useRef(true);
   const { showPopup } = usePopup();

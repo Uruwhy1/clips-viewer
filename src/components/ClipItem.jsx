@@ -1,15 +1,17 @@
-import React, { useContext, useRef, useState } from "react";
-import GlobalContext from "../contexts/GlobalContext";
+import React from "react";
 import styles from "./ClipItem.module.css";
 import { Calendar, Tv } from "lucide-react";
 import FavouriteButton from "./icons/StarButton.jsx";
-import { convertFileSrc } from "@tauri-apps/api/core";
+
+import { useClips } from "../contexts/ClipsContext";
+import { useFavorites } from "../contexts/FavoritesContext";
 
 const MemoizedTv = React.memo(({ ...props }) => <Tv {...props} />);
 const MemoizedCalendar = React.memo(({ ...props }) => <Calendar {...props} />);
 
 const ClipItem = React.memo(({ clip, setView }) => {
-  const { setCurrentClip, toggleFavourite } = useContext(GlobalContext);
+  const { setCurrentClip } = useClips();
+  const { toggleFavourite } = useFavorites();
 
   const handleClick = () => {
     setCurrentClip(clip);

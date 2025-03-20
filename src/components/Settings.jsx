@@ -1,11 +1,4 @@
-import {
-  forwardRef,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import GlobalContext from "../contexts/GlobalContext";
+import { forwardRef, useCallback, useEffect, useState } from "react";
 import styles from "./Settings.module.css";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Aperture, Folder, LucideSettings2 } from "lucide-react";
@@ -17,9 +10,11 @@ import GameConfigForm from "./GameConfigForm";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { usePopup } from "../contexts/PopupContext";
+import { useSettings } from "../contexts/SettingsContext";
 
 const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
-  const { settings, setSettings } = useContext(GlobalContext);
+  const { settings, setSettings } = useSettings();
+
   const [removingIndex, setRemovingIndex] = useState(null);
   const [tempThreshold, setTempThreshold] = useState(
     settings.clipsDeleteThreshold | 9999999

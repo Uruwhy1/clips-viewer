@@ -1,15 +1,15 @@
-import React, { useState, useContext, useEffect } from "react";
-import GlobalContext from "../contexts/GlobalContext";
+import React, { useState, useEffect } from "react";
 import styles from "./Clips.module.css";
 import ClipItem from "./ClipItem";
 import { Tv, ChevronLeft, ChevronRight } from "lucide-react";
 import ClipsSkeleton from "../skeletons/ClipsSkeleton";
 
 import FavouriteButton from "./icons/StarButton.jsx";
+import { useClips } from "../contexts/ClipsContext.jsx";
 
 const Clips = React.memo(({ setView }) => {
-  const { filteredClips, games, filter, updateFilter } =
-    useContext(GlobalContext);
+  const { filteredClips, games, filter, updateFilter } = useClips();
+
   const [showGames, setShowGames] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 

@@ -1,19 +1,16 @@
-import React, {
-  useContext,
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Calendar, Folder, Tv, Edit3Icon, Trash2 } from "lucide-react";
 import RenameInput from "./RenameInput";
-import GlobalContext from "../contexts/GlobalContext";
 import VideoComponent from "./Video";
 import RandomVideos from "./RandomVideos";
 import styles from "./CurrentVideo.module.css";
 import { invoke } from "@tauri-apps/api/core";
 import StarButton from "./icons/StarButton";
+
 import { usePopup } from "../contexts/PopupContext";
+import { useClips } from "../contexts/ClipsContext";
+import { useFavorites } from "../contexts/FavoritesContext";
+import { useMedia } from "../contexts/MediaContext";
 
 const MemoizedCalendar = React.memo(() => <Calendar size={15} />);
 const MemoizedFolder = React.memo(() => <Folder size={15} />);
@@ -24,15 +21,11 @@ const MemoizedEdit3Icon = React.memo(({ ...props }) => (<Edit3Icon {...props} />
 const MemoizedTrash2 = React.memo(({ ...props }) => <Trash2 {...props} />);
 
 const CurrentVideo = React.memo(() => {
-  const {
-    currentClip,
-    deleteClip,
-    toggleFavourite,
-    coverCache,
-    editClip,
-    favourites,
-  } = useContext(GlobalContext);
+  const { currentClip, deleteClip, editClip } = useClips();
+  const { toggleFavourite, favorites } = useFavorites();
+  const { coverCache } = useMedia();
   const { showPopup } = usePopup();
+
   const [cover, setCover] = useState("");
   const [imageError, setImageError] = useState(false);
   const videoRef = useRef(null);
@@ -48,6 +41,7 @@ const CurrentVideo = React.memo(() => {
     return <div>There's no clip. This should not be possible.</div>;
   }
 
+  const isFavourite = (path) => favorites.has(path);
   const handleFavouriteClick = (path) => toggleFavourite(path);
 
   const handlePathClick = (path) => invoke("open_file_explorer", { path });
@@ -118,7 +112,7 @@ const CurrentVideo = React.memo(() => {
                   handleFavouriteClick(currentClip.filePath);
                 }}
               >
-                <StarButton active={currentClip.isFavourite} />
+                <StarButton active={isFavourite(currentClip.filePath)} />
               </div>
               <div
                 onClick={(e) => {

@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect, useRef } from "react";
 import OBSWebSocket from "obs-websocket-js";
 import { loadSettings } from "../helpers/settingsFile";
-import GlobalContext from "./GlobalContext";
+import { useSettings } from "./SettingsContext";
 import { invoke } from "@tauri-apps/api/core";
 import { join } from "@tauri-apps/api/path";
 import { mkdir } from "@tauri-apps/plugin-fs";
@@ -10,7 +10,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 const OBSContext = createContext();
 
 export const OBSProvider = ({ children }) => {
-  const { settings, loadedSettings } = useContext(GlobalContext);
+  const { settings, loadedSettings } = useSettings();
   const [obs] = useState(() => new OBSWebSocket());
   const [connection, setConnection] = useState({
     status: "disconnected",

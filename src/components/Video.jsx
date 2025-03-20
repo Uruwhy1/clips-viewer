@@ -9,9 +9,7 @@ import {
   Maximize,
   Minimize,
   Settings2,
-  ChevronUp,
   Minus,
-  ChevronDown,
   LucideTriangle,
 } from "lucide-react";
 import styles from "./Video.module.css";

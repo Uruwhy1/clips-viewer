@@ -1,5 +1,5 @@
 import { useOBS } from "../contexts/ObsContext";
-import React, { useState, useCallback, useContext, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
 

@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./EditingControls.module.css";
-import GlobalContext from "../contexts/GlobalContext";
 import createClipHandler from "../helpers/createClip";
 import { usePopup } from "../contexts/PopupContext";
+import { useClips } from "../contexts/ClipsContext";
 import { Plus, FlagTriangleRight, FlagTriangleLeft } from "lucide-react";
 
 const MemoizedPlus = React.memo(() => <Plus size={20} />);
@@ -12,7 +12,7 @@ const MemoizedFlagTriangleRight = React.memo(() => <FlagTriangleRight size={20} 
 const MemoizedFlagTriangleLeft = React.memo(() => <FlagTriangleLeft size={20} />);
 
 const EditingControls = React.memo(({ videoRef, onMarkersUpdate }) => {
-  const { currentClip, addClip } = useContext(GlobalContext);
+  const { currentClip, addClip } = useClips();
   const { showPopup } = usePopup();
 
   const [startTime, setStartTime] = useState(null);
