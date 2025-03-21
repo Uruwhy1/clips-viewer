@@ -21,7 +21,8 @@ const Clips = React.memo(({ setView }) => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter]);
+    handlePageChange(1);
+  }, [filter, filteredClips]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
