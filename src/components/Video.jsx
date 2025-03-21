@@ -38,6 +38,10 @@ const Video = forwardRef(({ currentClip }, ref) => {
   const [endMarker, setEndMarker] = useState(null);
 
   useEffect(() => {
+    handleVolumeChange(false);
+  }, []);
+
+  useEffect(() => {
     setIsPlaying(true);
   }, [currentClip]);
 

@@ -169,13 +169,14 @@ video {
 
 .volumeControl {
   display: flex;
-  gap: var(--gap-smallest);
 }
 
 .volumeSlider {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  margin-right: var(--gap-smallest);
 
   width: 0px;
   overflow: hidden;
@@ -200,7 +201,6 @@ video {
     var(--accent-white) 50%
   );
 
-  border-radius: var();
   cursor: pointer;
   transition: background 0.15s ease;
 }

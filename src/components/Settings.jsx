@@ -152,7 +152,6 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     try {
       const backupId = "backup-process";
 
-      // Remove any existing backup notification
       removePersistentNotification(backupId);
 
       setIsBackingUp(true);
@@ -168,13 +167,11 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
         return;
       }
 
-      // Create initial notification
       showPersistentNotification(backupId, {
         text: "Starting backup process...",
         progress: 0,
       });
 
-      // Start the backup process
       invoke("backup_favourite_clips", {
         backupDir: selectedPath,
       }).catch((err) => {
