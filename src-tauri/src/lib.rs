@@ -84,6 +84,8 @@ async fn create_clip(
         .arg(&input_file)
         .arg("-c")
         .arg("copy")
+        .arg("-movflags")
+        .arg("+faststart")
         .arg(&output_file)
         .creation_flags(CREATE_NO_WINDOW)
         .output()
