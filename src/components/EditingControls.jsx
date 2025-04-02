@@ -4,6 +4,7 @@ import createClipHandler from "../helpers/createClip";
 import { usePopup } from "../contexts/PopupContext";
 import { useClips } from "../contexts/ClipsContext";
 import { Plus, FlagTriangleRight, FlagTriangleLeft } from "lucide-react";
+import { listen } from "@tauri-apps/api/event";
 
 const MemoizedPlus = React.memo(() => <Plus size={20} />);
 // prettier-ignore
@@ -13,10 +14,41 @@ const MemoizedFlagTriangleLeft = React.memo(() => <FlagTriangleLeft size={20} />
 
 const EditingControls = React.memo(({ videoRef, onMarkersUpdate }) => {
   const { currentClip, addClip } = useClips();
-  const { showPopup } = usePopup();
+  const {
+    showPopup,
+    showPersistentNotification,
+    removePersistentNotification,
+  } = usePopup();
 
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
+
+  useEffect(() => {
+    let unlisten;
+
+    async function setupListener() {
+      unlisten = await listen("clip-progress", (event) => {
+        const payload = event.payload;
+        const { main_text, progress_text, progress, is_complete } = payload;
+
+        const popupId = "clip-process";
+
+        console.log(payload);
+        showPersistentNotification(popupId, {
+          mainText: main_text,
+          progressText: [progress_text],
+          progress: progress,
+          isComplete: is_complete,
+        });
+      });
+    }
+
+    setupListener();
+
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, [showPersistentNotification]);
 
   const markStart = () => {
     if (videoRef.current.currentTime !== 0) {
@@ -54,14 +86,14 @@ const EditingControls = React.memo(({ videoRef, onMarkersUpdate }) => {
             startTime,
             endTime,
             currentClip,
-            addClip
+            addClip,
+            showPersistentNotification,
+            removePersistentNotification
           );
 
           if (create.response) {
             setStartTime(null);
             setEndTime(null);
-
-            showPopup("Created clip!", true);
           } else {
             showPopup(create.error, false);
           }

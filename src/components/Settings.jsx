@@ -65,7 +65,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
                 : `Backup completed with issues. ${success_count} succeeded, ${failed_count} failed.`;
 
             showPersistentNotification(backupId, {
-              text: finalText,
+              mainText: finalText,
               progress: 100,
               isComplete: true,
             });
@@ -132,7 +132,7 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
       scrollbarOff: !prevSettings.scrollbarOff,
     }));
     showPopup(
-      `Scrollbars turned ${settings.scrollbarOff ? "on" : "off"}`,
+      `Scrollbars turned ${settings.scrollbarOff ? "on" : "off"}.`,
       true
     );
   };

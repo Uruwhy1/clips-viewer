@@ -71,7 +71,7 @@ export const PopupProvider = ({ children }) => {
       const timers = completedIds.map((id) => {
         return setTimeout(() => {
           removePersistentNotification(id);
-        }, 5000);
+        }, 2500);
       });
 
       return () => {

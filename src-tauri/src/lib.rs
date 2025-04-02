@@ -4,7 +4,6 @@ mod backup;
 
 use filetime::{ set_file_mtime, FileTime };
 use std::fs;
-use std::process::Command;
 use std::time::UNIX_EPOCH;
 use std::collections::HashSet;
 use std::os::windows::process::CommandExt;
@@ -12,6 +11,13 @@ use tauri::menu::MenuBuilder;
 use tauri::menu::MenuItemBuilder;
 use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
+
+use serde::{ Serialize };
+use std::process::{ Command, Stdio };
+use std::io::{ BufRead, BufReader };
+
+use tauri::Window;
+use tauri::Emitter;
 
 pub use clips::get_all_clips;
 pub use backup::backup_favourite_clips;
@@ -69,13 +75,22 @@ async fn create_clip(
     input_file: String,
     start_time: String,
     end_time: String,
-    output_file: String
+    output_file: String,
+    window: Window
 ) -> Result<String, String> {
-    // Retrieve original mtime
-    let original_metadata = fs::metadata(&input_file).map_err(|e| e.to_string())?;
-    let original_mtime = original_metadata.modified().map_err(|e| e.to_string())?;
+    #[derive(Serialize, Clone)]
+    struct ClipProgress {
+        main_text: String,
+        progress_text: String,
+        progress: Option<u8>,
+        is_complete: bool,
+    }
 
-    let output = Command::new("ffmpeg")
+    let start_seconds = parse_time_to_seconds(&start_time)?;
+    let end_seconds = parse_time_to_seconds(&end_time)?;
+    let total_duration = end_seconds - start_seconds;
+
+    let mut child = Command::new("ffmpeg")
         .arg("-ss")
         .arg(&start_time)
         .arg("-to")
@@ -86,24 +101,84 @@ async fn create_clip(
         .arg("copy")
         .arg("-movflags")
         .arg("+faststart")
+        .arg("-progress")
+        .arg("pipe:2") // Output progress info to stderr
+        .arg("-nostats") // Disable the default statistics
         .arg(&output_file)
-        .creation_flags(CREATE_NO_WINDOW)
-        .output()
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
         .map_err(|e| e.to_string())?;
 
-    if output.status.success() {
-        // Convert original mtime to UNIX timestamp
-        let mtime_unix = original_mtime.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+    let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
+    let reader = BufReader::new(stderr);
 
-        // Set mtime of the new clip to match the original
-        set_file_mtime(&output_file, FileTime::from_unix_time(mtime_unix, 0)).map_err(|e|
-            e.to_string()
-        )?;
+    for line in reader.lines() {
+        if let Ok(log) = line {
+            if log.contains("out_time=") {
+                if let Some(time_pos) = log.find("out_time=") {
+                    let time_str = &log[time_pos + 9..].trim();
+                    let processed_seconds =
+                        parse_time_to_seconds(time_str).unwrap_or(start_seconds);
 
+                    let progress = (((processed_seconds - start_seconds) / total_duration) *
+                        100.0) as u8;
+                    let is_complete = log.contains("progress=end");
+
+                    let progress_update = ClipProgress {
+                        main_text: "Processing clip...".to_string(),
+                        progress_text: format!(
+                            "{}/{}",
+                            format_time_from_seconds(processed_seconds - start_seconds),
+                            format_time_from_seconds(total_duration)
+                        ),
+                        progress: Some(progress),
+                        is_complete,
+                    };
+
+                    let _ = window.emit("clip-progress", progress_update);
+                }
+            }
+        }
+    }
+
+    let output = child.wait().map_err(|e| e.to_string())?;
+
+    if output.success() {
+        let completion_update = ClipProgress {
+            main_text: "Clip created successfully".to_string(),
+            progress_text: format!(
+                "{}/{}",
+                format_time_from_seconds(total_duration),
+                format_time_from_seconds(total_duration)
+            ),
+            progress: Some(100),
+            is_complete: true,
+        };
+        window.emit("clip-progress", completion_update).ok();
         Ok("Clip created successfully".to_string())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        Err("FFmpeg failed to process the clip".to_string())
     }
+}
+
+fn parse_time_to_seconds(time_str: &str) -> Result<f64, String> {
+    let parts: Vec<&str> = time_str.split(':').collect();
+    if parts.len() == 3 {
+        let hours: f64 = parts[0].parse::<f64>().map_err(|e| e.to_string())?;
+        let minutes: f64 = parts[1].parse::<f64>().map_err(|e| e.to_string())?;
+        let seconds: f64 = parts[2].parse::<f64>().map_err(|e| e.to_string())?;
+        Ok(hours * 3600.0 + minutes * 60.0 + seconds)
+    } else {
+        Err("Invalid time format".to_string())
+    }
+}
+
+fn format_time_from_seconds(total_seconds: f64) -> String {
+    let hours = (total_seconds / 3600.0).floor() as u32;
+    let minutes = ((total_seconds % 3600.0) / 60.0).floor() as u32;
+    let seconds = (total_seconds % 60.0).floor() as u32;
+    format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

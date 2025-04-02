@@ -1,7 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import { formatTime } from "./formatTime";
 
-async function createClipHandler(startTime, endTime, currentClip, addClip) {
+async function createClipHandler(
+  startTime,
+  endTime,
+  currentClip,
+  addClip,
+  showPersistentNotification,
+  removePersistentNotification
+) {
   if (!startTime || !endTime) {
     return { response: false, error: "Missing start or end time." };
   }
@@ -22,11 +29,27 @@ async function createClipHandler(startTime, endTime, currentClip, addClip) {
     const outputFilePath = parts.join("\\");
 
     try {
+      const popupId = "clip-process";
+      removePersistentNotification(popupId);
+
+      showPersistentNotification(popupId, {
+        mainText: "Creating Clip...",
+        progressText: ["Starting clipping process..."],
+        progress: 0,
+      });
+
       await invoke("create_clip", {
         inputFile: currentClip.filePath,
         startTime: startFormatted,
         endTime: endFormatted,
         outputFile: outputFilePath,
+      }).catch((err) => {
+        console.error("Clipping failed:", err);
+        showPersistentNotification(popupId, {
+          mainText: `Clip failed: ${err}`,
+          progress: 100,
+          isComplete: true,
+        });
       });
 
       const newClip = {
