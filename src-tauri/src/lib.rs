@@ -91,6 +91,7 @@ async fn create_clip(
     let total_duration = end_seconds - start_seconds;
 
     let mut child = Command::new("ffmpeg")
+        .creation_flags(CREATE_NO_WINDOW)
         .arg("-ss")
         .arg(&start_time)
         .arg("-to")

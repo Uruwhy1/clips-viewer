@@ -22,24 +22,19 @@ struct BackupProgress {
 
 #[tauri::command]
 pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Result<String, String> {
-    println!("Starting backup process with target directory: {}", backup_dir);
-
     // Step 1: Load the favourites list
     let favourites_set = match load_favourites() {
         Ok(set) => set,
         Err(e) => {
             let error_msg = format!("Failed to load favourites: {}", e);
-            println!("ERROR: {}", error_msg);
             return Err(error_msg);
         }
     };
 
     if favourites_set.is_empty() {
-        println!("No favourite clips found to backup");
         return Err("No favourite clips found to backup".to_string());
     }
 
-    println!("Loaded {} favourite clips", favourites_set.len());
     let total_clips = favourites_set.len();
 
     // Send initial progress
@@ -60,7 +55,6 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
     let backup_dir = Path::new(&backup_dir);
     if !backup_dir.exists() || !backup_dir.is_dir() {
         let error_msg = format!("Invalid backup directory path: {}", backup_dir.display());
-        println!("ERROR: {}", error_msg);
         return Err(error_msg);
     }
 
@@ -104,8 +98,6 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
             .file_name()
             .map(|n| n.to_string_lossy().to_string())
             .unwrap_or_else(|| clip_path.clone());
-
-        println!("Processing file {}/{}: {}", current, total_clips, short_path);
 
         // Send progress update for current file
         if
@@ -264,8 +256,6 @@ fn load_favourites() -> Result<HashSet<String>, String> {
             return Err("Could not find home directory".into());
         }
     };
-
-    println!("Looking for favourites at: {}", document_path.display());
 
     // Create directory if it doesn't exist
     if let Some(parent) = document_path.parent() {

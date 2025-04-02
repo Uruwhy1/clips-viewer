@@ -27,62 +27,6 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     removePersistentNotification,
   } = usePopup();
 
-  useEffect(() => {
-    let unlisten;
-
-    async function setupListener() {
-      unlisten = await listen("backup-progress", (event) => {
-        const payload = event.payload;
-        const {
-          status,
-          current,
-          total,
-          success_count,
-          failed_count,
-          current_file,
-        } = payload;
-
-        const percent = total > 0 ? Math.floor((current / total) * 100) : 0;
-        const backupId = "backup-process";
-
-        // Update persistent notification with progress
-        showPersistentNotification(backupId, {
-          mainText: status,
-          progressText: [
-            `${current} of ${total} (${success_count} succeeded, ${failed_count} failed)`,
-            `${current_file ? `Current: ${current_file}` : ""}`,
-          ],
-          progress: percent,
-          isComplete: percent === 100,
-        });
-
-        // When complete, update the notification after a delay
-        if (percent === 100) {
-          setTimeout(() => {
-            const finalText =
-              failed_count === 0
-                ? `Backup completed successfully! ${success_count} files backed up.`
-                : `Backup completed with issues. ${success_count} succeeded, ${failed_count} failed.`;
-
-            showPersistentNotification(backupId, {
-              mainText: finalText,
-              progress: 100,
-              isComplete: true,
-            });
-
-            setIsBackingUp(false);
-          }, 1000);
-        }
-      });
-    }
-
-    setupListener();
-
-    return () => {
-      if (unlisten) unlisten();
-    };
-  }, [showPersistentNotification]);
-
   function debounce(func, wait) {
     let timeout;
     return function (...args) {
@@ -186,6 +130,8 @@ const Settings = forwardRef(({ isOpen, obs, setObs }, ref) => {
     } catch (err) {
       console.error("Backup process error:", err);
       showPopup(`Backup process error: ${err}`, false);
+      setIsBackingUp(false);
+    } finally {
       setIsBackingUp(false);
     }
   };

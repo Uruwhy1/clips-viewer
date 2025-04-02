@@ -13,6 +13,7 @@ import { useMedia } from "./contexts/MediaContext";
 
 import { usePopup } from "./contexts/PopupContext.jsx";
 import { checkAndDeleteOldClips } from "./helpers/automaticClipDeletion";
+import { listen } from "@tauri-apps/api/event";
 
 function App() {
   const [view, setView] = useState("clips");
@@ -24,7 +25,7 @@ function App() {
   const { allClips, setAllClips } = useClips();
 
   const firstLoadRef = useRef(true);
-  const { showPopup } = usePopup();
+  const { showPopup, showPersistentNotification } = usePopup();
 
   useEffect(() => {
     (async () => {

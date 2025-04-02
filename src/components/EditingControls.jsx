@@ -23,33 +23,6 @@ const EditingControls = React.memo(({ videoRef, onMarkersUpdate }) => {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
 
-  useEffect(() => {
-    let unlisten;
-
-    async function setupListener() {
-      unlisten = await listen("clip-progress", (event) => {
-        const payload = event.payload;
-        const { main_text, progress_text, progress, is_complete } = payload;
-
-        const popupId = "clip-process";
-
-        console.log(payload);
-        showPersistentNotification(popupId, {
-          mainText: main_text,
-          progressText: [progress_text],
-          progress: progress,
-          isComplete: is_complete,
-        });
-      });
-    }
-
-    setupListener();
-
-    return () => {
-      if (unlisten) unlisten();
-    };
-  }, [showPersistentNotification]);
-
   const markStart = () => {
     if (videoRef.current.currentTime !== 0) {
       setStartTime(videoRef.current.currentTime);
