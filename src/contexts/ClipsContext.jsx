@@ -124,10 +124,6 @@ export const ClipsProvider = ({ children }) => {
         return false;
       }
 
-      if (clip.isFavourite) {
-        toggleFavourite(clipPath);
-      }
-
       setAllClips((prevClips) => {
         const newClips = prevClips.filter((clip) => clip.filePath !== clipPath);
 

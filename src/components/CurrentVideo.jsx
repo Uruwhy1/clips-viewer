@@ -35,6 +35,8 @@ const CurrentVideo = React.memo(() => {
     if (coverCache.has(currentClip.game)) {
       setCover(coverCache.get(currentClip.game));
     }
+
+    setRenaming(false);
   }, [currentClip, coverCache]);
 
   if (currentClip == null) {
@@ -55,10 +57,13 @@ const CurrentVideo = React.memo(() => {
       "Are you sure you want to delete this clip?"
     );
     if (confirmDelete) {
-      let response = await deleteClip(currentClip.filePath);
+      let response = await deleteClip(
+        currentClip.filePath,
+        currentClip.isFavourite
+      );
       if (response) {
         showPopup("Clip deleted!", true);
-        if (currentClip.isFavourite()) {
+        if (currentClip.isFavourite) {
           toggleFavourite();
         }
       } else {

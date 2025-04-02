@@ -22,6 +22,11 @@ const MemoizedVolume2 = React.memo(() => <Volume2 size={20} />);
 const MemoizedMinimize = React.memo(() => <Minimize size={20} />);
 const MemoizedMaximize = React.memo(() => <Maximize size={20} />);
 const MemoizedVideotape = React.memo(() => <Settings2 size={20} />);
+const MemoizedTriangle = React.memo(() => <LucideTriangle size={16} />);
+const MemoizedRotatedTriangle = React.memo(() => (
+  <LucideTriangle size={16} style={{ rotate: "180deg" }} />
+));
+const MemoizedMinus = React.memo(() => <Minus size={16} />);
 
 const Video = forwardRef(({ currentClip }, ref) => {
   const [isPlaying, setIsPlaying] = useState(true);
@@ -327,19 +332,16 @@ const Video = forwardRef(({ currentClip }, ref) => {
             >
               {/* prettier-ignore */}
               <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : "" }`}>
-              <div className={styles.playback} onClick={() => changePlaybackRate(0.5)}>
-                <LucideTriangle size={16} />
+                <div className={styles.playback} onClick={() => changePlaybackRate(0.5)}>
+                  <MemoizedTriangle />
+                </div>
+                <div className={styles.playback} onClick={() => changePlaybackRate()}>
+                  <MemoizedMinus />
+                </div>
+                <div className={styles.playback} onClick={() => changePlaybackRate(-0.25)}>
+                  <MemoizedRotatedTriangle />
+                </div>
               </div>
-              <div className={styles.playback} onClick={() => changePlaybackRate()}>
-                <Minus size={16} />
-              </div>
-              <div className={styles.playback} onClick={() => changePlaybackRate(-0.25)}>
-
-                <LucideTriangle size={16} style={{rotate: '180deg'}} />
-
-              </div>
-           </div>
-
               <MemoizedVideotape />
             </button>
 
