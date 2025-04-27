@@ -78,6 +78,8 @@ async fn create_clip(
     output_file: String,
     window: Window
 ) -> Result<String, String> {
+    println!("Starting create_clip function"); // Log function start
+
     #[derive(Serialize, Clone)]
     struct ClipProgress {
         main_text: String,
@@ -86,10 +88,12 @@ async fn create_clip(
         is_complete: bool,
     }
 
+    println!("Parsing time values"); // Log parsing step
     let start_seconds = parse_time_to_seconds(&start_time)?;
     let end_seconds = parse_time_to_seconds(&end_time)?;
     let total_duration = end_seconds - start_seconds;
 
+    println!("Starting FFmpeg process"); // Log process creation
     let mut child = Command::new("ffmpeg")
         .creation_flags(CREATE_NO_WINDOW)
         .arg("-ss")
@@ -109,22 +113,30 @@ async fn create_clip(
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| {
+            println!("Failed to spawn FFmpeg: {}", e); // Log spawn error
+            e.to_string()
+        })?;
 
+    println!("Getting stderr handle"); // Log stderr capture
     let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
     let reader = BufReader::new(stderr);
 
+    println!("Starting to process FFmpeg output"); // Log processing start
     for line in reader.lines() {
         if let Ok(log) = line {
+            println!("FFmpeg output: {}", log); // Log each line from FFmpeg
+
             if log.contains("out_time=") {
                 if let Some(time_pos) = log.find("out_time=") {
                     let time_str = &log[time_pos + 9..].trim();
                     let processed_seconds =
                         parse_time_to_seconds(time_str).unwrap_or(start_seconds);
-
                     let progress = (((processed_seconds - start_seconds) / total_duration) *
                         100.0) as u8;
                     let is_complete = log.contains("progress=end");
+
+                    println!("Progress: {}%", progress); // Log calculated progress
 
                     let progress_update = ClipProgress {
                         main_text: "Processing clip...".to_string(),
@@ -137,15 +149,19 @@ async fn create_clip(
                         is_complete,
                     };
 
-                    let _ = window.emit("clip-progress", progress_update);
+                    if let Err(e) = window.emit("clip-progress", progress_update) {
+                        println!("Failed to emit progress event: {}", e); // Log emission failure
+                    }
                 }
             }
         }
     }
 
+    println!("Waiting for FFmpeg process to complete"); // Log wait step
     let output = child.wait().map_err(|e| e.to_string())?;
 
     if output.success() {
+        println!("FFmpeg process completed successfully"); // Log success
         let completion_update = ClipProgress {
             main_text: "Clip created successfully".to_string(),
             progress_text: format!(
@@ -156,13 +172,17 @@ async fn create_clip(
             progress: Some(100),
             is_complete: true,
         };
-        window.emit("clip-progress", completion_update).ok();
+
+        if let Err(e) = window.emit("clip-progress", completion_update) {
+            println!("Failed to emit completion event: {}", e); // Log final emission
+        }
+
         Ok("Clip created successfully".to_string())
     } else {
+        println!("FFmpeg process failed"); // Log failure
         Err("FFmpeg failed to process the clip".to_string())
     }
 }
-
 fn parse_time_to_seconds(time_str: &str) -> Result<f64, String> {
     let parts: Vec<&str> = time_str.split(':').collect();
     if parts.len() == 3 {

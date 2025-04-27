@@ -15,7 +15,7 @@ const ClipsContext = createContext();
 
 export const ClipsProvider = ({ children }) => {
   const { settings } = useSettings();
-  const { favorites, toggleFavourite } = useFavorites();
+  const { favorites, toggleFavourite, updateFavoritePath } = useFavorites();
 
   const [allClips, setAllClips] = useState([]);
   const [currentClip, setCurrentClip] = useState(null);
@@ -83,8 +83,7 @@ export const ClipsProvider = ({ children }) => {
       const { newPath, newName } = await renameClipFile(oldPath, newTitle);
 
       if (isFavourite) {
-        await toggleFavourite(oldPath);
-        await toggleFavourite(newPath);
+        await updateFavoritePath(oldPath, newPath);
       }
 
       setAllClips((prevClips) =>
@@ -117,7 +116,7 @@ export const ClipsProvider = ({ children }) => {
   };
 
   const deleteClip = useCallback(
-    async (clipPath) => {
+    async (clipPath, isFavourite) => {
       const success = await deleteClipFile(clipPath);
       if (!success) {
         console.error("Failed to delete clip file.");
@@ -135,6 +134,10 @@ export const ClipsProvider = ({ children }) => {
 
         return newClips;
       });
+
+      if (isFavourite) {
+        toggleFavourite(clipPath);
+      }
 
       return true;
     },

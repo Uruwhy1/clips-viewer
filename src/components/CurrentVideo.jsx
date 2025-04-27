@@ -56,6 +56,7 @@ const CurrentVideo = React.memo(() => {
     const confirmDelete = await window.confirm(
       "Are you sure you want to delete this clip?"
     );
+
     if (confirmDelete) {
       let response = await deleteClip(
         currentClip.filePath,
@@ -63,9 +64,6 @@ const CurrentVideo = React.memo(() => {
       );
       if (response) {
         showPopup("Clip deleted!", true);
-        if (currentClip.isFavourite) {
-          toggleFavourite();
-        }
       } else {
         showPopup("Failed to delete clip.", false);
       }
@@ -79,6 +77,7 @@ const CurrentVideo = React.memo(() => {
 
         if (response) showPopup("Clip renamed!", true);
         else {
+          console.log(response);
           showPopup("Failed to rename.", false);
         }
       }

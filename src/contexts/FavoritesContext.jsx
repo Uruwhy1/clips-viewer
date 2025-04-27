@@ -18,7 +18,6 @@ export const FavoritesProvider = ({ children }) => {
     };
 
     loadFavorites();
-    console.log(favorites);
   }, [settings.gamesDir]);
 
   const toggleFavourite = async (clipPath) => {
@@ -33,11 +32,29 @@ export const FavoritesProvider = ({ children }) => {
     await saveFavourites(newFavorites);
 
     setFavorites(newFavorites);
+
+    return newFavorites.has(clipPath);
+  };
+
+  const updateFavoritePath = async (oldPath, newPath) => {
+    const newFavorites = new Set(favorites);
+
+    if (newFavorites.has(oldPath)) {
+      newFavorites.delete(oldPath);
+      newFavorites.add(newPath);
+
+      await saveFavourites(newFavorites);
+      setFavorites(newFavorites);
+
+      return true;
+    }
+    return false;
   };
 
   const contextValue = {
     favorites,
     toggleFavourite,
+    updateFavoritePath,
     isFavorite: (clipPath) => favorites.has(clipPath),
   };
 
