@@ -130,7 +130,7 @@
   }
 }
 
-@media screen and (max-width: 1300px) {
+@media screen and (max-width: 1300px) and (min-height: 650px) {
   .container {
     margin-top: var(--title-bar-height);
     max-height: calc(100vh - var(--title-bar-height));
@@ -171,5 +171,15 @@
 
     flex-shrink: 0;
     border-radius: 5px;
+  }
+}
+
+@media screen and (max-height: 650px) {
+  .container {
+    flex-direction: row;
+  }
+
+  .info {
+    flex-direction: column;
   }
 }
