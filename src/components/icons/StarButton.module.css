@@ -2,11 +2,13 @@
   cursor: pointer;
   fill: none;
 
-  &.active {
+  &.animate {
     animation: favourite 0.5s 1 ease;
+  }
 
-    stroke: gold;
-    fill: gold;
+  &.active {
+    stroke: rgb(255, 208, 0);
+    fill: rgb(255, 208, 0);
   }
 }
 
