@@ -1,5 +1,7 @@
 body {
   background-color: var(--page-bg);
+  color: var(--color);
+
   font-family: system-ui;
   scroll-behavior: smooth;
 }
@@ -46,42 +48,14 @@ body.hide-scroll {
   --page-bg: #fff;
   --page-bg-opposite: #000;
 
-  /* sidebar */
-  --sidebar-width: 50px;
-  --sidebar-bg: var(--accent-washed);
-  --sidebar-color: #fff;
-  --sidebar-hover: #00000026;
-
-  /* settings */
-  --settings-bg: #1e1e1e;
-
-  /* currentvideo view */
-  --current-bg: #1e1e1e;
-
-  /* titlebar */
-  --title-bar-bg: #1e1e1e;
-  --title-bar-color: #fff;
-  --title-bar-height: 32px;
-
-  /* clips view */
-  --clips-filters-bg: var(--page-bg);
-  --clips-bg: var(--page-bg);
-
-  /* --- */
-  --gray-color: #666;
-  --page-cover: #0000006f;
-
-  --borders: #e0e0e0;
-  --page-padding: 1.5rem;
-  --page-padding-small: 0.25rem;
-
-  --accent-dark: #852112;
-  --accent: #9d2816;
-  --accent-washed: #f4795b;
-  --accent-white: #fee5e5;
-
   --value: 0;
   --curent-game-cover: "";
+
+  --sidebar-width: 50px;
+  --title-bar-height: 32px;
+
+  --page-padding: 1.5rem;
+  --page-padding-small: 0.25rem;
 
   --button-padding: 10px;
   --radius-big: 8px;

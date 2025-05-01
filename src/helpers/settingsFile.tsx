@@ -24,6 +24,7 @@ export const loadSettings = async (
         console.warn("Settings file not found. Creating default settings.");
 
         const defaultSettings = {
+          theme: "System",
           gamesDir: null,
           gamesConfig: {},
           scrollbarOff: false,

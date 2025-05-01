@@ -28,6 +28,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(
 
 export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   const [settings, setSettings] = useState<Settings>({
+    theme: "System",
     gamesDir: null,
     gamesConfig: {},
     scrollbarOff: false,
@@ -57,6 +58,51 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       document.body.classList.remove("hide-scroll");
     }
   }, [settings]);
+
+  useEffect(() => {
+    let theme = settings.theme;
+    if (theme === "System (Default)") {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      document.documentElement.setAttribute(
+        "data-theme",
+        prefersDark ? "Dark" : "Light"
+      );
+
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = (e: MediaQueryListEvent) => {
+        document.documentElement.setAttribute(
+          "data-theme",
+          e.matches ? "Dark" : "Light"
+        );
+      };
+
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    } else if (theme === "System (Catppuccin)") {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      document.documentElement.setAttribute(
+        "data-theme",
+        prefersDark ? "Mocha" : "Latte"
+      );
+
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = (e: MediaQueryListEvent) => {
+        document.documentElement.setAttribute(
+          "data-theme",
+          e.matches ? "Mocha" : "Latte"
+        );
+      };
+
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    } else {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+  }, [settings.theme]);
 
   useEffect(() => {
     const save = async () => {

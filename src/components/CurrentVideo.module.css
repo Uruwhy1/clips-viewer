@@ -10,6 +10,8 @@
     "edit info";
 
   background-color: var(--current-bg);
+  color: var(--dark-bg-color);
+
   > div {
     overflow: hidden;
   }
@@ -41,7 +43,7 @@
   align-items: center;
   gap: var(--gap-smallest);
 
-  color: #ccc;
+  color: var(--dark-bg-color-2);
 
   overflow: hidden;
 

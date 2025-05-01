@@ -1,6 +1,6 @@
 .sidebar {
-  background-color: var(--sidebar-bg);
-  color: var(--sidebar-color);
+  background-color: var(--accent-washed);
+  color: #fff;
   z-index: 9000;
 
   height: 100vh;

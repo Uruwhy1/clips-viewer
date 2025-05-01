@@ -10,6 +10,8 @@ import GameConfigForm from "./GameConfigForm";
 import { invoke } from "@tauri-apps/api/core";
 import { usePopup } from "../contexts/PopupContext";
 import { useSettings } from "../contexts/SettingsContext";
+import { ThemeFamilyControl } from "./ThemeFamily";
+import { AppearanceModeControl } from "./ThemeAppearance";
 
 type SettingsProps = {
   isOpen: boolean;
@@ -145,6 +147,21 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
       }
     };
 
+    const handleThemeClick = (newTheme: string) => {
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        theme: newTheme,
+      }));
+      showPopup(`Theme changed to ${newTheme}.`, true);
+    };
+
+    const selectedFamily =
+      settings.theme.includes("Catppuccin") ||
+      settings.theme === "Mocha" ||
+      settings.theme === "Latte"
+        ? "Catppuccin"
+        : "Default";
+
     return (
       <div
         className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
@@ -220,6 +237,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
             <LucideSettings2 />
             <h3>UI Tweaks</h3>
           </div>
+
           <div className={styles.settingIndividual}>
             <div className={styles.subSectionTitle}>
               <strong>Visible Scrollbars</strong>
@@ -229,6 +247,17 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
               />
             </div>
           </div>
+
+          <AppearanceModeControl
+            currentTheme={settings.theme}
+            switchTheme={handleThemeClick}
+            selectedFamily={selectedFamily}
+          />
+
+          <ThemeFamilyControl
+            currentTheme={settings.theme}
+            switchTheme={handleThemeClick}
+          />
         </div>
       </div>
     );

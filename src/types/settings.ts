@@ -19,4 +19,5 @@ export type Settings = {
   clipsDeleteThreshold: number;
   clipDeletion: boolean;
   obs: OBSSettings;
+  theme: string;
 };

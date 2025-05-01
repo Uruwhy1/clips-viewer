@@ -149,9 +149,9 @@
 
 .pagination button {
   padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--borders);
   border-radius: 4px;
-  background: white;
+  background: var(--page-bg);
   cursor: pointer;
 
   position: relative;
@@ -161,7 +161,6 @@
 
     width: 0;
     height: 1px;
-    background-color: #000;
 
     left: 50%;
     top: 50%;

@@ -69,8 +69,8 @@
   gap: var(--gap-small);
 
   padding: var(--padding-medium);
-  background-color: #fff;
-  color: #000;
+  background-color: var(--page-bg);
+  color: var(--color);
 
   border-radius: var(--radius-small);
 
@@ -132,7 +132,9 @@
     left: 0;
     top: 0;
 
-    color: red;
+    background-color: var(--page-bg);
+
+    color: var(--red);
     border: 0;
 
     border-radius: 0;
@@ -148,7 +150,7 @@
   }
 
   > button.edit {
-    color: rgb(17, 0, 252);
+    color: var(--blue);
 
     border-left: 1px solid var(--borders);
 
@@ -167,14 +169,14 @@
     top: 0;
 
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--accent-washed);
 
     border: 1px solid var(--borders);
     border-top: 0;
 
     z-index: 1;
-    background-color: #fff;
+    background-color: var(--page-bg);
     border-radius: 0 0 var(--radius-small) var(--radius-small);
     padding: var(--padding-small);
   }
@@ -329,4 +331,59 @@
 
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+/* themes stuff */
+
+.themeItem {
+  display: flex;
+  flex-direction: column;
+
+  height: 3.5rem;
+  border: 1px solid var(--borders);
+
+  transition: background 0.5s ease;
+  &:hover {
+    cursor: pointer;
+  }
+
+  &.active {
+    background-color: var(--accent-white);
+  }
+}
+
+.themeItemContent {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-small);
+
+  padding: var(--padding-medium);
+  height: 100%;
+}
+
+.themeIcon {
+  font-size: 1.2rem;
+}
+
+.activeIndicator {
+  margin-left: auto;
+
+  font-weight: bold;
+  color: var(--accent-washed);
+}
+
+.themeDescription {
+  font-size: var(--font-size-small);
+  color: var(--gray-color);
+
+  padding: var(--padding-small);
+}
+
+.currentThemeBadge {
+  color: var(--dark-bg-accent);
+  font-size: 0.8rem;
+
+  border-radius: var(--radius-small);
+  background-color: var(--dark-bg-accent-white);
+  padding: 2px 6px;
 }

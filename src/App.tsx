@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useContext } from "react";
 import "./reset.css";
+import "./root.css";
 import "./App.css";
 import CurrentVideo from "./components/CurrentVideo";
 import Clips from "./components/Clips";
