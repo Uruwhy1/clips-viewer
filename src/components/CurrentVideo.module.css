@@ -80,6 +80,7 @@
   font-size: var(--header-medium-size);
   color: #fff;
 
+  flex-wrap: wrap;
   .title {
     border-bottom: 1px solid transparent;
     font-size: inherit;
@@ -177,11 +178,16 @@
 }
 
 @media screen and (max-height: 650px) {
-  .container {
-    flex-direction: row;
-  }
+  .clipTitleContainer {
+    font-size: 1.25rem;
 
-  .info {
-    flex-direction: column;
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    > div {
+      gap: var(--gap-small);
+    }
   }
 }

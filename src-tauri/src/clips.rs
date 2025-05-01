@@ -52,31 +52,64 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
     let time_part = parts[parts.len() - 1].split('.').next().unwrap_or("");
 
     let time_parts: Vec<&str> = time_part.split('-').collect();
-    let time_format: String;
-    let datetime_str: String;
 
-    if time_parts.len() <= 3 {
-        // MM-DD-YYYY_HH-MM-SS
-        time_format = "%d-%m-%Y_%H-%M-%S".to_string();
-        datetime_str = format!("{}_{}", date_part, time_part);
-    } else if time_parts.len() == 4 {
-        // MM-DD-YYYY_HH-MM-SS-MMM
-        time_format = "%d-%m-%Y_%H-%M-%S".to_string();
-        datetime_str = format!(
-            "{}_{}-{}-{}",
-            date_part,
-            time_parts[0],
-            time_parts[1],
-            time_parts[2]
-        );
-    } else {
-        return Err(format!("Failed to parse date from '{}': Invalid time format", filename));
+    if time_parts.len() >= 3 {
+        if time_parts.len() == 3 {
+            let datetime_str = format!("{}_{}", date_part, time_part);
+
+            match NaiveDateTime::parse_from_str(&datetime_str, "%d-%m-%Y_%H-%M-%S") {
+                Ok(dt) => {
+                    return Ok(dt.timestamp());
+                }
+                Err(_) => {}
+            }
+        } else if time_parts.len() >= 4 {
+            let datetime_str = format!(
+                "{}_{}-{}-{}",
+                date_part,
+                time_parts[0],
+                time_parts[1],
+                time_parts[2]
+            );
+
+            match NaiveDateTime::parse_from_str(&datetime_str, "%d-%m-%Y_%H-%M-%S") {
+                Ok(dt) => {
+                    return Ok(dt.timestamp());
+                }
+                Err(_) => {}
+            }
+        }
     }
 
-    match NaiveDateTime::parse_from_str(&datetime_str, &time_format) {
-        Ok(dt) => Ok(dt.timestamp()),
-        Err(e) => Err(format!("Failed to parse date time from filename: {}", e)),
+    if time_parts.len() >= 3 {
+        if time_parts.len() == 3 {
+            let datetime_str = format!("{}_{}", date_part, time_part);
+
+            match NaiveDateTime::parse_from_str(&datetime_str, "%m-%d-%Y_%H-%M-%S") {
+                Ok(dt) => {
+                    return Ok(dt.timestamp());
+                }
+                Err(_) => {}
+            }
+        } else if time_parts.len() >= 4 {
+            let datetime_str = format!(
+                "{}_{}-{}-{}",
+                date_part,
+                time_parts[0],
+                time_parts[1],
+                time_parts[2]
+            );
+
+            match NaiveDateTime::parse_from_str(&datetime_str, "%m-%d-%Y_%H-%M-%S") {
+                Ok(dt) => {
+                    return Ok(dt.timestamp());
+                }
+                Err(_) => {}
+            }
+        }
     }
+
+    Err(format!("Failed to parse date from '{}'", filename))
 }
 
 fn extract_title_from_filename(filename: &str) -> String {
