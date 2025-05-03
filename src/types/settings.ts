@@ -20,4 +20,11 @@ export type Settings = {
   clipDeletion: boolean;
   obs: OBSSettings;
   theme: string;
+  accentVariable: string;
+};
+
+export type SemanticColor = {
+  name: string;
+  variable: string;
+  previewColor: string;
 };

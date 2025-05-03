@@ -1,7 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useState } from "react";
 import styles from "./Settings.module.css";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Aperture, Folder, LucideSettings2 } from "lucide-react";
+import { Aperture, Folder, LucideSettings2, Palette } from "lucide-react";
 import SettingButton from "./SettingButton";
 
 import ObsConnectionForm from "./ObsConnectionForm";
@@ -12,6 +12,8 @@ import { usePopup } from "../contexts/PopupContext";
 import { useSettings } from "../contexts/SettingsContext";
 import { ThemeFamilyControl } from "./ThemeFamily";
 import { AppearanceModeControl } from "./ThemeAppearance";
+import AccentColor from "./AccentColor";
+import { SemanticColor } from "../types/settings";
 
 type SettingsProps = {
   isOpen: boolean;
@@ -155,6 +157,20 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
       showPopup(`Theme changed to ${newTheme}.`, true);
     };
 
+    const handleAccentChange = (semanticColor: SemanticColor) => {
+      document.documentElement.style.setProperty(
+        "--accent-var",
+        `var(${semanticColor.variable})`
+      );
+
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        accentVariable: semanticColor.variable,
+      }));
+
+      showPopup(`Accent color changed to ${semanticColor.name}.`, true);
+    };
+
     const selectedFamily =
       settings.theme.includes("Catppuccin") ||
       settings.theme === "Mocha" ||
@@ -257,6 +273,11 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
           <ThemeFamilyControl
             currentTheme={settings.theme}
             switchTheme={handleThemeClick}
+          />
+
+          <AccentColor
+            currentAccent={settings.accentVariable || "--red"}
+            onAccentChange={handleAccentChange}
           />
         </div>
       </div>

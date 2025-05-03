@@ -38,6 +38,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       port: "0",
       password: "",
     },
+    accentVariable: "--red",
   });
   const [loadedSettings, setLoadedSettings] = useState<boolean>(false);
   const settingsRef = useRef(settings);
@@ -60,6 +61,12 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   }, [settings]);
 
   useEffect(() => {
+    let accent = settings.accentVariable;
+    document.documentElement.style.setProperty(
+      "--accent-var",
+      `var(${accent})`
+    );
+
     let theme = settings.theme;
     if (theme === "System (Default)") {
       const prefersDark = window.matchMedia(
