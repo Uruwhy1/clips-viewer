@@ -14,6 +14,7 @@ import { useMedia } from "./contexts/MediaContext";
 
 import { usePopup } from "./contexts/PopupContext.js";
 import { checkAndDeleteOldClips } from "./helpers/automaticClipDeletion";
+import SplashScreen from "./SplashScreen";
 
 function App() {
   const [view, setView] = useState("clips");
@@ -106,6 +107,7 @@ function App() {
 
   return (
     <>
+      <SplashScreen />
       {coverCache && (
         <div
           style={{

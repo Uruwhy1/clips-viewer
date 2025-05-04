@@ -4,6 +4,7 @@ mod backup;
 
 use filetime::{ set_file_mtime, FileTime };
 use std::fs;
+use dirs;
 use std::time::UNIX_EPOCH;
 use std::collections::HashSet;
 use std::os::windows::process::CommandExt;
@@ -68,6 +69,50 @@ fn open_file_explorer(path: String) -> Result<(), String> {
         .map_err(|e| format!("Failed to open file explorer: {}", e))?;
 
     Ok(())
+}
+
+#[tauri::command]
+fn get_theme() -> String {
+    let config_dir = dirs::config_dir().expect("Failed to get config directory");
+    let config_path = config_dir.join("Tauri").join("settings.json");
+
+    match std::fs::read_to_string(&config_path) {
+        Ok(content) => {
+            match serde_json::from_str::<serde_json::Value>(&content) {
+                Ok(json) => {
+                    if let Some(theme) = json.get("theme").and_then(|v| v.as_str()) {
+                        theme.to_string()
+                    } else {
+                        "light".to_string()
+                    }
+                }
+                Err(_) => "light".to_string(),
+            }
+        }
+        Err(_) => "light".to_string(),
+    }
+}
+
+#[tauri::command]
+fn get_accent() -> String {
+    let config_dir = dirs::config_dir().expect("Failed to get config directory");
+    let config_path = config_dir.join("Tauri").join("settings.json");
+
+    match std::fs::read_to_string(&config_path) {
+        Ok(content) => {
+            match serde_json::from_str::<serde_json::Value>(&content) {
+                Ok(json) => {
+                    if let Some(accent) = json.get("accent").and_then(|v| v.as_str()) {
+                        accent.to_string()
+                    } else {
+                        "blue".to_string()
+                    }
+                }
+                Err(_) => "blue".to_string(),
+            }
+        }
+        Err(_) => "blue".to_string(),
+    }
 }
 
 #[tauri::command]
@@ -252,7 +297,9 @@ pub fn run() {
                 open_file_explorer,
                 delete::calculate_total_size,
                 delete::delete_older_clips,
-                backup_favourite_clips
+                backup_favourite_clips,
+                get_theme,
+                get_accent
             ]
         )
         .run(tauri::generate_context!())

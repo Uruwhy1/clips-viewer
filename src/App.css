@@ -45,9 +45,6 @@ body.hide-scroll {
 }
 
 :root {
-  --page-bg: #fff;
-  --page-bg-opposite: #000;
-
   --value: 0;
   --curent-game-cover: "";
 

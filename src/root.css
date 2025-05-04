@@ -9,39 +9,12 @@
   --lavender: #b4befe;
 
   --accent-var: var(--red);
-}
 
-/* dark theme */
-:root {
-  --page-bg: #121212;
-  --color: #000000;
-
-  /* settings */
+  --page-bg: #303030;
   --settings-bg: var(--dark-bg);
   --current-bg: var(--dark-bg);
-
-  /* titlebar */
-  --title-bar-bg: var(--dark-bg);
-  --title-bar-color: #eee;
-
-  /* clips view */
-  --clips-filters-bg: var(--page-bg);
-
-  /* --- */
-  --gray-color: #999;
-  --page-cover: #ffffff14;
-
-  --borders: #d0caca;
-
-  --dark-bg: #1e1e1e;
-
-  /* Updated to use semantic colors */
-  --accent: var(--accent-var);
-  --accent-washed: var(--accent-var);
-  --accent-white: color-mix(in srgb, var(--accent-var) 50%, white);
 }
 
-/* Light mode - redefine semantic colors */
 :root[data-theme="Light"] {
   --red: #d20f39;
   --blue: #1e66f5;
@@ -51,6 +24,8 @@
   --yellow: #df8e1d;
   --teal: #179299;
   --lavender: #7287fd;
+
+  --page-bg: #fff;
 }
 
 :root[data-theme="Dark"] {
@@ -66,9 +41,6 @@
   --clips-filters-bg: var(--page-bg);
   --clips-bg: var(--page-bg);
 
-  --settings-bg: var(--dark-bg);
-  --current-bg: var(--dark-bg);
-
   /* titlebar */
   --title-bar-bg: var(--dark-bg);
   --title-bar-color: #fff;
@@ -77,9 +49,8 @@
   --gray-color: #afafaf;
   --page-cover: #0000006f;
 
-  --borders: #6b6b6b; /* on page-bg */
+  --borders: #565454; /* on page-bg */
 
-  /* Updated to use semantic colors */
   --accent: var(--accent-var);
   --accent-washed: var(--accent-var);
   --accent-white: color-mix(in srgb, var(--accent-var) 40%, black);

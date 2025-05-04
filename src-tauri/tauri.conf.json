@@ -14,7 +14,8 @@
       {
         "decorations": false,
         "title": "Gaming Viewer",
-        "maximized": true
+        "maximized": false,
+        "label": "main"
       }
     ],
     "security": {
