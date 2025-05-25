@@ -13,6 +13,9 @@
   --page-bg: #303030;
   --settings-bg: var(--dark-bg);
   --current-bg: var(--dark-bg);
+
+  --title-bar-bg: var(--dark-bg);
+  --title-bar-color: #fff;
 }
 
 :root[data-theme="Light"] {
@@ -26,6 +29,15 @@
   --lavender: #7287fd;
 
   --page-bg: #fff;
+  --color: #000;
+  --borders: #d7d7d7; /* on page-bg */
+
+  --dark-bg: #303030;
+  --dark-bg-color-2: #dbdbdb;
+
+  --accent: var(--accent-var);
+  --accent-washed: var(--accent-var);
+  --accent-white: color-mix(in srgb, var(--accent-var) 10%, rgb(255, 255, 255));
 }
 
 :root[data-theme="Dark"] {
