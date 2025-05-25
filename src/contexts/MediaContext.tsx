@@ -14,6 +14,7 @@ import { useSettings } from "./SettingsContext";
 import { useClips } from "./ClipsContext";
 import { useFavorites } from "./FavoritesContext";
 import { Clip } from "../types/clip";
+import { getName } from "@tauri-apps/api/app";
 
 interface MediaContextType {
   coverCache: Map<string, string>;
@@ -57,10 +58,11 @@ export const MediaProvider = ({ children }: MediaProviderProps) => {
 
       for (const game of uniqueGames) {
         try {
+          const appName = await getName();
           const docsDir = await documentDir();
           const coverPath = await join(
             docsDir,
-            "Tauri",
+            appName,
             "game_covers",
             `${game}.jpg`
           );

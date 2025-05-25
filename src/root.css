@@ -84,6 +84,8 @@
   --page-bg: var(--ctp-latte-base);
   --color: var(--ctp-latte-text);
 
+  --dark-bg-color-2: var(--ctp-latte-mantle);
+
   --clips-filters-bg: var(--page-bg);
   --clips-bg: var(--page-bg);
 

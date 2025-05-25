@@ -119,15 +119,14 @@ fn extract_title_from_filename(filename: &str) -> String {
     }
 }
 
-fn load_favourites() -> Result<HashSet<String>, String> {
+fn load_favourites(app_name: &str) -> Result<HashSet<String>, String> {
     let document_path: PathBuf = match dirs::document_dir() {
-        Some(path) => path.join("Tauri").join("favourites.json"),
+        Some(doc_dir) => { doc_dir.join(app_name).join("favourites.json") }
         None => {
             return Err("Could not find home directory".into());
         }
     };
 
-    // Create directory if it doesn't exist
     if let Some(parent) = document_path.parent() {
         fs::create_dir_all(parent).map_err(|e| format!("Failed to create directory: {}", e))?;
     }
@@ -137,13 +136,26 @@ fn load_favourites() -> Result<HashSet<String>, String> {
             if content.is_empty() {
                 return Ok(HashSet::new());
             }
-
             let favourites: Favourites = serde_json
                 ::from_str(&content)
                 .map_err(|e| format!("Failed to parse favourites: {}", e))?;
             Ok(favourites.0.into_iter().collect())
         }
-        Err(e) => { Err(format!("Failed to read favourites file: {}", e)) }
+        Err(e) => {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                let default_favourites = Favourites(Vec::new());
+                let default_content = serde_json
+                    ::to_string_pretty(&default_favourites)
+                    .map_err(|e| format!("Failed to serialize default favourites: {}", e))?;
+
+                fs
+                    ::write(&document_path, default_content)
+                    .map_err(|e| format!("Failed to create favourites file: {}", e))?;
+
+                return Ok(HashSet::new());
+            }
+            Err(format!("Failed to read favourites file: {}", e))
+        }
     }
 }
 
@@ -208,8 +220,18 @@ fn process_directory(
 }
 
 #[tauri::command]
-pub fn get_all_clips(dir_path: String) -> Result<ClipsResult, String> {
-    let favourites_set = load_favourites()?;
+pub fn get_all_clips(
+    app_handle: tauri::AppHandle,
+    dir_path: String
+) -> Result<ClipsResult, String> {
+    let app_name = app_handle
+        .config()
+        .product_name.as_ref()
+        .ok_or("App product_name is not set")?
+        .as_str();
+
+    let favourites_set = load_favourites(&app_name)?;
+
     let mut all_clips = Vec::new();
     process_directory(Path::new(&dir_path), None, &favourites_set, &mut all_clips)?;
 

@@ -8,7 +8,11 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import { loadSettings, saveSettings } from "../helpers/settingsFile";
+import {
+  defaultSettings,
+  loadSettings,
+  saveSettings,
+} from "../helpers/settingsFile";
 import { Settings } from "../types/settings";
 
 interface SettingsContextType {
@@ -27,19 +31,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(
 );
 
 export const SettingsProvider = ({ children }: SettingsProviderProps) => {
-  const [settings, setSettings] = useState<Settings>({
-    theme: "System",
-    gamesDir: null,
-    gamesConfig: {},
-    scrollbarOff: false,
-    clipDeletion: false,
-    clipsDeleteThreshold: 999999,
-    obs: {
-      port: "0",
-      password: "",
-    },
-    accentVariable: "--red",
-  });
+  const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [loadedSettings, setLoadedSettings] = useState<boolean>(false);
   const settingsRef = useRef(settings);
 

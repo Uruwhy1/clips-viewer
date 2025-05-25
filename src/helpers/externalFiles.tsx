@@ -1,14 +1,14 @@
-import { documentDir } from "@tauri-apps/api/path";
-import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { join } from "@tauri-apps/api/path";
-import { rename, remove } from "@tauri-apps/plugin-fs";
+import { documentDir, join } from "@tauri-apps/api/path";
+import { getName } from "@tauri-apps/api/app";
+import { writeTextFile, rename, remove } from "@tauri-apps/plugin-fs";
 
 let tauriFolderPath: string;
 
 async function initializePaths() {
   try {
     const docsDir = await documentDir();
-    tauriFolderPath = await join(docsDir, "Tauri");
+    const appName = await getName(); 
+    tauriFolderPath = await join(docsDir, appName);
   } catch (error) {
     console.error("Error initializing paths:", error);
   }
