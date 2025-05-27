@@ -201,3 +201,117 @@
 .pagination span {
   font-weight: 600;
 }
+
+/* Add these styles to your existing Clips.module.css file */
+
+.setupMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.setupMessage svg {
+  color: var(--text-secondary, #666);
+  margin-bottom: 0.5rem;
+}
+
+.setupMessage h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+
+.setupMessage p {
+  margin: 0;
+  color: var(--text-secondary, #666);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.setupButtons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primaryButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--accent-var, #007bff);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryButton:hover {
+  background: var(--accent-hover, #0056b3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+}
+
+.primaryButton:active {
+  transform: translateY(0);
+}
+
+.secondaryButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  color: var(--text-primary, #333);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryButton:hover {
+  background: var(--hover-bg, #f5f5f5);
+  border-color: var(--accent-var, #007bff);
+  color: var(--accent-var, #007bff);
+}
+
+.secondaryButton:active {
+  transform: translateY(1px);
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .setupMessage h3 {
+    color: var(--text-primary, #fff);
+  }
+
+  .setupMessage p {
+    color: var(--text-secondary, #ccc);
+  }
+
+  .setupMessage svg {
+    color: var(--text-secondary, #888);
+  }
+
+  .secondaryButton {
+    color: var(--text-primary, #fff);
+    border-color: var(--border-color, #444);
+  }
+
+  .secondaryButton:hover {
+    background: var(--hover-bg, #333);
+  }
+}

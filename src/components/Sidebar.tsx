@@ -5,6 +5,7 @@ import {
   Settings,
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
+import { useSettings } from "../contexts/SettingsContext";
 
 type SidebarProps = {
   setView: (view: string) => void;
@@ -19,13 +20,24 @@ const Sidebar: React.FC<SidebarProps> = ({
   openSettings,
   settingsState,
 }) => {
+  const { settings } = useSettings();
+
+  const isGamesDirSet = settings.gamesDir && settings.gamesDir.trim() !== "";
+
+  const handleVideoClick = () => {
+    if (isGamesDirSet) {
+      setView("video");
+    }
+  };
+
   return (
     <aside className={styles.sidebar}>
       <div
         className={`${styles.button} ${styles.video} ${
           view === "video" ? styles.active : ""
-        }`}
-        onClick={() => setView("video")}
+        } ${!isGamesDirSet ? styles.disabled : ""}`}
+        onClick={handleVideoClick}
+        title={!isGamesDirSet ? "Please set games directory first" : ""}
       >
         {view !== "video" ? <LucideCirclePlay /> : <LucideCirclePause />}
       </div>

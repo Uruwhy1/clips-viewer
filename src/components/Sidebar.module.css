@@ -35,6 +35,18 @@
   &.active {
     background-color: #000;
   }
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &.disabled:hover {
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 .settings {

@@ -8,6 +8,7 @@ import { useClips } from "../contexts/ClipsContext";
 import { usePagination } from "../hooks/usePagination";
 import GameFilter from "./GameFilter";
 import { Clip } from "../types/clip";
+import { useSettings } from "../contexts/SettingsContext";
 
 const CLIPS_PER_PAGE = 36;
 
@@ -18,6 +19,7 @@ type Clips = {
 const Clips: React.FC<Clips> = React.memo(({ setView }) => {
   const { filteredClips, games, filter, updateFilter } = useClips();
   const [showGames, setShowGames] = useState<boolean>(false);
+  const { settings } = useSettings();
 
   const {
     currentPage,
@@ -114,7 +116,11 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
         </button>
       </div>
 
-      {games.length > 0 ? (
+      {!settings.gamesDir ? (
+        <div className={styles.noClips}>
+          No games directory set. Please configure your settings.
+        </div>
+      ) : games.length > 0 ? (
         <div className={styles.clipGrid}>
           {currentClips.map((clip: Clip) => (
             <ClipItem key={clip.filePath} clip={clip} setView={setView} />
