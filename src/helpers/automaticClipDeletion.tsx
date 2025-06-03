@@ -6,7 +6,7 @@ export const checkAndDeleteOldClips = async (
   settings: Settings,
   allClips: Clip[],
   setAllClips: React.Dispatch<React.SetStateAction<Clip[]>>
-): Promise<[boolean, string]> => {
+): Promise<[boolean, string] | undefined> => {
   if (
     !settings.clipDeletion ||
     !settings.clipsDeleteThreshold ||

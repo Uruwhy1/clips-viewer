@@ -40,7 +40,7 @@ interface ClipsProviderProps {
 
 export const ClipsProvider = ({ children }: ClipsProviderProps) => {
   const { settings } = useSettings();
-  const { favorites, toggleFavourite, updateFavoritePath } = useFavorites();
+  const { isFavorite, toggleFavourite, updateFavoritePath } = useFavorites();
 
   const [allClips, setAllClips] = useState<Clip[]>([]);
   const [currentClip, setCurrentClip] = useState<Clip | null>(null);
@@ -59,21 +59,15 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
       if (settings.gamesDir) {
         const [_, initialClips] = await getAllClips(settings.gamesDir);
 
-        // Mark favorites in clips
-        const clipsWithFavorites = initialClips.map((clip: Clip) => ({
-          ...clip,
-          isFavourite: favorites.has(clip.filePath),
-        }));
-
-        setAllClips(clipsWithFavorites);
-        if (clipsWithFavorites.length > 0 && !currentClip) {
-          setCurrentClip(clipsWithFavorites[0]);
+        setAllClips(initialClips);
+        if (initialClips.length > 0 && !currentClip) {
+          setCurrentClip(initialClips[0]);
         }
       }
     };
 
     fetchClips();
-  }, [settings.gamesDir, favorites]);
+  }, [settings.gamesDir]);
 
   // Filtered clips calculation
   const filteredClips = useMemo(() => {
@@ -101,7 +95,7 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
 
   const editClip = async (clip: Clip, newTitle: string): Promise<boolean> => {
     const oldPath = clip.filePath;
-    const isFavourite = favorites.has(oldPath);
+    const isFavourite = isFavorite(oldPath);
 
     if (!newTitle || newTitle.trim() === "") {
       alert("Edit canceled or invalid name.");

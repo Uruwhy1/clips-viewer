@@ -5,6 +5,7 @@ import React, {
   useEffect,
   RefObject,
   ForwardedRef,
+  useCallback,
 } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -281,10 +282,13 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
     const startMarkerPos = getStartMarkerPosition();
     const endMarkerPos = getEndMarkerPosition();
 
-    const handleMarkerUpdate = (start: number | null, end: number | null) => {
-      setStartMarker(start);
-      setEndMarker(end);
-    };
+    const handleMarkerUpdate = useCallback(
+      (start: number | null, end: number | null) => {
+        setStartMarker(start);
+        setEndMarker(end);
+      },
+      []
+    );
 
     return (
       <div className={styles.videoContainer} ref={divRef}>

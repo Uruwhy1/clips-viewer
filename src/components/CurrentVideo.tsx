@@ -33,7 +33,7 @@ const MemoizedTrash2 = React.memo((props: LucideProps) => (
 
 const CurrentVideo: React.FC = React.memo(() => {
   const { currentClip, deleteClip, editClip } = useClips();
-  const { toggleFavourite, favorites } = useFavorites();
+  const { toggleFavourite, isFavorite } = useFavorites();
   const { coverCache } = useMedia();
   const { showPopup } = usePopup();
 
@@ -42,20 +42,17 @@ const CurrentVideo: React.FC = React.memo(() => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [renaming, setRenaming] = useState<boolean>(false);
 
- if (currentClip == null) {
+  if (currentClip == null) {
     return <div>There's no clip. This should not be possible.</div>;
   }
 
   useEffect(() => {
     if (coverCache.has(currentClip.game)) {
-      setCover(coverCache.get(currentClip.game));
+      setCover(coverCache.get(currentClip.game) || ""); // add "no cover" image
     }
     setRenaming(false);
   }, [currentClip, coverCache]);
 
- 
-
-  const isFavourite = (path: string) => favorites.has(path);
   const handleFavouriteClick = (path: string) => toggleFavourite(path);
 
   const handlePathClick = (path: string) =>
@@ -129,7 +126,7 @@ const CurrentVideo: React.FC = React.memo(() => {
                   handleFavouriteClick(currentClip.filePath);
                 }}
               >
-                <StarButton active={isFavourite(currentClip.filePath)} />
+                <StarButton active={isFavorite(currentClip.filePath)} />
               </div>
               <div
                 onClick={(e) => {

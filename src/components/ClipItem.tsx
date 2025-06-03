@@ -20,7 +20,7 @@ const MemoizedCalendar = React.memo((props: LucideProps) => (
 ));
 const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
   const { setCurrentClip } = useClips();
-  const { toggleFavourite } = useFavorites();
+  const { toggleFavourite, isFavorite } = useFavorites();
 
   const handleClick = () => {
     setCurrentClip(clip);
@@ -41,7 +41,7 @@ const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
             handleFavouriteClick(clip.filePath);
           }}
         >
-          <FavouriteButton size={18} active={clip.isFavourite} />
+          <FavouriteButton size={18} active={isFavorite(clip.filePath)} />
         </div>
       </div>
       <div className={styles.clipMeta}>
