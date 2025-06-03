@@ -1,3 +1,4 @@
+import { ThemeModeType } from "../types/settings";
 import styles from "./Settings.module.css";
 import { ThemeMode } from "./ThemeMode";
 
@@ -6,7 +7,6 @@ export const AppearanceModeControl: React.FC<{
   switchTheme: (newTheme: string) => void;
   selectedFamily: string;
 }> = ({ currentTheme, switchTheme, selectedFamily }) => {
-  // Extract the mode from current theme
   const getCurrentMode = (): string => {
     if (currentTheme.includes("System")) {
       return "System";
@@ -20,13 +20,12 @@ export const AppearanceModeControl: React.FC<{
 
   const selectedMode = getCurrentMode();
 
-  // Apply new mode but keep the same theme family
-  const handleModeChange = (mode: string) => {
+  const handleModeChange = (mode: ThemeModeType) => {
     if (selectedFamily === "Default") {
       if (mode === "System") {
         switchTheme("System (Default)");
       } else {
-        switchTheme(mode); // "Light" or "Dark"
+        switchTheme(mode);
       }
     } else if (selectedFamily === "Catppuccin") {
       if (mode === "System") {

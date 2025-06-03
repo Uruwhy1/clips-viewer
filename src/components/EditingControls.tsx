@@ -1,10 +1,9 @@
-import React, { ForwardedRef, RefObject, useEffect, useState } from "react";
+import React, { RefObject, useEffect, useState } from "react";
 import styles from "./EditingControls.module.css";
 import createClipHandler from "../helpers/createClip";
 import { usePopup } from "../contexts/PopupContext";
 import { useClips } from "../contexts/ClipsContext";
 import { Plus, FlagTriangleRight, FlagTriangleLeft } from "lucide-react";
-import { listen } from "@tauri-apps/api/event";
 
 const MemoizedPlus = React.memo(() => <Plus size={20} />);
 // prettier-ignore
@@ -30,25 +29,26 @@ const EditingControls = React.memo<EditingControlsProps>(
     const [endTime, setEndTime] = useState<number | null>(null);
 
     const markStart = () => {
-      if (videoRef.current.currentTime !== 0) {
-        setStartTime(videoRef.current.currentTime);
-      } else {
-        setStartTime(1);
-      }
+      const newStartTime =
+        videoRef.current.currentTime !== 0 ? videoRef.current.currentTime : 1;
+
+      setStartTime(newStartTime);
+      onMarkersUpdate(newStartTime, endTime);
     };
 
-    const markEnd = () => setEndTime(videoRef.current.currentTime);
+    const markEnd = () => {
+      const newEndTime = videoRef.current.currentTime;
+
+      setEndTime(newEndTime);
+      onMarkersUpdate(startTime, newEndTime);
+    };
 
     useEffect(() => {
       setStartTime(null);
       setEndTime(null);
-    }, [currentClip]);
 
-    useEffect(() => {
-      if (onMarkersUpdate) {
-        onMarkersUpdate(startTime, endTime);
-      }
-    }, [startTime, endTime, onMarkersUpdate]);
+      onMarkersUpdate(null, null);
+    }, [currentClip, onMarkersUpdate]);
 
     return (
       <div className={styles.clipControls}>
@@ -70,7 +70,7 @@ const EditingControls = React.memo<EditingControlsProps>(
               removePersistentNotification
             );
 
-            if (create.response) {
+            if (!create.error) {
               setStartTime(null);
               setEndTime(null);
             } else {

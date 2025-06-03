@@ -58,16 +58,13 @@ export const FavoritesProvider = ({ children }: FavouritesProviderProps) => {
   const updateFavoritePath = async (oldPath: string, newPath: string) => {
     const newFavorites = new Set(favorites);
 
-    if (newFavorites.has(oldPath)) {
-      newFavorites.delete(oldPath);
-      newFavorites.add(newPath);
+    newFavorites.delete(oldPath);
+    newFavorites.add(newPath);
 
-      await saveFavourites(newFavorites);
-      setFavorites(newFavorites);
+    await saveFavourites(newFavorites);
+    setFavorites(newFavorites);
 
-      return true;
-    }
-    return false;
+    return true;
   };
 
   const contextValue = {

@@ -28,3 +28,6 @@ export type SemanticColor = {
   variable: string;
   previewColor: string;
 };
+
+export type ThemeModeType = "Dark" | "Light" | "System";
+export type ThemeFamily = "Catppuccin" | "Default";

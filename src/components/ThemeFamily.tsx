@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import styles from "./Settings.module.css";
+import { ThemeFamily, ThemeModeType } from "../types/settings";
 
 export const ThemeFamilyControl: React.FC<{
   currentTheme: string;
   switchTheme: (newTheme: string) => void;
 }> = ({ currentTheme, switchTheme }) => {
-  // Determine the current family based on theme name
   const selectedFamily =
     currentTheme.includes("Catppuccin") ||
     currentTheme === "Mocha" ||
@@ -13,8 +13,7 @@ export const ThemeFamilyControl: React.FC<{
       ? "Catppuccin"
       : "Default";
 
-  // Extract the current mode to preserve it when changing family
-  const getCurrentMode = (): string => {
+  const getCurrentMode = (): "System" | "Light" | "Dark" => {
     if (currentTheme.includes("System")) {
       return "System";
     } else if (currentTheme === "Light" || currentTheme === "Latte") {
@@ -25,15 +24,14 @@ export const ThemeFamilyControl: React.FC<{
     return "System";
   };
 
-  const currentMode = getCurrentMode();
+  const currentMode: ThemeModeType = getCurrentMode();
 
-  // Apply new theme family but keep the same mode
-  const handleFamilyChange = (family: string) => {
+  const handleFamilyChange = (family: ThemeFamily) => {
     if (family === "Default") {
       if (currentMode === "System") {
         switchTheme("System (Default)");
       } else {
-        switchTheme(currentMode); // "Light" or "Dark"
+        switchTheme(currentMode);
       }
     } else if (family === "Catppuccin") {
       if (currentMode === "System") {

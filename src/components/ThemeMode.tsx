@@ -1,9 +1,10 @@
+import { ThemeModeType } from "../types/settings";
 import styles from "./Settings.module.css";
 
 interface ThemeModeProps {
-  title: string;
+  title: ThemeModeType;
   current: string;
-  onClick: (newMode: string) => void;
+  onClick: (newMode: ThemeModeType) => void;
 }
 
 export const ThemeMode: React.FC<ThemeModeProps> = ({

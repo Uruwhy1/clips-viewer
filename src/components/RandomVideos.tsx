@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { Play } from "lucide-react";
 import styles from "./RandomVideos.module.css";
 import { useClips } from "../contexts/ClipsContext";
@@ -6,7 +6,6 @@ import { useMedia } from "../contexts/MediaContext";
 import { Clip } from "../types/clip";
 
 const RandomVideos = () => {
-  // Use the thumbnail data from GlobalContext
   const { setCurrentClip, currentClip } = useClips();
   const { thumbnails, randomClips } = useMedia();
 
