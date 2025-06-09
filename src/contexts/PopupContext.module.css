@@ -1,11 +1,11 @@
 :root {
-  --success: #1aed67;
+  --success: var(--green);
   --success-text: #ffffff;
 
-  --error: #ff6b52;
+  --error: var(--red);
   --error-text: #ffffff;
 
-  --info: #3498db;
+  --info: var(--blue);
   --info-text: #ffffff;
 
   --background: #1e1e1e;
