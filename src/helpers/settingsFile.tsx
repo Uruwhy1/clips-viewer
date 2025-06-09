@@ -72,4 +72,5 @@ export const defaultSettings: Settings = {
     password: "",
   },
   accentVariable: "--red",
+  recordingSoundEnabled: true,
 };

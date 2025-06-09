@@ -21,6 +21,7 @@ export type Settings = {
   obs: OBSSettings;
   theme: string;
   accentVariable: string;
+  recordingSoundEnabled: boolean;
 };
 
 export type SemanticColor = {

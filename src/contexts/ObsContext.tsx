@@ -19,6 +19,7 @@ import { join } from "@tauri-apps/api/path";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { GamesConfig, OBSSettings } from "../types/settings";
+import yodaSound from "../assets/yoda.mp3";
 
 interface ConnectionState {
   status: "disconnected" | "connected" | "error";
@@ -60,6 +61,11 @@ export const OBSProvider = ({ children }: OBSProviderProps) => {
       clearInterval(gameDetectionInterval.current);
       gameDetectionInterval.current = null;
     }
+  };
+
+  const playSound = () => {
+    const audio = new Audio(yodaSound);
+    audio.play().catch((err) => console.error("Failed to play sound:", err));
   };
 
   useEffect(() => {
@@ -156,6 +162,8 @@ export const OBSProvider = ({ children }: OBSProviderProps) => {
         await obs.call("StartRecord");
       }
       await obs.call("StartReplayBuffer");
+
+      if (settings.recordingSoundEnabled) playSound();
 
       return { success: true };
     } catch (error) {

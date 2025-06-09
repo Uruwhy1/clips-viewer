@@ -105,6 +105,19 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
       );
     };
 
+    const handleToggleRecordingSound = () => {
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        recordingSoundEnabled: !prevSettings.recordingSoundEnabled,
+      }));
+      showPopup(
+        `Recording sound notifications turned ${
+          !settings.recordingSoundEnabled ? "on" : "off"
+        }.`,
+        true
+      );
+    };
+
     const handleBackup = async () => {
       try {
         const backupId = "backup-process";
@@ -247,7 +260,17 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
             removingIndex={removingIndex}
             setRemovingIndex={setRemovingIndex}
           />
+          <div className={styles.settingIndividual}>
+            <div className={styles.subSectionTitle}>
+              <strong>Recording Sound Notifications</strong>
+              <SettingButton
+                text={settings.recordingSoundEnabled ? "On" : "Off"}
+                func={handleToggleRecordingSound}
+              />
+            </div>
+          </div>
         </div>
+
         <div className={`${styles.settingCategory}`}>
           <div className={styles.title}>
             <LucideSettings2 />
