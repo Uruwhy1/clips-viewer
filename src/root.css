@@ -11,11 +11,15 @@
   --accent-var: var(--red);
 
   --page-bg: #303030;
-  --settings-bg: var(--dark-bg);
-  --current-bg: var(--dark-bg);
 
   --title-bar-bg: var(--dark-bg);
   --title-bar-color: #fff;
+
+  /* common styles */
+  --clips-filters-bg: var(--page-bg);
+  --clips-bg: var(--page-bg);
+  --settings-bg: var(--dark-bg);
+  --current-bg: var(--dark-bg);
 }
 
 :root[data-theme="Light"] {
@@ -31,6 +35,10 @@
   --page-bg: #fff;
   --color: #000;
   --borders: #d7d7d7; /* on page-bg */
+
+  /* --- */
+  --gray-color: #949494;
+  --page-cover: #0000006f;
 
   --dark-bg: #303030;
   --dark-bg-color-2: #dbdbdb;
@@ -49,9 +57,6 @@
   --dark-bg-within-border: #1b1b1b;
   --dark-bg-color: #fff;
   --dark-bg-color-2: #ccc;
-
-  --clips-filters-bg: var(--page-bg);
-  --clips-bg: var(--page-bg);
 
   /* titlebar */
   --title-bar-bg: var(--dark-bg);
@@ -85,9 +90,6 @@
   --color: var(--ctp-latte-text);
 
   --dark-bg-color-2: var(--ctp-latte-mantle);
-
-  --clips-filters-bg: var(--page-bg);
-  --clips-bg: var(--page-bg);
 
   /* --- */
   --gray-color: var(--ctp-latte-subtext0);
