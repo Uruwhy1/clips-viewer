@@ -22,6 +22,8 @@ interface SettingsContextType {
   loadedSettings: boolean;
 }
 
+export type RecordingMethod = "obs" | "wgc";
+
 interface SettingsProviderProps {
   children: ReactNode;
 }

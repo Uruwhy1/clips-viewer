@@ -7,7 +7,6 @@ import {
   ReactNode,
 } from "react";
 import OBSWebSocket, {
-  OBSEventTypes,
   OBSRequestTypes,
   OBSResponseTypes,
 } from "obs-websocket-js";
@@ -27,7 +26,7 @@ interface ConnectionState {
   error: string | null;
 }
 
-interface OBSContextValue {
+interface RecordingContextValue {
   connection: ConnectionState;
   connect: (port: string, password: string) => Promise<boolean>;
   obsSetting: OBSSettings;
@@ -35,13 +34,15 @@ interface OBSContextValue {
   startGameDetection: (settings: { gamesConfig: GamesConfig }) => void;
 }
 
-const OBSContext = createContext<OBSContextValue | undefined>(undefined);
+const RecordingContext = createContext<RecordingContextValue | undefined>(
+  undefined
+);
 
-interface OBSProviderProps {
+interface RecordingProviderProps {
   children: ReactNode;
 }
 
-export const OBSProvider = ({ children }: OBSProviderProps) => {
+export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   const { settings, loadedSettings } = useSettings();
   const [obs] = useState(() => new OBSWebSocket());
   const [connection, setConnection] = useState<ConnectionState>({
@@ -125,9 +126,11 @@ export const OBSProvider = ({ children }: OBSProviderProps) => {
   }, [obsSetting]);
 
   useEffect(() => {
-    if (connection.status === "connected" && loadedSettings) {
+    if (loadedSettings && settings.recordingMethod === "obs") {
       clearGameDetectionInterval();
-      startGameDetection(settings);
+      if (connection.status === "connected") {
+        startGameDetection(settings);
+      }
     }
   }, [connection, settings, loadedSettings]);
 
@@ -310,7 +313,7 @@ export const OBSProvider = ({ children }: OBSProviderProps) => {
     await obs.call("SetCurrentProgramScene", request);
   }
 
-  const value: OBSContextValue = {
+  const value: RecordingContextValue = {
     connection,
     connect,
     obsSetting,
@@ -318,15 +321,19 @@ export const OBSProvider = ({ children }: OBSProviderProps) => {
     startGameDetection,
   };
 
-  return <OBSContext.Provider value={value}>{children}</OBSContext.Provider>;
+  return (
+    <RecordingContext.Provider value={value}>
+      {children}
+    </RecordingContext.Provider>
+  );
 };
 
-export const useOBS = (): OBSContextValue => {
-  const context = useContext(OBSContext);
+export const useRecording = (): RecordingContextValue => {
+  const context = useContext(RecordingContext);
   if (!context) {
-    throw new Error("useOBS must be used within an OBSProvider");
+    throw new Error("useRecording must be used within a RecordingProvider");
   }
   return context;
 };
 
-export default OBSContext;
+export default RecordingContext;

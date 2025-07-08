@@ -248,18 +248,37 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
             </div>
           </div>
         </div>
+
         <div className={`${styles.settingCategory}`}>
           <div className={styles.title}>
             <Aperture />
-            <h3>OBS</h3>
+            <h3>Recording</h3>
+            <SettingButton
+              text={settings.recordingMethod === "obs" ? "OBS" : "WGC"}
+              func={() => {
+                setSettings((prev) => ({
+                  ...prev,
+                  recordingMethod:
+                    prev.recordingMethod === "obs" ? "wgc" : "obs",
+                }));
+                showPopup(
+                  `Recording method set to ${
+                    settings.recordingMethod === "obs" ? "WGC" : "OBS"
+                  }.`,
+                  true
+                );
+              }}
+            />
           </div>
-          <ObsConnectionForm />
+
+          {settings.recordingMethod === "obs" && <ObsConnectionForm />}
           <GameConfigForm
             settings={settings}
             setSettings={setSettings}
             removingIndex={removingIndex}
             setRemovingIndex={setRemovingIndex}
           />
+
           <div className={styles.settingIndividual}>
             <div className={styles.subSectionTitle}>
               <strong>Recording Sound Notifications</strong>

@@ -4,7 +4,7 @@ import { FavoritesProvider } from "./FavoritesContext";
 import { ClipsProvider } from "./ClipsContext";
 import { MediaProvider } from "./MediaContext";
 import { PopupProvider } from "./PopupContext";
-import { OBSProvider } from "./ObsContext";
+import { RecordingProvider } from "./RecordingContext";
 
 type AppProviderProps = {
   children: ReactNode;
@@ -16,9 +16,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       <FavoritesProvider>
         <ClipsProvider>
           <PopupProvider>
-            <OBSProvider>
+            <RecordingProvider>
               <MediaProvider>{children}</MediaProvider>
-            </OBSProvider>
+            </RecordingProvider>
           </PopupProvider>
         </ClipsProvider>
       </FavoritesProvider>

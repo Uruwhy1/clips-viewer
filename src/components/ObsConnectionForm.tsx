@@ -1,10 +1,10 @@
-import { useOBS } from "../contexts/ObsContext";
+import { useRecording } from "../contexts/RecordingContext";
 import React, { useState, useCallback, useEffect } from "react";
 import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
 
 const ObsConnectionForm = React.memo(() => {
-  const { obsSetting, setObsSetting, connect, connection } = useOBS();
+  const { obsSetting, setObsSetting, connect, connection } = useRecording();
   const [obsPort, setObsPort] = useState("");
   const [obsPassword, setObsPassword] = useState("");
   const [isFormVisible, setIsFormVisible] = useState(false);
