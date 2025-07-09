@@ -34,4 +34,4 @@ export type SemanticColor = {
 };
 
 export type ThemeModeType = "Dark" | "Light" | "System";
-export type ThemeFamily = "Catppuccin" | "Default";
+export type ThemeFamily = "Catppuccin";

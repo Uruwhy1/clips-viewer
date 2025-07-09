@@ -5,14 +5,13 @@ import { ThemeMode } from "./ThemeMode";
 export const AppearanceModeControl: React.FC<{
   currentTheme: string;
   switchTheme: (newTheme: string) => void;
-  selectedFamily: string;
-}> = ({ currentTheme, switchTheme, selectedFamily }) => {
+}> = ({ currentTheme, switchTheme }) => {
   const getCurrentMode = (): string => {
     if (currentTheme.includes("System")) {
       return "System";
-    } else if (currentTheme === "Light" || currentTheme === "Latte") {
+    } else if (currentTheme === "Latte") {
       return "Light";
-    } else if (currentTheme === "Dark" || currentTheme === "Mocha") {
+    } else if (currentTheme === "Mocha") {
       return "Dark";
     }
     return "System";
@@ -21,20 +20,12 @@ export const AppearanceModeControl: React.FC<{
   const selectedMode = getCurrentMode();
 
   const handleModeChange = (mode: ThemeModeType) => {
-    if (selectedFamily === "Default") {
-      if (mode === "System") {
-        switchTheme("System (Default)");
-      } else {
-        switchTheme(mode);
-      }
-    } else if (selectedFamily === "Catppuccin") {
-      if (mode === "System") {
-        switchTheme("System (Catppuccin)");
-      } else if (mode === "Light") {
-        switchTheme("Latte");
-      } else if (mode === "Dark") {
-        switchTheme("Mocha");
-      }
+    if (mode === "System") {
+      switchTheme("System (Catppuccin)");
+    } else if (mode === "Light") {
+      switchTheme("Latte");
+    } else if (mode === "Dark") {
+      switchTheme("Mocha");
     }
   };
 
