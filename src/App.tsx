@@ -34,7 +34,7 @@ function App() {
         let result = await checkAndDeleteOldClips(
           settings,
           allClips,
-          setAllClips
+          setAllClips,
         );
         firstLoadRef.current = false;
 

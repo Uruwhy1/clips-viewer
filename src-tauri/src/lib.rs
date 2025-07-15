@@ -214,7 +214,8 @@ pub fn run() {
             let quit = MenuItemBuilder::new("Quit").id("quit").build(app).unwrap();
             let hide = MenuItemBuilder::new("Hide").id("hide").build(app).unwrap();
             let show = MenuItemBuilder::new("Show").id("show").build(app).unwrap();
-            let menu = MenuBuilder::new(app).items(&[&quit, &hide, &show]).build().unwrap();
+            let reload = MenuItemBuilder::new("Reload").id("reload").build(app).unwrap();
+            let menu = MenuBuilder::new(app).items(&[&quit, &hide, &show, &reload]).build().unwrap();
 
             let _window = app.get_webview_window("main").unwrap();
 
@@ -235,7 +236,12 @@ pub fn run() {
                             dbg!("menu item show clicked");
                             let window = app.get_webview_window("main").unwrap();
                             window.show().unwrap();
-                        }
+                        },
+                        "reload" => {
+                            dbg!("menu item reload clicked");
+                            let window = app.get_webview_window("main").unwrap();
+                            window.eval("window.location.reload()").unwrap();
+                        },
                         _ => {}
                     }
                 })

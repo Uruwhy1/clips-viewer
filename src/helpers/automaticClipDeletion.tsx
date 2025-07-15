@@ -5,7 +5,7 @@ import { Settings } from "../types/settings";
 export const checkAndDeleteOldClips = async (
   settings: Settings,
   allClips: Clip[],
-  setAllClips: React.Dispatch<React.SetStateAction<Clip[]>>
+  setAllClips: React.Dispatch<React.SetStateAction<Clip[]>>,
 ): Promise<[boolean, string] | undefined> => {
   if (
     !settings.clipDeletion ||
@@ -16,6 +16,13 @@ export const checkAndDeleteOldClips = async (
   }
 
   try {
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error("delete_older_clips timed out")),
+        50000,
+      ),
+    );
+
     const result = (await invoke("delete_older_clips", {
       clips: allClips,
       thresholdGb: settings.clipsDeleteThreshold,
@@ -30,23 +37,22 @@ export const checkAndDeleteOldClips = async (
     if (result.deletedCount > 0) {
       setAllClips((prevClips: Clip[]) =>
         prevClips.filter(
-          (clip: Clip) => !result.deletedPaths.includes(clip.filePath)
-        )
+          (clip: Clip) => !result.deletedPaths.includes(clip.filePath),
+        ),
       );
 
       return [
         true,
-        `Deleted ${
-          result.deletedCount
+        `Deleted ${result.deletedCount
         } clips. Freed ${result.freedSpaceGb.toFixed(
-          2
+          2,
         )} GB. New total: ${result.totalSizeGb.toFixed(2)} GB`,
       ];
     } else {
       return [
         true,
         `No clips deleted. Total size: ${result.totalSizeGb.toFixed(
-          2
+          2,
         )} GB is under threshold of ${settings.clipsDeleteThreshold} GB`,
       ];
     }
