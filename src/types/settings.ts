@@ -7,8 +7,6 @@ export type GamesConfig = {
   [gameName: string]: GameConfig;
 };
 
-export type RecordingMethod = "obs" | "wgc";
-
 export type OBSSettings = {
   port: string | null;
   password: string | null;
@@ -24,7 +22,6 @@ export type Settings = {
   theme: string;
   accentVariable: string;
   recordingSoundEnabled: boolean;
-  recordingMethod: RecordingMethod;
 };
 
 export type SemanticColor = {

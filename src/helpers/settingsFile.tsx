@@ -73,5 +73,4 @@ export const defaultSettings: Settings = {
   },
   accentVariable: "--red",
   recordingSoundEnabled: true,
-  recordingMethod: "obs",
 };

@@ -6,19 +6,21 @@ import {
   useRef,
   ReactNode,
 } from "react";
-import OBSWebSocket, {
-  OBSRequestTypes,
-  OBSResponseTypes,
-} from "obs-websocket-js";
 
 import { loadSettings } from "../helpers/settingsFile";
 import { useSettings } from "./SettingsContext";
 import { invoke } from "@tauri-apps/api/core";
-import { join } from "@tauri-apps/api/path";
-import { mkdir } from "@tauri-apps/plugin-fs";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+
 import { GamesConfig, OBSSettings } from "../types/settings";
 import yodaSound from "../assets/yoda.mp3";
+
+import {
+  obs,
+  connectOBS,
+  setOutputPathForGame,
+  startOBSRecording,
+  stopOBSRecording,
+} from "../helpers/OBS";
 
 interface ConnectionState {
   status: "disconnected" | "connected" | "error";
@@ -35,7 +37,7 @@ interface RecordingContextValue {
 }
 
 const RecordingContext = createContext<RecordingContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 interface RecordingProviderProps {
@@ -44,12 +46,13 @@ interface RecordingProviderProps {
 
 export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   const { settings, loadedSettings } = useSettings();
-  const [obs] = useState(() => new OBSWebSocket());
+
   const [connection, setConnection] = useState<ConnectionState>({
     status: "disconnected",
     version: null,
     error: null,
   });
+
   const [obsSetting, setObsSetting] = useState<OBSSettings>({
     port: null,
     password: null,
@@ -74,7 +77,6 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
       console.log("OBS WebSocket disconnected:", data);
 
       clearGameDetectionInterval();
-
       setConnection({
         status: "disconnected",
         version: null,
@@ -86,7 +88,6 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
       console.error("OBS WebSocket error:", error);
 
       clearGameDetectionInterval();
-
       setConnection({
         status: "error",
         version: null,
@@ -101,7 +102,7 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
       obs.off("ConnectionClosed", handleConnectionClosed);
       obs.off("ConnectionError", handleConnectionError);
     };
-  }, [obs]);
+  }, []);
 
   useEffect(() => {
     const start = async () => {
@@ -118,7 +119,7 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
           await connect(obsSetting.port, obsSetting.password);
         }
       } catch (error) {
-        console.error("Failed to initialize OBS context:", error);
+        console.error("Failed to initialize recording context:", error);
       }
     };
 
@@ -126,74 +127,55 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   }, [obsSetting]);
 
   useEffect(() => {
-    if (loadedSettings && settings.recordingMethod === "obs") {
+    if (loadedSettings && connection.status === "connected") {
       clearGameDetectionInterval();
-      if (connection.status === "connected") {
-        startGameDetection(settings);
-      }
+      startGameDetection(settings);
     }
   }, [connection, settings, loadedSettings]);
 
   const connect = async (port: string, password: string): Promise<boolean> => {
-    try {
-      await obs.connect(`ws://localhost:${port}`, password);
-      const version = await obs.call("GetVersion");
-
+    const result = await connectOBS(port, password);
+    if (result.success) {
       setConnection({
         status: "connected",
-        version: version.obsVersion,
+        version: result.version ?? null,
         error: null,
       });
 
       return true;
-    } catch (error) {
+    } else {
       setConnection({
         status: "error",
         version: null,
-        error: (error as Error).message,
+        error: result.error ?? "Unknown error",
       });
-
       return false;
     }
   };
 
-  const startRecording = async (currentGame: string, record: boolean) => {
-    try {
-      await setSceneForGame(currentGame);
-
-      if (record) {
-        await obs.call("StartRecord");
-      }
-      await obs.call("StartReplayBuffer");
-
-      if (settings.recordingSoundEnabled) playSound();
-
-      return { success: true };
-    } catch (error) {
-      console.error("OBS Recording Start Error:", error);
-      return { success: false, message: (error as Error).message };
+  const startRecording = async (
+    currentGame: string,
+    record: boolean,
+  ): Promise<{ success: boolean; message?: string }> => {
+    if (settings.gamesDir) {
+      await setOutputPathForGame(currentGame, settings.gamesDir);
     }
+    return await startOBSRecording(
+      currentGame,
+      record,
+      settings.recordingSoundEnabled,
+      playSound,
+    );
   };
 
-  const stopRecording = async (record: boolean) => {
-    try {
-      if (record) {
-        await obs.call("StopRecord");
-      }
-      await obs.call("StopReplayBuffer");
-
-      location.reload();
-      await getCurrentWindow().show();
-
-      return { success: true };
-    } catch (error) {
-      console.error("OBS Recording Stop Error:", error);
-      return { success: false, message: (error as Error).message };
-    }
+  const stopRecording = async (
+    record: boolean,
+  ): Promise<{ success: boolean; message?: string }> => {
+    return await stopOBSRecording(record);
   };
 
   async function checkGameRunning(
-    gamesConfig: GamesConfig
+    gamesConfig: GamesConfig,
   ): Promise<[string | null, boolean | null]> {
     if (connection.status !== "connected") return [null, null];
     try {
@@ -225,20 +207,19 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     }
   }
 
-  function startGameDetection(settings: { gamesConfig: GamesConfig }) {
+  function startGameDetection(gameSettings: { gamesConfig: GamesConfig }) {
     let lastDetectedRecord: boolean | null = null;
     let lastDetectedGame: string | null = null;
 
     const interval = setInterval(async () => {
       const [currentGame, record] = await checkGameRunning(
-        settings.gamesConfig
+        gameSettings.gamesConfig,
       );
 
       if (currentGame !== lastDetectedGame) {
         if (currentGame) {
           console.log(`${currentGame} detected! Starting OBS recording.`);
           try {
-            await setOutputPathForGame(currentGame);
             await startRecording(currentGame, record ?? false);
             console.log(`Started recording for ${currentGame}`);
           } catch (error) {
@@ -263,54 +244,6 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     return () => {
       clearInterval(interval);
     };
-  }
-
-  async function setOutputPathForGame(gameName: string): Promise<boolean> {
-    const GAMES_DIR = "E:/Clips";
-    try {
-      const gameDir = await join(GAMES_DIR, gameName);
-      await mkdir(gameDir, { recursive: true });
-
-      await obs.call("SetRecordDirectory", {
-        recordDirectory: gameDir,
-      });
-
-      await obs.call("SetProfileParameter", {
-        parameterCategory: "Output",
-        parameterName: "FilenameFormatting",
-        parameterValue: `${gameName}_%DD-%MM-%CCYY_%hh-%mm-%ss%`,
-      });
-
-      return true;
-    } catch (error) {
-      console.error("Error setting output path:", error);
-      return false;
-    }
-  }
-
-  async function setSceneForGame(gameName: string): Promise<void> {
-    const response: OBSResponseTypes["GetSceneList"] = await obs.call(
-      "GetSceneList"
-    );
-    const scenes = response.scenes;
-
-    let sceneName = "Default";
-    if (
-      scenes &&
-      scenes.some(
-        (scene) =>
-          typeof scene.sceneName === "string" &&
-          scene.sceneName.includes(gameName)
-      )
-    ) {
-      sceneName = gameName;
-    }
-
-    const request: OBSRequestTypes["SetCurrentProgramScene"] = {
-      sceneName,
-    };
-
-    await obs.call("SetCurrentProgramScene", request);
   }
 
   const value: RecordingContextValue = {

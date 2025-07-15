@@ -25,7 +25,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
 
     const [removingIndex, setRemovingIndex] = useState<number | null>(null);
     const [tempThreshold, setTempThreshold] = useState(
-      settings.clipsDeleteThreshold | 9999999
+      settings.clipsDeleteThreshold || 9999999
     );
 
     const [isBackingUp, setIsBackingUp] = useState(false);
@@ -253,25 +253,9 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
           <div className={styles.title}>
             <Aperture />
             <h3>Recording</h3>
-            <SettingButton
-              text={settings.recordingMethod === "obs" ? "OBS" : "WGC"}
-              func={() => {
-                setSettings((prev) => ({
-                  ...prev,
-                  recordingMethod:
-                    prev.recordingMethod === "obs" ? "wgc" : "obs",
-                }));
-                showPopup(
-                  `Recording method set to ${
-                    settings.recordingMethod === "obs" ? "WGC" : "OBS"
-                  }.`,
-                  true
-                );
-              }}
-            />
           </div>
 
-          {settings.recordingMethod === "obs" && <ObsConnectionForm />}
+          <ObsConnectionForm />
           <GameConfigForm
             settings={settings}
             setSettings={setSettings}
@@ -309,7 +293,6 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
           <AppearanceModeControl
             currentTheme={settings.theme}
             switchTheme={handleThemeClick}
-            selectedFamily={selectedFamily}
           />
 
           <ThemeFamilyControl
