@@ -47,8 +47,9 @@ const CurrentVideo: React.FC = React.memo(() => {
   }
 
   useEffect(() => {
+    console.log(coverCache);
     if (coverCache.has(currentClip.game)) {
-      setCover(coverCache.get(currentClip.game) || ""); // add "no cover" image
+      setCover(coverCache.get(currentClip.game) || "");
     }
     setRenaming(false);
   }, [currentClip, coverCache]);
@@ -64,13 +65,13 @@ const CurrentVideo: React.FC = React.memo(() => {
 
   const handleDeleteClick = useCallback(async () => {
     const confirmDelete = await window.confirm(
-      "Are you sure you want to delete this clip?"
+      "Are you sure you want to delete this clip?",
     );
 
     if (confirmDelete) {
       let response = await deleteClip(
         currentClip.filePath,
-        currentClip.isFavourite
+        currentClip.isFavourite,
       );
       if (response) {
         showPopup("Clip deleted!", true);
@@ -93,11 +94,13 @@ const CurrentVideo: React.FC = React.memo(() => {
       }
       setRenaming(false);
     },
-    [editClip]
+    [editClip],
   );
 
-  const handleImageError = () => {
-    setImageError(true);
+  const handleImageError = (e) => {
+    const target = e.currentTarget as HTMLImageElement;
+    target.onerror = null; // prevent infinite loop
+    target.src = coverCache.get("default") || "";
   };
 
   return (
@@ -161,7 +164,7 @@ const CurrentVideo: React.FC = React.memo(() => {
             <img
               src={cover}
               alt={`${currentClip.game} Cover`}
-              onError={handleImageError}
+              onError={(e) => handleImageError(e)}
             />
           </div>
         )}

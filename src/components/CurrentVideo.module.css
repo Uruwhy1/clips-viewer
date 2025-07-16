@@ -12,7 +12,7 @@
   background-color: var(--current-bg);
   color: var(--dark-bg-color);
 
-  > div {
+  >div {
     overflow: hidden;
   }
 }
@@ -47,18 +47,18 @@
 
   overflow: hidden;
 
-  > * {
+  >* {
     flex-shrink: 0;
   }
 
-  > p {
+  >p {
     width: 95%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  > svg {
+  >svg {
     stroke-width: 3;
     stroke: var(--accent-washed);
   }
@@ -70,6 +70,7 @@
 
   font-weight: 500;
   transition: 0.1s color;
+
   &:hover {
     color: #fff;
   }
@@ -81,6 +82,7 @@
   color: #fff;
 
   flex-wrap: wrap;
+
   .title {
     border-bottom: 1px solid transparent;
     font-size: inherit;
@@ -97,6 +99,7 @@
     border-bottom: 1px solid var(--clr);
 
     padding: 0;
+
     &:focus {
       --clr: var(--accent-washed);
       outline: 0;
@@ -107,7 +110,7 @@
     cursor: pointer;
   }
 
-  > div {
+  >div {
     display: flex;
     align-items: center;
     gap: var(--gap-medium);
@@ -117,6 +120,7 @@
 .imageDiv {
   z-index: 1;
   position: relative;
+
   &::after {
     position: absolute;
     top: 0;
@@ -127,7 +131,7 @@
     height: 110%;
   }
 
-  > img {
+  >img {
     width: 100%;
     object-fit: cover;
   }
@@ -163,10 +167,13 @@
 
   .imageDiv {
     flex-shrink: 0;
+    padding-left: var(--padding-slightly-bigger);
   }
+
   .imageDiv::after {
     display: none;
   }
+
   .imageDiv img {
     height: 120px;
     width: auto;
@@ -186,7 +193,7 @@
       height: 1.25rem;
     }
 
-    > div {
+    >div {
       gap: var(--gap-small);
     }
   }

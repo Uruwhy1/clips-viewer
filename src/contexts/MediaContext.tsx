@@ -38,7 +38,7 @@ export const MediaProvider = ({ children }: MediaProviderProps) => {
   const [coverCache, setCoverCache] = useState<Map<string, string>>(new Map());
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
   const [processingVideos, setProcessingVideos] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   const loadedClips = useRef(false);
@@ -56,21 +56,30 @@ export const MediaProvider = ({ children }: MediaProviderProps) => {
       const newCache = new Map();
       const uniqueGames = new Set(allClips.map((clip) => clip.game));
 
+      const appName = await getName();
+      const docsDir = await documentDir();
       for (const game of uniqueGames) {
         try {
-          const appName = await getName();
-          const docsDir = await documentDir();
           const coverPath = await join(
             docsDir,
             appName,
             "game_covers",
-            `${game}.jpg`
+            `${game}.jpg`,
           );
           newCache.set(game, convertFileSrc(coverPath));
         } catch (error) {
           console.error(`Error caching cover for ${game}:`, error);
         }
       }
+
+      const defaultPath = await join(
+        docsDir,
+        appName,
+        "game_covers",
+        `default.jpg`,
+      );
+
+      newCache.set("default", convertFileSrc(defaultPath));
 
       setCoverCache(newCache);
     };
@@ -132,7 +141,7 @@ export const MediaProvider = ({ children }: MediaProviderProps) => {
         });
       }
     },
-    [processingVideos, thumbnails]
+    [processingVideos, thumbnails],
   );
 
   const randomClips = useMemo(() => {
@@ -140,7 +149,7 @@ export const MediaProvider = ({ children }: MediaProviderProps) => {
 
     const availableClips = allClips.filter(
       (clip) =>
-        clip.filePath !== currentClip?.filePath && favorites.has(clip.filePath)
+        clip.filePath !== currentClip?.filePath && favorites.has(clip.filePath),
     );
 
     if (availableClips.length === 0) return [];

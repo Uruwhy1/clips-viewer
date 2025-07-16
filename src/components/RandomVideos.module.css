@@ -75,7 +75,7 @@
   opacity: 0.8;
   transition: opacity 0.2s;
 
-  > svg {
+  >svg {
     fill: currentColor;
   }
 }
@@ -133,6 +133,7 @@
 
     padding: var(--padding-medium);
   }
+
   .thumbnailContainer {
     height: 50%;
     width: 100%;
@@ -143,6 +144,7 @@
   .clipInfo {
     display: none;
   }
+
   .thumbnailContainer {
     height: 100%;
   }
@@ -159,7 +161,8 @@
 }
 
 @media screen and (max-height: 875px) and (min-height: 650px),
-  screen and (max-height: 550px) {
+screen and (max-height: 550px) {
+
   .clipItem:nth-child(4),
   .clipItem:nth-child(5),
   .clipItem:nth-child(6) {
@@ -190,5 +193,17 @@
 @media screen and (max-height: 650px) {
   .container {
     display: flex;
+  }
+}
+
+@media screen and (max-width: 890px) and (min-height: 900px) {
+
+  .clipItem:nth-child(3),
+  .clipItem:nth-child(6) {
+    display: none;
+  }
+
+  .clipsList {
+    grid-template-columns: 1fr 1fr;
   }
 }
