@@ -4,7 +4,7 @@ use std::fs;
 use std::path::Path;
 use dirs;
 use std::time::{ SystemTime, UNIX_EPOCH };
-use chrono::{ DateTime, Utc, NaiveDateTime };
+use chrono::{ DateTime, Utc, NaiveDateTime, TimeZone };
 use std::path::PathBuf;
 
 #[derive(Debug, Serialize)]
@@ -34,9 +34,8 @@ fn format_date(timestamp: SystemTime) -> String {
 }
 
 fn format_date_from_timestamp(timestamp: i64) -> String {
-    let datetime = DateTime::<Utc>::from_utc(
-        NaiveDateTime::from_timestamp_opt(timestamp, 0).unwrap_or_default(),
-        Utc
+    let datetime = Utc.from_utc_datetime(
+        &NaiveDateTime::from_timestamp(timestamp, 0)
     );
     datetime.format("%d %b %Y, %H:%M").to_string()
 }
@@ -59,7 +58,7 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
 
             match NaiveDateTime::parse_from_str(&datetime_str, "%d-%m-%Y_%H-%M-%S") {
                 Ok(dt) => {
-                    return Ok(dt.timestamp());
+                    return Ok(dt.and_utc().timestamp());
                 }
                 Err(_) => {}
             }
@@ -74,7 +73,7 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
 
             match NaiveDateTime::parse_from_str(&datetime_str, "%d-%m-%Y_%H-%M-%S") {
                 Ok(dt) => {
-                    return Ok(dt.timestamp());
+                    return Ok(dt.and_utc().timestamp());
                 }
                 Err(_) => {}
             }
@@ -87,7 +86,7 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
 
             match NaiveDateTime::parse_from_str(&datetime_str, "%m-%d-%Y_%H-%M-%S") {
                 Ok(dt) => {
-                    return Ok(dt.timestamp());
+                    return Ok(dt.and_utc().timestamp());
                 }
                 Err(_) => {}
             }
@@ -102,7 +101,7 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
 
             match NaiveDateTime::parse_from_str(&datetime_str, "%m-%d-%Y_%H-%M-%S") {
                 Ok(dt) => {
-                    return Ok(dt.timestamp());
+                    return Ok(dt.and_utc().timestamp());
                 }
                 Err(_) => {}
             }

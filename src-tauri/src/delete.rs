@@ -1,8 +1,6 @@
 use std::fs;
 use std::path::Path;
 use serde::{ Deserialize, Serialize };
-use tauri::command;
-use walkdir::WalkDir;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]

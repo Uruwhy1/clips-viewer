@@ -2,10 +2,6 @@ mod clips;
 mod delete;
 mod backup;
 
-use filetime::{ set_file_mtime, FileTime };
-use std::fs;
-use dirs;
-use std::time::UNIX_EPOCH;
 use std::collections::HashSet;
 use std::os::windows::process::CommandExt;
 use tauri::menu::MenuBuilder;
@@ -126,7 +122,6 @@ async fn create_clip(
     println!("Starting to process FFmpeg output"); // Log processing start
     for line in reader.lines() {
         if let Ok(log) = line {
-            println!("FFmpeg output: {}", log); // Log each line from FFmpeg
 
             if log.contains("out_time=") {
                 if let Some(time_pos) = log.find("out_time=") {
@@ -136,8 +131,6 @@ async fn create_clip(
                     let progress = (((processed_seconds - start_seconds) / total_duration) *
                         100.0) as u8;
                     let is_complete = log.contains("progress=end");
-
-                    println!("Progress: {}%", progress); // Log calculated progress
 
                     let progress_update = ClipProgress {
                         main_text: "Processing clip...".to_string(),
@@ -259,7 +252,7 @@ pub fn run() {
                 open_file_explorer,
                 delete::calculate_total_size,
                 delete::delete_older_clips,
-                backup_favourite_clips
+                backup_favourite_clips,
             ]
         )
         .run(tauri::generate_context!())

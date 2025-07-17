@@ -149,7 +149,7 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
         println!("Copying {} to {}", path.display(), dest_path.display());
 
         match fs::copy(path, &dest_path) {
-            Ok(bytes) => {
+            Ok(_bytes) => {
                 success_count += 1;
             }
             Err(e) => {
