@@ -1,11 +1,11 @@
-use serde::{ Serialize, Deserialize };
+use chrono::Local;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
-use std::path::{ Path, PathBuf };
 use std::io;
-use chrono::Local;
-use tauri::Window;
+use std::path::{Path, PathBuf};
 use tauri::Emitter;
+use tauri::Window;
 
 #[derive(Deserialize, Serialize)]
 struct Favourites(Vec<String>);
@@ -38,16 +38,17 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
     let total_clips = favourites_set.len();
 
     // Send initial progress
-    if
-        let Err(e) = window.emit("backup-progress", BackupProgress {
+    if let Err(e) = window.emit(
+        "backup-progress",
+        BackupProgress {
             status: "Starting backup...".to_string(),
             current: 0,
             total: total_clips,
             success_count: 0,
             failed_count: 0,
             current_file: "".to_string(),
-        })
-    {
+        },
+    ) {
         println!("WARNING: Failed to emit initial progress event: {}", e);
     }
 
@@ -73,16 +74,17 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
     }
 
     // Send progress update
-    if
-        let Err(e) = window.emit("backup-progress", BackupProgress {
+    if let Err(e) = window.emit(
+        "backup-progress",
+        BackupProgress {
             status: "Created backup folder".to_string(),
             current: 0,
             total: total_clips,
             success_count: 0,
             failed_count: 0,
             current_file: "".to_string(),
-        })
-    {
+        },
+    ) {
         println!("WARNING: Failed to emit progress event: {}", e);
     }
 
@@ -100,16 +102,17 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
             .unwrap_or_else(|| clip_path.clone());
 
         // Send progress update for current file
-        if
-            let Err(e) = window.emit("backup-progress", BackupProgress {
+        if let Err(e) = window.emit(
+            "backup-progress",
+            BackupProgress {
                 status: "Copying files...".to_string(),
                 current,
                 total: total_clips,
                 success_count,
                 failed_count: failed_paths.len(),
                 current_file: short_path.clone(),
-            })
-        {
+            },
+        ) {
             println!("WARNING: Failed to emit progress event: {}", e);
         }
 
@@ -140,7 +143,10 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
 
         let game_backup_dir = backup_folder.join(&game_name);
         if let Err(e) = fs::create_dir_all(&game_backup_dir) {
-            println!("ERROR: Failed to create game directory {}: {}", game_name, e);
+            println!(
+                "ERROR: Failed to create game directory {}: {}",
+                game_name, e
+            );
             failed_paths.push(format!("{} (Error: {})", clip_path, e));
             continue;
         }
@@ -160,16 +166,17 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
 
         // Update progress after each file
         if current % 5 == 0 || current == total_clips {
-            if
-                let Err(e) = window.emit("backup-progress", BackupProgress {
+            if let Err(e) = window.emit(
+                "backup-progress",
+                BackupProgress {
                     status: "Copying files...".to_string(),
                     current,
                     total: total_clips,
                     success_count,
                     failed_count: failed_paths.len(),
                     current_file: short_path,
-                })
-            {
+                },
+            ) {
                 println!("WARNING: Failed to emit batch progress event: {}", e);
             }
         }
@@ -177,16 +184,17 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
 
     // Step 4: Create a backup log file
     println!("Creating backup log file");
-    if
-        let Err(e) = window.emit("backup-progress", BackupProgress {
+    if let Err(e) = window.emit(
+        "backup-progress",
+        BackupProgress {
             status: "Creating backup log...".to_string(),
             current: total_clips,
             total: total_clips,
             success_count,
             failed_count: failed_paths.len(),
             current_file: "backup_log.txt".to_string(),
-        })
-    {
+        },
+    ) {
         println!("WARNING: Failed to emit log progress event: {}", e);
     }
 
@@ -218,16 +226,17 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
     }
 
     // Final progress update
-    if
-        let Err(e) = window.emit("backup-progress", BackupProgress {
+    if let Err(e) = window.emit(
+        "backup-progress",
+        BackupProgress {
             status: "Backup complete".to_string(),
             current: total_clips,
             total: total_clips,
             success_count,
             failed_count: failed_paths.len(),
             current_file: "".to_string(),
-        })
-    {
+        },
+    ) {
         println!("WARNING: Failed to emit final progress event: {}", e);
     }
 
@@ -260,7 +269,11 @@ fn load_favourites() -> Result<HashSet<String>, String> {
     // Create directory if it doesn't exist
     if let Some(parent) = document_path.parent() {
         if let Err(e) = fs::create_dir_all(parent) {
-            println!("ERROR: Failed to create directory {}: {}", parent.display(), e);
+            println!(
+                "ERROR: Failed to create directory {}: {}",
+                parent.display(),
+                e
+            );
             return Err(format!("Failed to create directory: {}", e));
         }
     }

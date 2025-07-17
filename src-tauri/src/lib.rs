@@ -1,6 +1,6 @@
+mod backup;
 mod clips;
 mod delete;
-mod backup;
 
 use std::collections::HashSet;
 use std::os::windows::process::CommandExt;
@@ -9,15 +9,15 @@ use tauri::menu::MenuItemBuilder;
 use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
 
-use serde::{ Serialize };
-use std::process::{ Command, Stdio };
-use std::io::{ BufRead, BufReader };
+use serde::Serialize;
+use std::io::{BufRead, BufReader};
+use std::process::{Command, Stdio};
 
-use tauri::Window;
 use tauri::Emitter;
+use tauri::Window;
 
-pub use clips::get_all_clips;
 pub use backup::backup_favourite_clips;
+pub use clips::get_all_clips;
 
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
@@ -42,10 +42,7 @@ fn get_running_processes() -> Result<ProcessInfo, String> {
         .lines()
         .skip(3)
         .filter_map(|line| {
-            let name = line
-                .get(0..=24)?
-                .trim()
-                .to_lowercase();
+            let name = line.get(0..=24)?.trim().to_lowercase();
 
             Some(name)
         })
@@ -73,7 +70,7 @@ async fn create_clip(
     start_time: String,
     end_time: String,
     output_file: String,
-    window: Window
+    window: Window,
 ) -> Result<String, String> {
     println!("Starting create_clip function"); // Log function start
 
@@ -122,14 +119,13 @@ async fn create_clip(
     println!("Starting to process FFmpeg output"); // Log processing start
     for line in reader.lines() {
         if let Ok(log) = line {
-
             if log.contains("out_time=") {
                 if let Some(time_pos) = log.find("out_time=") {
                     let time_str = &log[time_pos + 9..].trim();
                     let processed_seconds =
                         parse_time_to_seconds(time_str).unwrap_or(start_seconds);
-                    let progress = (((processed_seconds - start_seconds) / total_duration) *
-                        100.0) as u8;
+                    let progress =
+                        (((processed_seconds - start_seconds) / total_duration) * 100.0) as u8;
                     let is_complete = log.contains("progress=end");
 
                     let progress_update = ClipProgress {
@@ -198,8 +194,7 @@ fn format_time_from_seconds(total_seconds: f64) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder
-        ::default()
+    tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             /* system tray setup */
@@ -207,8 +202,14 @@ pub fn run() {
             let quit = MenuItemBuilder::new("Quit").id("quit").build(app).unwrap();
             let hide = MenuItemBuilder::new("Hide").id("hide").build(app).unwrap();
             let show = MenuItemBuilder::new("Show").id("show").build(app).unwrap();
-            let reload = MenuItemBuilder::new("Reload").id("reload").build(app).unwrap();
-            let menu = MenuBuilder::new(app).items(&[&quit, &hide, &show, &reload]).build().unwrap();
+            let reload = MenuItemBuilder::new("Reload")
+                .id("reload")
+                .build(app)
+                .unwrap();
+            let menu = MenuBuilder::new(app)
+                .items(&[&quit, &hide, &show, &reload])
+                .build()
+                .unwrap();
 
             let _window = app.get_webview_window("main").unwrap();
 
@@ -217,26 +218,24 @@ pub fn run() {
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&menu)
                 // events handling here
-                .on_menu_event(|app, event| {
-                    match event.id().as_ref() {
-                        "quit" => app.exit(0),
-                        "hide" => {
-                            dbg!("menu item hide clicked");
-                            let window = app.get_webview_window("main").unwrap();
-                            window.hide().unwrap();
-                        }
-                        "show" => {
-                            dbg!("menu item show clicked");
-                            let window = app.get_webview_window("main").unwrap();
-                            window.show().unwrap();
-                        },
-                        "reload" => {
-                            dbg!("menu item reload clicked");
-                            let window = app.get_webview_window("main").unwrap();
-                            window.eval("window.location.reload()").unwrap();
-                        },
-                        _ => {}
+                .on_menu_event(|app, event| match event.id().as_ref() {
+                    "quit" => app.exit(0),
+                    "hide" => {
+                        dbg!("menu item hide clicked");
+                        let window = app.get_webview_window("main").unwrap();
+                        window.hide().unwrap();
                     }
+                    "show" => {
+                        dbg!("menu item show clicked");
+                        let window = app.get_webview_window("main").unwrap();
+                        window.show().unwrap();
+                    }
+                    "reload" => {
+                        dbg!("menu item reload clicked");
+                        let window = app.get_webview_window("main").unwrap();
+                        window.eval("window.location.reload()").unwrap();
+                    }
+                    _ => {}
                 })
                 .build(app);
 
@@ -244,17 +243,15 @@ pub fn run() {
         })
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(
-            tauri::generate_handler![
-                get_all_clips,
-                create_clip,
-                get_running_processes,
-                open_file_explorer,
-                delete::calculate_total_size,
-                delete::delete_older_clips,
-                backup_favourite_clips,
-            ]
-        )
+        .invoke_handler(tauri::generate_handler![
+            get_all_clips,
+            create_clip,
+            get_running_processes,
+            open_file_explorer,
+            delete::calculate_total_size,
+            delete::delete_older_clips,
+            backup_favourite_clips,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

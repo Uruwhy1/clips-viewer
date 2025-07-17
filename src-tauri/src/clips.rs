@@ -1,11 +1,11 @@
-use serde::{ Serialize, Deserialize };
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+use dirs;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
-use dirs;
-use std::time::{ SystemTime, UNIX_EPOCH };
-use chrono::{ DateTime, Utc, NaiveDateTime, TimeZone };
 use std::path::PathBuf;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -34,9 +34,7 @@ fn format_date(timestamp: SystemTime) -> String {
 }
 
 fn format_date_from_timestamp(timestamp: i64) -> String {
-    let datetime = Utc.from_utc_datetime(
-        &NaiveDateTime::from_timestamp(timestamp, 0)
-    );
+    let datetime = Utc.from_utc_datetime(&NaiveDateTime::from_timestamp(timestamp, 0));
     datetime.format("%d %b %Y, %H:%M").to_string()
 }
 
@@ -44,7 +42,10 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
     // separate TITLE from DATE_TIME
     let parts: Vec<&str> = filename.split('_').collect();
     if parts.len() < 2 {
-        return Err(format!("Failed to parse date from '{}': No date part found", filename));
+        return Err(format!(
+            "Failed to parse date from '{}': No date part found",
+            filename
+        ));
     }
 
     let date_part = parts[parts.len() - 2];
@@ -65,10 +66,7 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
         } else if time_parts.len() >= 4 {
             let datetime_str = format!(
                 "{}_{}-{}-{}",
-                date_part,
-                time_parts[0],
-                time_parts[1],
-                time_parts[2]
+                date_part, time_parts[0], time_parts[1], time_parts[2]
             );
 
             match NaiveDateTime::parse_from_str(&datetime_str, "%d-%m-%Y_%H-%M-%S") {
@@ -93,10 +91,7 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
         } else if time_parts.len() >= 4 {
             let datetime_str = format!(
                 "{}_{}-{}-{}",
-                date_part,
-                time_parts[0],
-                time_parts[1],
-                time_parts[2]
+                date_part, time_parts[0], time_parts[1], time_parts[2]
             );
 
             match NaiveDateTime::parse_from_str(&datetime_str, "%m-%d-%Y_%H-%M-%S") {
@@ -120,7 +115,7 @@ fn extract_title_from_filename(filename: &str) -> String {
 
 fn load_favourites(app_name: &str) -> Result<HashSet<String>, String> {
     let document_path: PathBuf = match dirs::document_dir() {
-        Some(doc_dir) => { doc_dir.join(app_name).join("favourites.json") }
+        Some(doc_dir) => doc_dir.join(app_name).join("favourites.json"),
         None => {
             return Err("Could not find home directory".into());
         }
@@ -135,20 +130,17 @@ fn load_favourites(app_name: &str) -> Result<HashSet<String>, String> {
             if content.is_empty() {
                 return Ok(HashSet::new());
             }
-            let favourites: Favourites = serde_json
-                ::from_str(&content)
+            let favourites: Favourites = serde_json::from_str(&content)
                 .map_err(|e| format!("Failed to parse favourites: {}", e))?;
             Ok(favourites.0.into_iter().collect())
         }
         Err(e) => {
             if e.kind() == std::io::ErrorKind::NotFound {
                 let default_favourites = Favourites(Vec::new());
-                let default_content = serde_json
-                    ::to_string_pretty(&default_favourites)
+                let default_content = serde_json::to_string_pretty(&default_favourites)
                     .map_err(|e| format!("Failed to serialize default favourites: {}", e))?;
 
-                fs
-                    ::write(&document_path, default_content)
+                fs::write(&document_path, default_content)
                     .map_err(|e| format!("Failed to create favourites file: {}", e))?;
 
                 return Ok(HashSet::new());
@@ -162,10 +154,9 @@ fn process_directory(
     dir_path: &Path,
     game: Option<String>,
     favourites_set: &HashSet<String>,
-    all_clips: &mut Vec<ClipInfo>
+    all_clips: &mut Vec<ClipInfo>,
 ) -> Result<(), String> {
-    let entries = fs
-        ::read_dir(dir_path)
+    let entries = fs::read_dir(dir_path)
         .map_err(|e| format!("Error reading directory {}: {}", dir_path.display(), e))?;
 
     for entry in entries {
@@ -185,11 +176,9 @@ fn process_directory(
                 Ok(timestamp) => (timestamp, format_date_from_timestamp(timestamp)),
                 Err(_) => {
                     // fallback to file modification time if date parsing fails
-                    let metadata = fs
-                        ::metadata(&path)
-                        .map_err(|e|
-                            format!("Error getting metadata for {}: {}", path.display(), e)
-                        )?;
+                    let metadata = fs::metadata(&path).map_err(|e| {
+                        format!("Error getting metadata for {}: {}", path.display(), e)
+                    })?;
 
                     let mtime = metadata
                         .modified()
@@ -221,11 +210,12 @@ fn process_directory(
 #[tauri::command]
 pub fn get_all_clips(
     app_handle: tauri::AppHandle,
-    dir_path: String
+    dir_path: String,
 ) -> Result<ClipsResult, String> {
     let app_name = app_handle
         .config()
-        .product_name.as_ref()
+        .product_name
+        .as_ref()
         .ok_or("App product_name is not set")?
         .as_str();
 

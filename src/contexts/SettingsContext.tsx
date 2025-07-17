@@ -22,14 +22,12 @@ interface SettingsContextType {
   loadedSettings: boolean;
 }
 
-export type RecordingMethod = "obs" | "wgc";
-
 interface SettingsProviderProps {
   children: ReactNode;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const SettingsProvider = ({ children }: SettingsProviderProps) => {
@@ -58,24 +56,24 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     let accent = settings.accentVariable;
     document.documentElement.style.setProperty(
       "--accent-var",
-      `var(${accent})`
+      `var(${accent})`,
     );
 
     let theme = settings.theme;
     if (theme === "System (Default)") {
       const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
+        "(prefers-color-scheme: dark)",
       ).matches;
       document.documentElement.setAttribute(
         "data-theme",
-        prefersDark ? "Dark" : "Light"
+        prefersDark ? "Dark" : "Light",
       );
 
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       const handleChange = (e: MediaQueryListEvent) => {
         document.documentElement.setAttribute(
           "data-theme",
-          e.matches ? "Dark" : "Light"
+          e.matches ? "Dark" : "Light",
         );
       };
 
@@ -83,18 +81,18 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       return () => mediaQuery.removeEventListener("change", handleChange);
     } else if (theme === "System (Catppuccin)") {
       const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
+        "(prefers-color-scheme: dark)",
       ).matches;
       document.documentElement.setAttribute(
         "data-theme",
-        prefersDark ? "Mocha" : "Latte"
+        prefersDark ? "Mocha" : "Latte",
       );
 
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       const handleChange = (e: MediaQueryListEvent) => {
         document.documentElement.setAttribute(
           "data-theme",
-          e.matches ? "Mocha" : "Latte"
+          e.matches ? "Mocha" : "Latte",
         );
       };
 

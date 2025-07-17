@@ -1,6 +1,6 @@
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
-use serde::{ Deserialize, Serialize };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -86,7 +86,8 @@ pub async fn delete_older_clips(
         // Sort clips
         let mut sorted_clips = clips.clone();
         sorted_clips.sort_by_key(|clip| clip.date);
-        let non_favorites: Vec<_> = sorted_clips.into_iter()
+        let non_favorites: Vec<_> = sorted_clips
+            .into_iter()
             .filter(|c| !c.is_favourite)
             .collect();
 

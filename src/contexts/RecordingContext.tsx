@@ -1,3 +1,5 @@
+// contexts/RecordingContext.tsx - Updated to support multiple recording methods
+
 import {
   createContext,
   useState,
@@ -11,7 +13,7 @@ import { loadSettings } from "../helpers/settingsFile";
 import { useSettings } from "./SettingsContext";
 import { invoke } from "@tauri-apps/api/core";
 
-import { GamesConfig, OBSSettings } from "../types/settings";
+import { GamesConfig, OBSSettings, RecordingMethod } from "../types/settings";
 import yodaSound from "../assets/yoda.mp3";
 
 import {
@@ -21,6 +23,11 @@ import {
   startOBSRecording,
   stopOBSRecording,
 } from "../helpers/OBS";
+
+import {
+  startWindowsAPIRecording,
+  stopWindowsAPIRecording,
+} from "../helpers/WindowsAPIRecording";
 
 interface ConnectionState {
   status: "disconnected" | "connected" | "error";
@@ -34,6 +41,7 @@ interface RecordingContextValue {
   obsSetting: OBSSettings;
   setObsSetting: (settings: OBSSettings) => void;
   startGameDetection: (settings: { gamesConfig: GamesConfig }) => void;
+  recordingMethod: RecordingMethod;
 }
 
 const RecordingContext = createContext<RecordingContextValue | undefined>(
@@ -46,6 +54,7 @@ interface RecordingProviderProps {
 
 export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   const { settings, loadedSettings } = useSettings();
+  const isRecordingInProgress = useRef(false);
 
   const [connection, setConnection] = useState<ConnectionState>({
     status: "disconnected",
@@ -115,7 +124,11 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   useEffect(() => {
     const initialize = async () => {
       try {
-        if (obsSetting.port && obsSetting.password) {
+        if (
+          settings.recordingMethod === "obs" &&
+          obsSetting.port &&
+          obsSetting.password
+        ) {
           await connect(obsSetting.port, obsSetting.password);
         }
       } catch (error) {
@@ -124,7 +137,7 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     };
 
     initialize();
-  }, [obsSetting]);
+  }, [obsSetting, settings.recordingMethod]);
 
   useEffect(() => {
     if (loadedSettings && connection.status === "connected") {
@@ -134,6 +147,8 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   }, [connection, settings, loadedSettings]);
 
   const connect = async (port: string, password: string): Promise<boolean> => {
+    if (settings.recordingMethod !== "obs") return false;
+
     const result = await connectOBS(port, password);
     if (result.success) {
       setConnection({
@@ -141,7 +156,6 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
         version: result.version ?? null,
         error: null,
       });
-
       return true;
     } else {
       setConnection({
@@ -157,21 +171,29 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     currentGame: string,
     record: boolean,
   ): Promise<{ success: boolean; message?: string }> => {
-    if (settings.gamesDir) {
-      await setOutputPathForGame(currentGame, settings.gamesDir);
+    if (settings.recordingMethod === "obs") {
+      if (settings.gamesDir) {
+        await setOutputPathForGame(currentGame, settings.gamesDir);
+      }
+      return await startOBSRecording(
+        currentGame,
+        record,
+        settings.recordingSoundEnabled,
+        playSound,
+      );
     }
-    return await startOBSRecording(
-      currentGame,
-      record,
-      settings.recordingSoundEnabled,
-      playSound,
-    );
+
+    return { success: false, message: "Unknown recording method" };
   };
 
   const stopRecording = async (
     record: boolean,
   ): Promise<{ success: boolean; message?: string }> => {
-    return await stopOBSRecording(record);
+    if (settings.recordingMethod === "obs") {
+      return await stopOBSRecording(record);
+    }
+
+    return { success: false, message: "Unknown recording method" };
   };
 
   async function checkGameRunning(
@@ -196,7 +218,7 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
       for (const process of running_processes) {
         const gameInfo = processGameMap.get(process.toLowerCase());
         if (gameInfo) {
-          return gameInfo;
+          return [gameInfo[0], gameInfo[1]];
         }
       }
 
@@ -210,28 +232,47 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   function startGameDetection(gameSettings: { gamesConfig: GamesConfig }) {
     let lastDetectedRecord: boolean | null = null;
     let lastDetectedGame: string | null = null;
+    let lastDetectedExe: string | null = null;
 
     const interval = setInterval(async () => {
+      if (isRecordingInProgress.current) return;
+
       const [currentGame, record] = await checkGameRunning(
         gameSettings.gamesConfig,
       );
 
       if (currentGame !== lastDetectedGame) {
         if (currentGame) {
-          console.log(`${currentGame} detected! Starting OBS recording.`);
+          console.log(
+            `${currentGame} detected! Starting recording with ${settings.recordingMethod}.`,
+          );
+
+          isRecordingInProgress.current = true;
+
           try {
             await startRecording(currentGame, record ?? false);
             console.log(`Started recording for ${currentGame}`);
           } catch (error) {
             console.error("Failed to start recording:", error);
           }
+
+          isRecordingInProgress.current = false;
         } else if (lastDetectedGame) {
+          isRecordingInProgress.current = true;
+
           try {
             await stopRecording(lastDetectedRecord ?? false);
-            console.log(`Stopped recording for ${lastDetectedGame}`);
+            console.log(
+              `Stopped recording for ${lastDetectedGame} (${lastDetectedExe})`,
+            );
+
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            window.location.reload();
           } catch (error) {
             console.error("Failed to stop recording:", error);
           }
+
+          isRecordingInProgress.current = false;
         }
 
         lastDetectedGame = currentGame;
@@ -252,6 +293,7 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     obsSetting,
     setObsSetting,
     startGameDetection,
+    recordingMethod: settings.recordingMethod,
   };
 
   return (

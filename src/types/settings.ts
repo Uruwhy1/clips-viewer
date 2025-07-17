@@ -1,6 +1,7 @@
 type GameConfig = {
   processes: string[];
   record: boolean;
+  windowTitle?: string;
 };
 
 export type GamesConfig = {
@@ -12,6 +13,7 @@ export type OBSSettings = {
   password: string | null;
 };
 
+export type RecordingMethod = "obs";
 export type Settings = {
   gamesDir: string | null;
   gamesConfig: GamesConfig;
@@ -22,6 +24,7 @@ export type Settings = {
   theme: string;
   accentVariable: string;
   recordingSoundEnabled: boolean;
+  recordingMethod: RecordingMethod;
 };
 
 export type SemanticColor = {

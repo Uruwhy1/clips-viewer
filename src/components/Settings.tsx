@@ -13,7 +13,7 @@ import { useSettings } from "../contexts/SettingsContext";
 import { ThemeFamilyControl } from "./ThemeFamily";
 import { AppearanceModeControl } from "./ThemeAppearance";
 import AccentColor from "./AccentColor";
-import { SemanticColor } from "../types/settings";
+import { RecordingMethod, SemanticColor } from "../types/settings";
 
 type SettingsProps = {
   isOpen: boolean;
@@ -25,7 +25,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
 
     const [removingIndex, setRemovingIndex] = useState<number | null>(null);
     const [tempThreshold, setTempThreshold] = useState(
-      settings.clipsDeleteThreshold || 9999999
+      settings.clipsDeleteThreshold || 9999999,
     );
 
     const [isBackingUp, setIsBackingUp] = useState(false);
@@ -37,10 +37,10 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
 
     function debounce<T extends (...args: any[]) => void>(
       func: T,
-      wait: number
+      wait: number,
     ): (...args: Parameters<T>) => void {
       let timeout: ReturnType<typeof setTimeout>;
-      return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+      return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(this, args), wait);
       };
@@ -53,7 +53,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
           clipsDeleteThreshold: parseInt(value, 10),
         }));
       }, 300),
-      []
+      [],
     );
 
     const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +88,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
       }));
       showPopup(
         `Scrollbars turned ${settings.scrollbarOff ? "on" : "off"}.`,
-        true
+        true,
       );
     };
 
@@ -98,10 +98,9 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
         clipDeletion: !prevSettings.clipDeletion,
       }));
       showPopup(
-        `Automatic clip deletion turned ${
-          !settings.clipDeletion ? "on" : "off"
+        `Automatic clip deletion turned ${!settings.clipDeletion ? "on" : "off"
         }`,
-        true
+        true,
       );
     };
 
@@ -111,10 +110,9 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
         recordingSoundEnabled: !prevSettings.recordingSoundEnabled,
       }));
       showPopup(
-        `Recording sound notifications turned ${
-          !settings.recordingSoundEnabled ? "on" : "off"
+        `Recording sound notifications turned ${!settings.recordingSoundEnabled ? "on" : "off"
         }.`,
-        true
+        true,
       );
     };
 
@@ -173,7 +171,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
     const handleAccentChange = (semanticColor: SemanticColor) => {
       document.documentElement.style.setProperty(
         "--accent-var",
-        `var(${semanticColor.variable})`
+        `var(${semanticColor.variable})`,
       );
 
       setSettings((prevSettings) => ({
@@ -183,13 +181,6 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
 
       showPopup(`Accent color changed to ${semanticColor.name}.`, true);
     };
-
-    const selectedFamily =
-      settings.theme.includes("Catppuccin") ||
-      settings.theme === "Mocha" ||
-      settings.theme === "Latte"
-        ? "Catppuccin"
-        : "Default";
 
     return (
       <div
@@ -233,9 +224,8 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
               />
             </div>
             <div
-              className={`${styles.currentSetting} ${
-                !settings.clipDeletion ? styles.inactive : ""
-              } `}
+              className={`${styles.currentSetting} ${!settings.clipDeletion ? styles.inactive : ""
+                } `}
             >
               <input
                 type="range"
@@ -253,9 +243,10 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
           <div className={styles.title}>
             <Aperture />
             <h3>Recording</h3>
+            <SettingButton text={"OBS"} func={() => console.log("Xd")} />
           </div>
 
-          <ObsConnectionForm />
+          {settings.recordingMethod === "obs" && <ObsConnectionForm />}
           <GameConfigForm
             settings={settings}
             setSettings={setSettings}
@@ -307,7 +298,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 export default Settings;

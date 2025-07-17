@@ -14,6 +14,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
   ({ removingIndex, setRemovingIndex, setSettings, settings }) => {
     const [gameName, setGameName] = useState<string>("");
     const [processNames, setProcessNames] = useState<string>("");
+    const [windowTitle, setWindowTitle] = useState<string>("");
     const [recordBool, setRecordBool] = useState<boolean>(false);
     const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const [editingGame, setEditingGame] = useState<string | null>(null);
@@ -28,6 +29,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
           updatedGamesConfig[gameName] = {
             processes: processArray,
             record: recordBool,
+            windowTitle: windowTitle.trim() || gameName,
           };
 
           return {
@@ -38,13 +40,14 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
 
         setGameName("");
         setProcessNames("");
+        setWindowTitle("");
         setRecordBool(false);
         setIsFormVisible(false);
         setEditingGame(null);
       } else {
         alert("Both game name and process names are required!");
       }
-    }, [gameName, processNames, recordBool, setSettings]);
+    }, [gameName, processNames, windowTitle, recordBool, setSettings]);
 
     const startEditGame = useCallback(
       (gameName: string) => {
@@ -53,17 +56,18 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
         setEditingGame(gameName);
         setGameName(gameName);
         setProcessNames(gameConfig.processes.join(", "));
+        setWindowTitle(gameConfig.windowTitle || gameName);
         setRecordBool(gameConfig.record);
         setIsFormVisible(true);
       },
-      [settings.gamesConfig]
+      [settings.gamesConfig],
     );
 
     const handleGameClick = useCallback(
       (index: number) => {
         setRemovingIndex(index);
       },
-      [setRemovingIndex]
+      [setRemovingIndex],
     );
 
     const removeGame = useCallback(
@@ -79,7 +83,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
           };
         });
       },
-      [setSettings]
+      [setSettings],
     );
 
     const toggleForm = useCallback(() => {
@@ -88,6 +92,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
       setTimeout(() => {
         setGameName("");
         setProcessNames("");
+        setWindowTitle("");
         setRecordBool(false);
       }, 500);
     }, []);
@@ -103,9 +108,8 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
         </div>
 
         <div
-          className={`${styles.form} ${isFormVisible && styles.active} ${
-            styles.addGameForm
-          }`}
+          className={`${styles.form} ${isFormVisible && styles.active} ${styles.addGameForm
+            }`}
         >
           <div className={styles.inputGroup}>
             <label htmlFor="gameName">Game Name</label>
@@ -132,6 +136,18 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
             />
           </div>
           <div className={styles.inputGroup}>
+            <label htmlFor="windowTitle">Window Title</label>
+            <input
+              autoComplete="off"
+              id="windowTitle"
+              type="text"
+              value={windowTitle}
+              onChange={(e) => setWindowTitle(e.target.value)}
+              placeholder="Enter window title (optional, defaults to game name)"
+              tabIndex={isFormVisible ? 0 : -1}
+            />
+          </div>
+          <div className={styles.inputGroup}>
             <label htmlFor="recordBool">Record Full Sessions</label>
             <input
               autoComplete="off"
@@ -152,13 +168,12 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
         </div>
         <div className={styles.gamesContainer}>
           {settings.gamesConfig &&
-          Object.keys(settings.gamesConfig).length > 0 ? (
+            Object.keys(settings.gamesConfig).length > 0 ? (
             Object.entries(settings.gamesConfig).map(
               ([gameName, config], index) => (
                 <div
-                  className={`${styles.gameItem} ${styles.currentSetting} ${
-                    index == removingIndex ? styles.remove : ""
-                  } ${gameName == editingGame ? styles.editing : ""}
+                  className={`${styles.gameItem} ${styles.currentSetting} ${index == removingIndex ? styles.remove : ""
+                    } ${gameName == editingGame ? styles.editing : ""}
                     ${config.record ? styles.recording : ""}`}
                   key={index}
                   onClick={(e) => {
@@ -189,7 +204,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
                     ""
                   )}
                 </div>
-              )
+              ),
             )
           ) : (
             <p>No games added yet.</p>
@@ -202,7 +217,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 export default GameConfigForm;

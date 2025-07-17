@@ -9,12 +9,12 @@ import { getName } from "@tauri-apps/api/app";
 import { Settings } from "../types/settings";
 
 export const loadSettings = async (
-  setSettings: React.Dispatch<React.SetStateAction<Settings>> | null
+  setSettings: React.Dispatch<React.SetStateAction<Settings>> | null,
 ) => {
   const appName = await getName();
   const settingsPath = await join(
     await documentDir(),
-    `${appName}/settings.json`
+    `${appName}/settings.json`,
   );
 
   const settingsExists = await exists(settingsPath);
@@ -73,4 +73,5 @@ export const defaultSettings: Settings = {
   },
   accentVariable: "--red",
   recordingSoundEnabled: true,
+  recordingMethod: "obs", // Default to OBS
 };
