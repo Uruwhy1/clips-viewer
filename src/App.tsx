@@ -46,6 +46,7 @@ function App() {
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        console.log("app.tsx stuff");
         if (isSettingsOpen) {
           setIsSettingsOpen(false);
         } else {

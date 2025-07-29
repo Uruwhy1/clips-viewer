@@ -82,14 +82,14 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
             case "ArrowLeft":
               ref.current.currentTime = Math.max(
                 0,
-                ref.current.currentTime - 5
+                ref.current.currentTime - 5,
               );
               setCurrentTime(ref.current.currentTime);
               break;
             case "ArrowRight":
               ref.current.currentTime = Math.min(
                 ref.current.duration,
-                ref.current.currentTime + 5
+                ref.current.currentTime + 5,
               );
               setCurrentTime(ref.current.currentTime);
               break;
@@ -110,24 +110,9 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
       };
     }, [isFullscreen, isPlaying, ref]);
 
-    // focus video after control interaction
-    useEffect(() => {
-      const controlsElement = document.querySelector(`.${styles.controls}`);
-
-      const handleControlsInteraction = () => {
-        if (ref && "current" in ref && ref.current) ref.current.focus();
-      };
-
-      if (controlsElement) {
-        controlsElement.addEventListener("click", handleControlsInteraction);
-        return () => {
-          controlsElement.removeEventListener(
-            "click",
-            handleControlsInteraction
-          );
-        };
-      }
-    }, [ref]);
+    const handleControlsInteraction = () => {
+      if (ref && "current" in ref && ref.current) ref.current.focus();
+    };
 
     useEffect(() => {
       const updateProgressBar = () => {
@@ -148,18 +133,33 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
       };
     }, [isPlaying]);
 
+    useEffect(() => {
+      const handleFullscreenChange = () => {
+        const isCurrentlyFullscreen = !!document.fullscreenElement;
+        setIsFullscreen(isCurrentlyFullscreen);
+      };
+
+      document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+      return () => {
+        document.removeEventListener(
+          "fullscreenchange",
+          handleFullscreenChange,
+        );
+      };
+    }, []);
+
     const toggleFullscreen = async () => {
-      const window = await getCurrentWindow();
-      if (!isFullscreen) {
-        if (divRef.current) {
-          divRef.current.requestFullscreen();
+      try {
+        if (!document.fullscreenElement && divRef.current) {
+          await divRef.current.requestFullscreen();
+        } else if (document.fullscreenElement) {
+          await document.exitFullscreen();
         }
-        // window.setFullscreen(true); // there is an issue with fullscreen and decorations: false;
-      } else {
-        document.exitFullscreen();
-        await window.setFullscreen(false);
+      } catch (error) {
+        console.error("Fullscreen error:", error);
+        setIsFullscreen(!!document.fullscreenElement);
       }
-      setIsFullscreen(!isFullscreen);
     };
 
     const togglePlayPause = () => {
@@ -239,7 +239,7 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
     };
 
     const handleVolumeChange = (
-      e: React.ChangeEvent<HTMLInputElement> | number | boolean
+      e: React.ChangeEvent<HTMLInputElement> | number | boolean,
     ) => {
       let value = 0;
       let max = 1;
@@ -265,7 +265,7 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
 
       document.documentElement.style.setProperty(
         "--volume",
-        percentage.toString()
+        percentage.toString(),
       );
     };
 
@@ -287,7 +287,7 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
         setStartMarker(start);
         setEndMarker(end);
       },
-      []
+      [],
     );
 
     return (
@@ -300,6 +300,7 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
           onTimeUpdate={handleTimeUpdate}
           className={styles.video}
           onClick={togglePlayPause}
+          onDoubleClick={toggleFullscreen}
           autoPlay
         ></video>
         <div className={styles.controls}>
@@ -380,17 +381,17 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
                 className={`${styles.controlButton} ${styles.playbackContainer}`}
               >
                 {/* prettier-ignore */}
-                <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : "" }`}>
-                <div className={styles.playback} onClick={() => changePlaybackRate(0.5)}>
-                  <MemoizedTriangle />
+                <div className={`${styles.playbackOptions} ${playback !== 1 ? styles.playbackActive : ""}`}>
+                  <div className={styles.playback} onClick={() => changePlaybackRate(0.5)}>
+                    <MemoizedTriangle />
+                  </div>
+                  <div className={styles.playback} onClick={() => changePlaybackRate()}>
+                    <MemoizedMinus />
+                  </div>
+                  <div className={styles.playback} onClick={() => changePlaybackRate(-0.25)}>
+                    <MemoizedRotatedTriangle />
+                  </div>
                 </div>
-                <div className={styles.playback} onClick={() => changePlaybackRate()}>
-                  <MemoizedMinus />
-                </div>
-                <div className={styles.playback} onClick={() => changePlaybackRate(-0.25)}>
-                  <MemoizedRotatedTriangle />
-                </div>
-              </div>
                 <MemoizedVideotape />
               </button>
 
@@ -405,7 +406,7 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 export default Video;
