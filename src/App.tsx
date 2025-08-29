@@ -15,6 +15,7 @@ import { useMedia } from "./contexts/MediaContext";
 import { usePopup } from "./contexts/PopupContext.js";
 import { checkAndDeleteOldClips } from "./helpers/automaticClipDeletion";
 import SplashScreen from "./SplashScreen";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 function App() {
   const [view, setView] = useState("clips");
@@ -30,6 +31,8 @@ function App() {
 
   useEffect(() => {
     (async () => {
+      let window = getCurrentWindow();
+      await window.show();
       if (firstLoadRef.current && settings.clipDeletion && allClips.length) {
         let result = await checkAndDeleteOldClips(
           settings,
@@ -46,7 +49,6 @@ function App() {
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        console.log("app.tsx stuff");
         if (isSettingsOpen) {
           setIsSettingsOpen(false);
         } else {

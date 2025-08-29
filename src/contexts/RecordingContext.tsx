@@ -24,11 +24,6 @@ import {
   stopOBSRecording,
 } from "../helpers/OBS";
 
-import {
-  startWindowsAPIRecording,
-  stopWindowsAPIRecording,
-} from "../helpers/WindowsAPIRecording";
-
 interface ConnectionState {
   status: "disconnected" | "connected" | "error";
   version: string | null;
