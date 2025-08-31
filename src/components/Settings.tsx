@@ -17,10 +17,11 @@ import { RecordingMethod, SemanticColor } from "../types/settings";
 
 type SettingsProps = {
   isOpen: boolean;
+  onClose: () => void;
 };
 
 const Settings = forwardRef<HTMLDivElement, SettingsProps>(
-  ({ isOpen }, ref) => {
+  ({ isOpen, onClose }, ref) => {
     const { settings, setSettings } = useSettings();
 
     const [removingIndex, setRemovingIndex] = useState<number | null>(null);
@@ -183,120 +184,124 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
     };
 
     return (
-      <div
-        className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
-        ref={ref}
-        onClick={(e) => {
-          e.stopPropagation();
-          setRemovingIndex(null);
-        }}
-      >
-        <div className={`${styles.settingCategory}`}>
-          <div className={styles.title}>
-            <Folder />
-            <h3>Storage</h3>
-            <SettingButton
-              text={isBackingUp ? "Backing Up..." : "Backup Favourites"}
-              func={handleBackup}
-              disabled={isBackingUp}
+      <>
+        {isOpen && <div className={styles.settingsOverlay} onClick={onClose} />}
+
+        <div
+          className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
+          ref={ref}
+          onClick={(e) => {
+            e.stopPropagation();
+            setRemovingIndex(null);
+          }}
+        >
+          <div className={`${styles.settingCategory}`}>
+            <div className={styles.title}>
+              <Folder />
+              <h3>Storage</h3>
+              <SettingButton
+                text={isBackingUp ? "Backing Up..." : "Backup Favourites"}
+                func={handleBackup}
+                disabled={isBackingUp}
+              />
+            </div>
+            <div className={styles.settingIndividual}>
+              <div className={styles.subSectionTitle}>
+                <strong>Clips Directory</strong>
+                <SettingButton
+                  func={handleSelectDirectory}
+                  text={"Change Directory"}
+                />
+              </div>
+              <div
+                className={`${styles.currentSetting} ${styles.currentDirectory}`}
+              >
+                <p>{settings.gamesDir}</p>
+              </div>
+            </div>
+            <div className={styles.settingIndividual}>
+              <div className={styles.subSectionTitle}>
+                <strong>Automatic Clips Deletion</strong>
+                <SettingButton
+                  text={!settings.clipDeletion ? "Off" : "On"}
+                  func={handleToggleClipDeletion}
+                />
+              </div>
+              <div
+                className={`${styles.currentSetting} ${!settings.clipDeletion ? styles.inactive : ""
+                  } `}
+              >
+                <input
+                  type="range"
+                  min={1}
+                  max={5000}
+                  value={tempThreshold}
+                  onChange={handleRangeChange}
+                />
+                <span className={styles.rangeValue}>{tempThreshold} GB</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={`${styles.settingCategory}`}>
+            <div className={styles.title}>
+              <Aperture />
+              <h3>Recording</h3>
+              <SettingButton text={"OBS"} func={() => console.log("Xd")} />
+            </div>
+
+            {settings.recordingMethod === "obs" && <ObsConnectionForm />}
+            <GameConfigForm
+              settings={settings}
+              setSettings={setSettings}
+              removingIndex={removingIndex}
+              setRemovingIndex={setRemovingIndex}
+            />
+
+            <div className={styles.settingIndividual}>
+              <div className={styles.subSectionTitle}>
+                <strong>Recording Sound Notifications</strong>
+                <SettingButton
+                  text={settings.recordingSoundEnabled ? "On" : "Off"}
+                  func={handleToggleRecordingSound}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className={`${styles.settingCategory}`}>
+            <div className={styles.title}>
+              <LucideSettings2 />
+              <h3>UI Tweaks</h3>
+            </div>
+
+            <div className={styles.settingIndividual}>
+              <div className={styles.subSectionTitle}>
+                <strong>Visible Scrollbars</strong>
+                <SettingButton
+                  text={settings.scrollbarOff ? "Off" : "On"}
+                  func={handleToggleBorders}
+                />
+              </div>
+            </div>
+
+            <AppearanceModeControl
+              currentTheme={settings.theme}
+              switchTheme={handleThemeClick}
+            />
+
+            <ThemeFamilyControl
+              currentTheme={settings.theme}
+              switchTheme={handleThemeClick}
+            />
+
+            <AccentColor
+              currentAccent={settings.accentVariable || "--red"}
+              onAccentChange={handleAccentChange}
             />
           </div>
-          <div className={styles.settingIndividual}>
-            <div className={styles.subSectionTitle}>
-              <strong>Clips Directory</strong>
-              <SettingButton
-                func={handleSelectDirectory}
-                text={"Change Directory"}
-              />
-            </div>
-            <div
-              className={`${styles.currentSetting} ${styles.currentDirectory}`}
-            >
-              <p>{settings.gamesDir}</p>
-            </div>
-          </div>
-          <div className={styles.settingIndividual}>
-            <div className={styles.subSectionTitle}>
-              <strong>Automatic Clips Deletion</strong>
-              <SettingButton
-                text={!settings.clipDeletion ? "Off" : "On"}
-                func={handleToggleClipDeletion}
-              />
-            </div>
-            <div
-              className={`${styles.currentSetting} ${!settings.clipDeletion ? styles.inactive : ""
-                } `}
-            >
-              <input
-                type="range"
-                min={1}
-                max={5000}
-                value={tempThreshold}
-                onChange={handleRangeChange}
-              />
-              <span className={styles.rangeValue}>{tempThreshold} GB</span>
-            </div>
-          </div>
         </div>
-
-        <div className={`${styles.settingCategory}`}>
-          <div className={styles.title}>
-            <Aperture />
-            <h3>Recording</h3>
-            <SettingButton text={"OBS"} func={() => console.log("Xd")} />
-          </div>
-
-          {settings.recordingMethod === "obs" && <ObsConnectionForm />}
-          <GameConfigForm
-            settings={settings}
-            setSettings={setSettings}
-            removingIndex={removingIndex}
-            setRemovingIndex={setRemovingIndex}
-          />
-
-          <div className={styles.settingIndividual}>
-            <div className={styles.subSectionTitle}>
-              <strong>Recording Sound Notifications</strong>
-              <SettingButton
-                text={settings.recordingSoundEnabled ? "On" : "Off"}
-                func={handleToggleRecordingSound}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className={`${styles.settingCategory}`}>
-          <div className={styles.title}>
-            <LucideSettings2 />
-            <h3>UI Tweaks</h3>
-          </div>
-
-          <div className={styles.settingIndividual}>
-            <div className={styles.subSectionTitle}>
-              <strong>Visible Scrollbars</strong>
-              <SettingButton
-                text={settings.scrollbarOff ? "Off" : "On"}
-                func={handleToggleBorders}
-              />
-            </div>
-          </div>
-
-          <AppearanceModeControl
-            currentTheme={settings.theme}
-            switchTheme={handleThemeClick}
-          />
-
-          <ThemeFamilyControl
-            currentTheme={settings.theme}
-            switchTheme={handleThemeClick}
-          />
-
-          <AccentColor
-            currentAccent={settings.accentVariable || "--red"}
-            onAccentChange={handleAccentChange}
-          />
-        </div>
-      </div>
+      </>
     );
   },
 );

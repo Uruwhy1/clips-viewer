@@ -1,3 +1,17 @@
+.settingsOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--page-cover);
+  z-index: 999;
+
+  display: flex;
+
+  animation: appear 0.3s ease;
+}
+
 .settingsContainer {
   --width: 500px;
 
@@ -20,7 +34,7 @@
   left: var(--sidebar-width);
   top: 0;
 
-  border-right: 1px solid var(--gray-color);
+  border-right: 1px solid var(--borders);
 
   transition: transform 0.5s ease;
   z-index: 1000;
