@@ -65,7 +65,7 @@
 
 .settingCategory {
   border: 1px solid rgba(128, 128, 128, 0.325);
-  border-radius: 5px;
+  border-radius: var(--radius-small);
   padding: var(--padding-big);
 
   display: flex;
@@ -275,7 +275,7 @@
 
   padding: 8px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: var(--radius-small);
 
   &:focus-visible {
     outline-color: var(--accent-washed);

@@ -18,6 +18,7 @@ export type Settings = {
   gamesDir: string | null;
   gamesConfig: GamesConfig;
   scrollbarOff: boolean;
+  borderRadiusOff: boolean;
   clipsDeleteThreshold: number;
   clipDeletion: boolean;
   obs: OBSSettings;

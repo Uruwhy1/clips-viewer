@@ -67,11 +67,12 @@ export const defaultSettings: Settings = {
   scrollbarOff: false,
   clipDeletion: false,
   clipsDeleteThreshold: 999999,
+  borderRadiusOff: false,
   obs: {
     port: "0",
     password: "",
   },
   accentVariable: "--red",
   recordingSoundEnabled: true,
-  recordingMethod: "obs", // Default to OBS
+  recordingMethod: "obs",
 };

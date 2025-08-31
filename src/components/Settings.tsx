@@ -117,6 +117,17 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
       );
     };
 
+    const handleToggleRadius = () => {
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        borderRadiusOff: !prevSettings.borderRadiusOff,
+      }));
+      showPopup(
+        `Border radiuses turned ${!settings.borderRadiusOff ? "off" : "on"}.`,
+        true,
+      );
+    };
+
     const handleBackup = async () => {
       try {
         const backupId = "backup-process";
@@ -281,6 +292,16 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
                 <SettingButton
                   text={settings.scrollbarOff ? "Off" : "On"}
                   func={handleToggleBorders}
+                />
+              </div>
+            </div>
+
+            <div className={styles.settingIndividual}>
+              <div className={styles.subSectionTitle}>
+                <strong>Border Radius</strong>
+                <SettingButton
+                  text={settings.borderRadiusOff ? "Off" : "On"}
+                  func={handleToggleRadius}
                 />
               </div>
             </div>

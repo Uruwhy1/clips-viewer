@@ -50,6 +50,12 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     } else {
       document.body.classList.remove("hide-scroll");
     }
+
+    if (settings.borderRadiusOff) {
+      document.body.classList.add("no-radius");
+    } else {
+      document.body.classList.remove("no-radius");
+    }
   }, [settings]);
 
   useEffect(() => {

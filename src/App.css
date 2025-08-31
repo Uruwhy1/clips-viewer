@@ -18,6 +18,11 @@ body.hide-scroll {
   }
 }
 
+body.no-radius {
+  --radius-big: 0px;
+  --radius-small: 0px;
+}
+
 * {
   &&::-webkit-scrollbar {
     width: 10px !important;

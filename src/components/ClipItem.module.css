@@ -1,6 +1,6 @@
 .clipCard {
   border: 1px solid var(--borders);
-  border-radius: 8px;
+  border-radius: var(--radius-big);
   overflow: hidden;
 
   padding: var(--inline-padding);
@@ -12,7 +12,7 @@
 
   user-select: none;
 
-  > div {
+  >div {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -20,6 +20,7 @@
 
   cursor: pointer;
   transition: all 0.15s;
+
   &:hover {
     transform: scale(1.02);
 
@@ -42,7 +43,7 @@
   color: var(--gray-color);
   font-size: var(--font-size-small);
 
-  > div {
+  >div {
     display: flex;
     align-items: center;
     gap: var(--inline-gap-small);
