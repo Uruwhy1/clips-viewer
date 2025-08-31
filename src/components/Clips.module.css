@@ -15,14 +15,14 @@
 
   font-weight: 500;
 
-  > div {
+  >div {
     position: relative;
 
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 
-    > * {
+    >* {
       width: 100%;
     }
   }
@@ -44,7 +44,10 @@
 
   border-width: 1px;
 
-  transition: border 0.15s, box-shadow 0.15s;
+  transition:
+    border 0.15s,
+    box-shadow 0.15s;
+
   &:hover {
     box-shadow: 0px 0px 0px 1px var(--accent-washed);
     border-color: var(--accent-washed);
@@ -53,7 +56,7 @@
   z-index: 3;
 }
 
-.filters > button {
+.filters>button {
   --star: gold;
 
   min-width: 20%;
@@ -71,7 +74,7 @@
     background-color: var(--accent-washed);
     border-color: var(--accent-washed);
 
-    > svg {
+    >svg {
       stroke: #fff;
       fill: #fff;
     }
@@ -94,7 +97,7 @@
   border-radius: var(--radius-big);
   overflow: hidden;
 
-  > button {
+  >button {
     border: none;
     border-radius: 0;
 
@@ -155,6 +158,7 @@
   cursor: pointer;
 
   position: relative;
+
   &::before {
     position: absolute;
     content: "";
@@ -173,6 +177,7 @@
     &:first-child {
       --width: -0.25rem;
     }
+
     --width: 0.25rem;
 
     svg {

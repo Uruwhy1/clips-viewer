@@ -49,13 +49,30 @@
   }
 }
 
+.sidebar:has(.newClips) .settings {
+  margin-top: 0;
+}
+
+.newClips {
+  margin-top: auto;
+
+  >svg {
+    transition: transform 0.5s ease;
+  }
+
+  &.active>svg {
+    transform: rotate(360deg);
+  }
+}
+
 .settings {
   margin-top: auto;
 
-  > svg {
+  >svg {
     transition: transform 0.5s ease;
   }
-  &.activeSettings > svg {
+
+  &.active>svg {
     transform: rotate(360deg);
   }
 }
@@ -63,16 +80,20 @@
 .clips.active path {
   animation: video 0.5s ease 1;
 }
+
 @keyframes video {
   0% {
     transform: translateX(0);
   }
+
   50% {
     transform: translateX(100%);
   }
+
   51% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(0);
   }

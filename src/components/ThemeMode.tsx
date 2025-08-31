@@ -27,15 +27,13 @@ export const ThemeMode: React.FC<ThemeModeProps> = ({
 
   return (
     <div
-      className={`${styles.themeItem} ${
-        current === title ? styles.active : ""
-      }`}
+      className={`${styles.themeItem} ${current === title ? styles.active : ""
+        }`}
       onClick={() => onClick(title)}
     >
       <div className={styles.themeItemContent}>
         <span className={styles.themeIcon}>{getIcon()}</span>
         <p>{title}</p>
-        {current === title && <span className={styles.activeIndicator}>✓</span>}
       </div>
     </div>
   );

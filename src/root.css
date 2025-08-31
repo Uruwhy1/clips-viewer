@@ -20,6 +20,8 @@
   --clips-bg: var(--page-bg);
   --settings-bg: var(--dark-bg);
   --current-bg: var(--dark-bg);
+
+  --page-cover: rgba(0, 0, 0, 0.8);
 }
 
 :root[data-theme="Latte"] {
@@ -42,7 +44,6 @@
 
   /* --- */
   --gray-color: var(--ctp-latte-subtext0);
-  --page-cover: rgba(76, 79, 105, 0.2);
   --borders: var(--ctp-latte-surface0);
 
   --accent: var(--accent-var);
@@ -68,7 +69,6 @@
 
   /* --- */
   --gray-color: var(--ctp-mocha-subtext0);
-  --page-cover: rgba(62, 67, 85, 0.562);
   --borders: var(--ctp-mocha-surface0);
 
   --accent: var(--accent-var);

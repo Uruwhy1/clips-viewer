@@ -1,0 +1,56 @@
+import React from "react";
+import styles from "./NewClips.module.css";
+import ClipItem from "./ClipItem";
+import { Clip } from "../types/clip";
+import { CheckCircle, Trash2 } from "lucide-react";
+
+interface NewClipsPopupProps {
+  newClips: Clip[];
+  onClose: () => void;
+  onClear: () => void;
+  setView: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const NewClipsPopup: React.FC<NewClipsPopupProps> = ({
+  newClips,
+  setView,
+  onClose,
+  onClear, // Add this prop
+}) => {
+  if (newClips.length === 0) return null;
+
+  return (
+    <div className={styles.overlay}>
+      <div className={styles.popup}>
+        <div className={styles.header}>
+          <h2>New Clips Recorded</h2>
+        </div>
+        <div className={styles.content}>
+          <div className={styles.clipsGrid}>
+            {newClips.map((clip: Clip) => (
+              <div
+                onClick={onClose}
+                key={clip.filePath}
+                className={styles.clipItem}
+              >
+                <ClipItem clip={clip} setView={setView} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.footer}>
+          <button className={styles.button} onClick={onClear}>
+            <Trash2 size={16} />
+            Clear
+          </button>
+          <button className={styles.button} onClick={onClose}>
+            <CheckCircle size={16} />
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default NewClipsPopup;

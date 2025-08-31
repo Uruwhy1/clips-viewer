@@ -15,7 +15,6 @@ import { invoke } from "@tauri-apps/api/core";
 import StarButton from "./icons/StarButton";
 import { usePopup } from "../contexts/PopupContext";
 import { useClips } from "../contexts/ClipsContext";
-import { useFavorites } from "../contexts/FavoritesContext";
 import { useMedia } from "../contexts/MediaContext";
 import { Clip } from "../types/clip";
 
@@ -32,8 +31,8 @@ const MemoizedTrash2 = React.memo((props: LucideProps) => (
 ));
 
 const CurrentVideo: React.FC = React.memo(() => {
-  const { currentClip, deleteClip, editClip } = useClips();
-  const { toggleFavourite, isFavorite } = useFavorites();
+  const { currentClip, deleteClip, editClip, isFavorite, toggleFavourite } =
+    useClips();
   const { coverCache } = useMedia();
   const { showPopup } = usePopup();
 

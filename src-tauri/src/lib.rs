@@ -18,6 +18,7 @@ use tauri::Window;
 
 pub use backup::backup_favourite_clips;
 pub use clips::get_all_clips;
+pub use clips::get_new_clips_since;
 
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
@@ -251,6 +252,7 @@ pub fn run() {
             delete::calculate_total_size,
             delete::delete_older_clips,
             backup_favourite_clips,
+            get_new_clips_since
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

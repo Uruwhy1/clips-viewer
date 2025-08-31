@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
 use dirs;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -33,13 +33,7 @@ fn format_date(timestamp: SystemTime) -> String {
     datetime.format("%d %b %Y, %H:%M").to_string()
 }
 
-fn format_date_from_timestamp(timestamp: i64) -> String {
-    let datetime = Utc.from_utc_datetime(&NaiveDateTime::from_timestamp(timestamp, 0));
-    datetime.format("%d %b %Y, %H:%M").to_string()
-}
-
 fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
-    // separate TITLE from DATE_TIME
     let parts: Vec<&str> = filename.split('_').collect();
     if parts.len() < 2 {
         return Err(format!(
@@ -50,55 +44,16 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
 
     let date_part = parts[parts.len() - 2];
     let time_part = parts[parts.len() - 1].split('.').next().unwrap_or("");
+    let datetime_str = format!("{}_{}", date_part, time_part);
 
-    let time_parts: Vec<&str> = time_part.split('-').collect();
-
-    if time_parts.len() >= 3 {
-        if time_parts.len() == 3 {
-            let datetime_str = format!("{}_{}", date_part, time_part);
-
-            match NaiveDateTime::parse_from_str(&datetime_str, "%d-%m-%Y_%H-%M-%S") {
-                Ok(dt) => {
-                    return Ok(dt.and_utc().timestamp());
-                }
-                Err(_) => {}
-            }
-        } else if time_parts.len() >= 4 {
-            let datetime_str = format!(
-                "{}_{}-{}-{}",
-                date_part, time_parts[0], time_parts[1], time_parts[2]
-            );
-
-            match NaiveDateTime::parse_from_str(&datetime_str, "%d-%m-%Y_%H-%M-%S") {
-                Ok(dt) => {
-                    return Ok(dt.and_utc().timestamp());
-                }
-                Err(_) => {}
-            }
-        }
-    }
-
-    if time_parts.len() >= 3 {
-        if time_parts.len() == 3 {
-            let datetime_str = format!("{}_{}", date_part, time_part);
-
-            match NaiveDateTime::parse_from_str(&datetime_str, "%m-%d-%Y_%H-%M-%S") {
-                Ok(dt) => {
-                    return Ok(dt.and_utc().timestamp());
-                }
-                Err(_) => {}
-            }
-        } else if time_parts.len() >= 4 {
-            let datetime_str = format!(
-                "{}_{}-{}-{}",
-                date_part, time_parts[0], time_parts[1], time_parts[2]
-            );
-
-            match NaiveDateTime::parse_from_str(&datetime_str, "%m-%d-%Y_%H-%M-%S") {
-                Ok(dt) => {
-                    return Ok(dt.and_utc().timestamp());
-                }
-                Err(_) => {}
+    // Try parsing common formats as local time
+    let formats = ["%d-%m-%Y_%H-%M-%S", "%m-%d-%Y_%H-%M-%S"];
+    for fmt in formats {
+        if let Ok(naive_dt) = NaiveDateTime::parse_from_str(&datetime_str, fmt) {
+            // Interpret as local time
+            if let Some(local_dt) = Local.from_local_datetime(&naive_dt).single() {
+                // UTC timestamp for comparison
+                return Ok(local_dt.with_timezone(&Utc).timestamp());
             }
         }
     }
@@ -150,6 +105,43 @@ fn load_favourites(app_name: &str) -> Result<HashSet<String>, String> {
     }
 }
 
+fn process_file_entry(
+    path: &Path,
+    file_name: &str,
+) -> Result<(String, String, i64, String), String> {
+    let file_path_str = path.to_string_lossy().to_string();
+    let name = extract_title_from_filename(file_name);
+
+    let (unix_timestamp, formatted_date) = match parse_date_from_filename(file_name) {
+        Ok(utc_timestamp) => {
+            // Convert UTC timestamp back to local for display
+            let local_dt = Local
+                .timestamp_opt(utc_timestamp, 0)
+                .single()
+                .ok_or("Invalid timestamp")?;
+            (
+                utc_timestamp,
+                local_dt.format("%d %b %Y, %H:%M").to_string(),
+            )
+        }
+        Err(_) => {
+            // fallback to file modification time
+            let metadata = fs::metadata(path)
+                .map_err(|e| format!("Error getting metadata for {}: {}", path.display(), e))?;
+            let mtime = metadata
+                .modified()
+                .map_err(|e| format!("Error getting modification time: {}", e))?;
+            let unix_ts = mtime
+                .duration_since(UNIX_EPOCH)
+                .map_err(|_| "Error calculating timestamp".to_string())?
+                .as_secs() as i64;
+            (unix_ts, format_date(mtime))
+        }
+    };
+
+    Ok((file_path_str, name, unix_timestamp, formatted_date))
+}
+
 fn process_directory(
     dir_path: &Path,
     game: Option<String>,
@@ -168,30 +160,8 @@ fn process_directory(
             let current_game = game.clone().unwrap_or_else(|| file_name.clone());
             process_directory(&path, Some(current_game), favourites_set, all_clips)?;
         } else if let Some(current_game) = &game {
-            let file_path_str = path.to_string_lossy().to_string();
-
-            let name = extract_title_from_filename(&file_name);
-
-            let (unix_timestamp, formatted_date) = match parse_date_from_filename(&file_name) {
-                Ok(timestamp) => (timestamp, format_date_from_timestamp(timestamp)),
-                Err(_) => {
-                    // fallback to file modification time if date parsing fails
-                    let metadata = fs::metadata(&path).map_err(|e| {
-                        format!("Error getting metadata for {}: {}", path.display(), e)
-                    })?;
-
-                    let mtime = metadata
-                        .modified()
-                        .map_err(|e| format!("Error getting modification time: {}", e))?;
-
-                    let unix_ts = mtime
-                        .duration_since(UNIX_EPOCH)
-                        .map_err(|_| "Error calculating timestamp".to_string())?
-                        .as_secs() as i64;
-
-                    (unix_ts, format_date(mtime))
-                }
-            };
+            let (file_path_str, name, unix_timestamp, formatted_date) =
+                process_file_entry(&path, &file_name)?;
 
             all_clips.push(ClipInfo {
                 game: current_game.clone(),
@@ -201,6 +171,67 @@ fn process_directory(
                 date: unix_timestamp,
                 is_favourite: favourites_set.contains(&file_path_str),
             });
+        }
+    }
+
+    Ok(())
+}
+
+fn process_directory_newer(
+    dir_path: &Path,
+    game: Option<String>,
+    since_timestamp: i64,
+    all_clips: &mut Vec<ClipInfo>,
+) -> Result<(), String> {
+    if game.is_some() {
+        let dir_metadata = fs::metadata(dir_path).map_err(|e| {
+            format!(
+                "Error getting directory metadata for {}: {}",
+                dir_path.display(),
+                e
+            )
+        })?;
+
+        let dir_modified = dir_metadata
+            .modified()
+            .map_err(|e| format!("Error getting directory modification time: {}", e))?;
+
+        let dir_timestamp = dir_modified
+            .duration_since(UNIX_EPOCH)
+            .map_err(|_| "Error calculating directory timestamp".to_string())?
+            .as_secs() as i64;
+
+        if dir_timestamp <= since_timestamp {
+            return Ok(());
+        }
+    }
+
+    let entries = fs::read_dir(dir_path)
+        .map_err(|e| format!("Error reading directory {}: {}", dir_path.display(), e))?;
+
+    for entry in entries {
+        let entry = entry.map_err(|e| format!("Error reading entry: {}", e))?;
+        let path = entry.path();
+        let file_name = entry.file_name().to_string_lossy().to_string();
+
+        if path.is_dir() {
+            let current_game = game.clone().unwrap_or_else(|| file_name.clone());
+            process_directory_newer(&path, Some(current_game), since_timestamp, all_clips)?;
+        } else if let Some(current_game) = &game {
+            let (file_path_str, name, unix_timestamp, formatted_date) =
+                process_file_entry(&path, &file_name)?;
+
+            // Compare local timestamps
+            if unix_timestamp > since_timestamp {
+                all_clips.push(ClipInfo {
+                    game: current_game.clone(),
+                    name,
+                    file_path: file_path_str,
+                    formatted_date,
+                    date: unix_timestamp,
+                    is_favourite: false,
+                });
+            }
         }
     }
 
@@ -230,4 +261,14 @@ pub fn get_all_clips(
         favourites_set: favourites_set.into_iter().collect(),
         all_clips,
     })
+}
+
+#[tauri::command]
+pub fn get_new_clips_since(dir: String, since_timestamp: i64) -> Result<Vec<ClipInfo>, String> {
+    let mut all_clips = Vec::new();
+    process_directory_newer(Path::new(&dir), None, since_timestamp, &mut all_clips)?;
+
+    all_clips.sort_by(|a, b| b.date.cmp(&a.date));
+
+    Ok(all_clips)
 }

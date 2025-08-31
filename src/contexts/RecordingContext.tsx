@@ -23,6 +23,8 @@ import {
   startOBSRecording,
   stopOBSRecording,
 } from "../helpers/OBS";
+import { useClips } from "./ClipsContext";
+import { Clip } from "../types/clip";
 
 interface ConnectionState {
   status: "disconnected" | "connected" | "error";
@@ -48,6 +50,7 @@ interface RecordingProviderProps {
 }
 
 export const RecordingProvider = ({ children }: RecordingProviderProps) => {
+  const { setAllClips } = useClips();
   const { settings, loadedSettings } = useSettings();
   const isRecordingInProgress = useRef(false);
 
@@ -185,7 +188,32 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     record: boolean,
   ): Promise<{ success: boolean; message?: string }> => {
     if (settings.recordingMethod === "obs") {
-      return await stopOBSRecording(record);
+      const result = await stopOBSRecording(record);
+
+      const lastChecked = localStorage.getItem("lastCheckedTimestamp");
+      if (lastChecked && settings.gamesDir) {
+        const sinceTimestamp = parseInt(lastChecked, 10);
+
+        const newClips = await invoke<Clip[]>("get_new_clips_since", {
+          dir: settings.gamesDir,
+          sinceTimestamp,
+        });
+        console.log(newClips);
+
+        if (newClips.length > 0) {
+          setAllClips((prev) => [...newClips, ...prev]);
+
+          const now = Math.floor(Date.now() / 1000);
+          localStorage.setItem("lastCheckedTimestamp", now.toString());
+
+          console.log("xd");
+          window.dispatchEvent(
+            new CustomEvent("newClipsDetected", { detail: newClips }),
+          );
+        }
+      }
+
+      return result;
     }
 
     return { success: false, message: "Unknown recording method" };
@@ -262,7 +290,6 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
             );
 
             await new Promise((resolve) => setTimeout(resolve, 5000));
-            window.location.reload();
           } catch (error) {
             console.error("Failed to stop recording:", error);
           }

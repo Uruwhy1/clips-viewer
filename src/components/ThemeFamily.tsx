@@ -31,7 +31,6 @@ export const ThemeFamilyControl: React.FC<{
           <div className={styles.themeItemContent}>
             <span className={styles.themeIcon}>🎭</span>
             <p>Catppuccin</p>
-            <span className={styles.activeIndicator}>✓</span>
           </div>
         </div>
       </div>

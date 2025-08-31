@@ -1,4 +1,4 @@
-:root {
+.notificationsContainer {
   --success: var(--green);
   --success-text: #ffffff;
 
@@ -47,7 +47,7 @@
     color: var(--success-text);
     font-weight: normal;
 
-    > p::before {
+    >p::before {
       content: "Success:";
       font-weight: bold;
       margin-right: 5px;
@@ -60,7 +60,7 @@
     color: var(--error-text);
     font-weight: normal;
 
-    > p::before {
+    >p::before {
       content: "Failure:";
       font-weight: bold;
       margin-right: 5px;
@@ -79,14 +79,17 @@
     transform: translateY(100px);
     opacity: 0;
   }
+
   10% {
     transform: translateY(0);
     opacity: 1;
   }
+
   90% {
     transform: translateY(0);
     opacity: 1;
   }
+
   100% {
     transform: translateY(100px);
     opacity: 0;
@@ -150,6 +153,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

@@ -8,10 +8,14 @@ import {
   ReactNode,
 } from "react";
 import { getAllClips } from "../helpers/readFilesFromDirectory";
-import { renameClipFile, deleteClipFile } from "../helpers/externalFiles";
+import {
+  renameClipFile,
+  deleteClipFile,
+  saveFavourites,
+} from "../helpers/externalFiles";
 import { useSettings } from "./SettingsContext";
-import { useFavorites } from "./FavoritesContext";
 import { Clip } from "../types/clip";
+import { invoke } from "@tauri-apps/api/core";
 
 interface ClipsContextType {
   allClips: Clip[];
@@ -25,11 +29,16 @@ interface ClipsContextType {
     showFavourites: boolean;
   };
   updateFilter: (
-    newFilter: Partial<{ game: string; showFavourites: boolean }>
+    newFilter: Partial<{ game: string; showFavourites: boolean }>,
   ) => void;
   addClip: (newClip: Clip) => void;
   editClip: (clip: Clip, newTitle: string) => Promise<boolean>;
   deleteClip: (clipPath: string, isFavourite: boolean) => Promise<boolean>;
+
+  favorites: Set<string>;
+  toggleFavourite: (clipPath: string) => void;
+  updateFavoritePath: (oldPath: string, newPath: string) => void;
+  isFavorite: (clipPath: string) => boolean;
 }
 
 const ClipsContext = createContext<ClipsContextType | undefined>(undefined);
@@ -40,10 +49,10 @@ interface ClipsProviderProps {
 
 export const ClipsProvider = ({ children }: ClipsProviderProps) => {
   const { settings } = useSettings();
-  const { isFavorite, toggleFavourite, updateFavoritePath } = useFavorites();
 
   const [allClips, setAllClips] = useState<Clip[]>([]);
   const [currentClip, setCurrentClip] = useState<Clip | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   const [filter, setFilter] = useState<{
     game: string;
@@ -53,15 +62,27 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     showFavourites: false,
   });
 
-  // Load clips when games directory changes
   useEffect(() => {
     const fetchClips = async () => {
       if (settings.gamesDir) {
-        const [_, initialClips] = await getAllClips(settings.gamesDir);
+        const [favouritesSet, initialClips] = await getAllClips(
+          settings.gamesDir,
+        );
 
-        setAllClips(initialClips);
-        if (initialClips.length > 0 && !currentClip) {
-          setCurrentClip(initialClips[0]);
+        setFavorites(favouritesSet);
+
+        const clipsWithFavorites = initialClips.map((clip) => ({
+          ...clip,
+          isFavourite: favouritesSet.has(clip.filePath),
+        }));
+
+        setAllClips(clipsWithFavorites);
+
+        const now = Math.floor(Date.now() / 1000);
+        localStorage.setItem("lastCheckedTimestamp", now.toString());
+
+        if (clipsWithFavorites.length > 0 && !currentClip) {
+          setCurrentClip(clipsWithFavorites[0]);
         }
       }
     };
@@ -69,13 +90,12 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     fetchClips();
   }, [settings.gamesDir]);
 
-  // Filtered clips calculation
   const filteredClips = useMemo(() => {
     return allClips
       .filter(
         (clip) =>
           (filter.game === "All" || clip.game === filter.game) &&
-          (!filter.showFavourites || clip.isFavourite)
+          (!filter.showFavourites || clip.isFavourite),
       )
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [allClips, filter]);
@@ -95,7 +115,7 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
 
   const editClip = async (clip: Clip, newTitle: string): Promise<boolean> => {
     const oldPath = clip.filePath;
-    const isFavourite = isFavorite(oldPath);
+    const isFavourite = favorites.has(oldPath);
 
     if (!newTitle || newTitle.trim() === "") {
       alert("Edit canceled or invalid name.");
@@ -113,13 +133,13 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
         prevClips.map((c) =>
           c.filePath === oldPath
             ? {
-                ...c,
-                filePath: newPath,
-                name: newName,
-                isFavourite: isFavourite,
-              }
-            : c
-        )
+              ...c,
+              filePath: newPath,
+              name: newName,
+              isFavourite: isFavourite,
+            }
+            : c,
+        ),
       );
 
       if (currentClip && currentClip.filePath === oldPath) {
@@ -164,17 +184,77 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
 
       return true;
     },
-    [currentClip, toggleFavourite]
+    [currentClip],
   );
 
+  async function checkForNewClips() {
+    const lastStopped = localStorage.getItem("lastCheckedTimestamp");
+    if (!lastStopped || !settings.gamesDir) return [];
+
+    const sinceTimestamp = parseInt(lastStopped, 10);
+    const newClips = await invoke<Clip[]>("get_new_clips_since", {
+      dir: settings.gamesDir,
+      sinceTimestamp,
+    });
+
+    if (newClips.length > 0) {
+      setAllClips((prev) => [...newClips, ...prev]);
+    }
+
+    return newClips;
+  }
+
   const updateFilter = (
-    newFilter: Partial<{ game: string; showFavourites: boolean }>
+    newFilter: Partial<{ game: string; showFavourites: boolean }>,
   ) => {
     setFilter((prev) => ({
       ...prev,
       ...newFilter,
     }));
   };
+
+  // favorites methods
+  const toggleFavourite = async (clipPath: string) => {
+    const newFavorites = new Set(favorites);
+    if (newFavorites.has(clipPath)) {
+      newFavorites.delete(clipPath);
+    } else {
+      newFavorites.add(clipPath);
+    }
+
+    await saveFavourites(newFavorites);
+    setFavorites(newFavorites);
+
+    setAllClips((prevClips) =>
+      prevClips.map((clip) =>
+        clip.filePath === clipPath
+          ? { ...clip, isFavourite: newFavorites.has(clipPath) }
+          : clip,
+      ),
+    );
+
+    if (currentClip && currentClip.filePath === clipPath) {
+      setCurrentClip({
+        ...currentClip,
+        isFavourite: newFavorites.has(clipPath),
+      });
+    }
+
+    return newFavorites.has(clipPath);
+  };
+
+  const updateFavoritePath = async (oldPath: string, newPath: string) => {
+    const newFavorites = new Set(favorites);
+    newFavorites.delete(oldPath);
+    newFavorites.add(newPath);
+
+    await saveFavourites(newFavorites);
+    setFavorites(newFavorites);
+
+    return true;
+  };
+
+  const isFavorite = (clipPath: string) => favorites.has(clipPath);
 
   const contextValue: ClipsContextType = {
     allClips,
@@ -188,6 +268,11 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     addClip,
     editClip,
     deleteClip,
+    favorites,
+    toggleFavourite,
+    updateFavoritePath,
+    isFavorite,
+    checkForNewClips,
   };
 
   return (

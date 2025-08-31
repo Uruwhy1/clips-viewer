@@ -5,7 +5,6 @@ import { Calendar, Tv } from "lucide-react";
 import FavouriteButton from "./icons/StarButton";
 
 import { useClips } from "../contexts/ClipsContext";
-import { useFavorites } from "../contexts/FavoritesContext";
 import { Clip } from "../types/clip";
 
 type ClipItemProps = {
@@ -19,8 +18,7 @@ const MemoizedCalendar = React.memo((props: LucideProps) => (
   <Calendar {...props} />
 ));
 const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
-  const { setCurrentClip } = useClips();
-  const { toggleFavourite, isFavorite } = useFavorites();
+  const { setCurrentClip, toggleFavourite, isFavorite } = useClips();
 
   const handleClick = () => {
     setCurrentClip(clip);

@@ -7,6 +7,7 @@ import Clips from "./components/Clips";
 import TitleBar from "./components/TitleBar";
 import Sidebar from "./components/Sidebar";
 import Settings from "./components/Settings";
+import NewClipsPopup from "./components/NewClips";
 
 import { useSettings } from "./contexts/SettingsContext";
 import { useClips } from "./contexts/ClipsContext";
@@ -16,10 +17,15 @@ import { usePopup } from "./contexts/PopupContext.js";
 import { checkAndDeleteOldClips } from "./helpers/automaticClipDeletion";
 import SplashScreen from "./SplashScreen";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { Clip } from "./types/clip";
 
 function App() {
   const [view, setView] = useState("clips");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const [newClips, setNewClips] = useState<Clip[]>([]);
+  const [showNewClipsPopup, setShowNewClipsPopup] = useState(false);
+
   const settingsRef = useRef<HTMLDivElement | null>(null);
 
   const { coverCache } = useMedia();
@@ -51,6 +57,8 @@ function App() {
       if (event.key === "Escape") {
         if (isSettingsOpen) {
           setIsSettingsOpen(false);
+        } else if (showNewClipsPopup) {
+          setShowNewClipsPopup(false);
         } else {
           switch (view) {
             case "video":
@@ -88,14 +96,37 @@ function App() {
       }
     };
 
+    const handleNewClips = (event: CustomEvent<Clip[]>) => {
+      setNewClips(event.detail);
+      setShowNewClipsPopup(true);
+    };
+
     window.addEventListener("keydown", handleEscapeKey);
     window.addEventListener("click", handleClick);
+
+    window.addEventListener(
+      "newClipsDetected",
+      handleNewClips as EventListener,
+    );
 
     return () => {
       window.removeEventListener("keydown", handleEscapeKey);
       window.removeEventListener("click", handleClick);
+      window.removeEventListener(
+        "newClipsDetected",
+        handleNewClips as EventListener,
+      );
     };
   }, [view, isSettingsOpen]);
+
+  const handleCloseNewClipsPopup = () => {
+    setShowNewClipsPopup(false);
+  };
+
+  const handleClearNewClips = () => {
+    setNewClips([]);
+    setShowNewClipsPopup(false);
+  };
 
   const currentView = () => {
     switch (view) {
@@ -137,15 +168,31 @@ function App() {
           ))}
         </div>
       )}
+
       <TitleBar />
       <Sidebar
         view={view}
         setView={setView}
         settingsState={isSettingsOpen}
+        newClipsState={showNewClipsPopup}
+        newClipsNumber={newClips.length}
+        setNewClipsState={setShowNewClipsPopup}
         openSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
+      {showNewClipsPopup && (
+        <NewClipsPopup
+          setView={setView}
+          newClips={newClips}
+          onClose={handleCloseNewClipsPopup}
+          onClear={handleClearNewClips}
+        />
+      )}
       {currentView()}
-      <Settings ref={settingsRef} isOpen={isSettingsOpen} />
+      <Settings
+        ref={settingsRef}
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </>
   );
 }

@@ -12,7 +12,6 @@ import { documentDir, join } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { useSettings } from "./SettingsContext";
 import { useClips } from "./ClipsContext";
-import { useFavorites } from "./FavoritesContext";
 import { Clip } from "../types/clip";
 import { getName } from "@tauri-apps/api/app";
 
@@ -32,8 +31,7 @@ interface MediaProviderProps {
 
 export const MediaProvider = ({ children }: MediaProviderProps) => {
   const { settings } = useSettings();
-  const { allClips, currentClip } = useClips();
-  const { favorites } = useFavorites();
+  const { allClips, currentClip, favorites } = useClips();
 
   const [coverCache, setCoverCache] = useState<Map<string, string>>(new Map());
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
