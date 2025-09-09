@@ -7,7 +7,7 @@ let tauriFolderPath: string;
 async function initializePaths() {
   try {
     const docsDir = await documentDir();
-    const appName = await getName(); 
+    const appName = await getName();
     tauriFolderPath = await join(docsDir, appName);
   } catch (error) {
     console.error("Error initializing paths:", error);
@@ -31,7 +31,7 @@ type RenameResult = {
 
 export const renameClipFile = async (
   oldPath: string,
-  newTitle: string
+  newTitle: string,
 ): Promise<RenameResult> => {
   const oldFileName = oldPath.split("\\").pop();
   if (!oldFileName) {
@@ -39,12 +39,12 @@ export const renameClipFile = async (
   }
 
   const fileParts = oldFileName.match(
-    /^(.+?)_([\d-]+_[\d-]+(?:\.?\d*)?)\.mp4$/
+    /^(.+?)_([\d-]+_[\d-]+(?:\.?\d*)?)\.mp4$/,
   );
 
   if (!fileParts || fileParts.length < 3) {
     throw new Error(
-      "File name format is invalid. Expected format: TITLE_DATE_TIME.mp4"
+      "File name format is invalid. Expected format: TITLE_DATE_TIME.mp4",
     );
   }
 
@@ -64,9 +64,8 @@ export const renameClipFile = async (
   } catch (error) {
     console.error("Error renaming file:", error);
     throw new Error(
-      `Failed to rename file: ${
-        error instanceof Error ? error.message : String(error)
-      }`
+      `Failed to rename file: ${error instanceof Error ? error.message : String(error)
+      }`,
     );
   }
 };

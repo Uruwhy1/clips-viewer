@@ -187,23 +187,6 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     [currentClip],
   );
 
-  async function checkForNewClips() {
-    const lastStopped = localStorage.getItem("lastCheckedTimestamp");
-    if (!lastStopped || !settings.gamesDir) return [];
-
-    const sinceTimestamp = parseInt(lastStopped, 10);
-    const newClips = await invoke<Clip[]>("get_new_clips_since", {
-      dir: settings.gamesDir,
-      sinceTimestamp,
-    });
-
-    if (newClips.length > 0) {
-      setAllClips((prev) => [...newClips, ...prev]);
-    }
-
-    return newClips;
-  }
-
   const updateFilter = (
     newFilter: Partial<{ game: string; showFavourites: boolean }>,
   ) => {
@@ -272,7 +255,6 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     toggleFavourite,
     updateFavoritePath,
     isFavorite,
-    checkForNewClips,
   };
 
   return (
