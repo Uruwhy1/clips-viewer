@@ -14,77 +14,82 @@ interface ClipResult {
   error?: string;
 }
 
-async function createClipHandler(
-  startTime: number | null,
-  endTime: number | null,
-  currentClip: Clip | null,
+export default async function createClipHandler(
+  startTime: number,
+  endTime: number,
+  currentClip: Clip,
+  newName: string,
+
   addClip: (clip: Clip) => void,
   showPersistentNotification: (
     id: string,
-    options: NotificationOptions
+    options: NotificationOptions,
   ) => void,
-  removePersistentNotification: (id: string) => void
+  removePersistentNotification: (id: string) => void,
 ): Promise<ClipResult> {
-  if (!startTime || !endTime) {
-    return { response: false, error: "Missing start or end time." };
-  }
-  if (startTime >= endTime) {
-    return { response: false, error: "Start time is after end time." };
-  }
+  const startFormatted: string = formatTime(startTime);
+  const endFormatted: string = formatTime(endTime);
 
-  if (startTime !== null && endTime !== null && currentClip) {
-    const startFormatted: string = formatTime(startTime);
-    const endFormatted: string = formatTime(endTime);
-    const parts: string[] = currentClip.filePath.split("\\");
-    const clipName: string[] = parts.pop()!.split("_");
+  let outputFilePath: string;
+  let clipName: string;
 
-    clipName[0] = clipName[0] + " Clip";
-    parts.push(clipName.join("_"));
+  const parts: string[] = currentClip.filePath.split("\\");
+  const originalFileName: string[] = parts.pop()!.split("_");
 
-    const outputFilePath: string = parts.join("\\");
+  originalFileName[0] = newName;
+  parts.push(originalFileName.join("_"));
+  outputFilePath = parts.join("\\");
+  clipName = newName;
 
-    try {
-      const popupId: string = "clip-process";
-      removePersistentNotification(popupId);
+  try {
+    const popupId: string = "clip-process";
+    removePersistentNotification(popupId);
+
+    const operationText = "Creating Clip...";
+    showPersistentNotification(popupId, {
+      mainText: operationText,
+      progressText: [`Starting clipping process...`],
+      progress: 0,
+    });
+
+    await invoke("create_clip", {
+      inputFile: currentClip.filePath,
+      startTime: startFormatted,
+      endTime: endFormatted,
+      outputFile: outputFilePath,
+    }).catch((err: Error) => {
+      console.error(`Clipping failed:`, err);
       showPersistentNotification(popupId, {
-        mainText: "Creating Clip...",
-        progressText: ["Starting clipping process..."],
-        progress: 0,
+        mainText: `Clipping failed: ${err}`,
+        progress: 100,
+        isComplete: true,
       });
+      throw err;
+    });
 
-      await invoke("create_clip", {
-        inputFile: currentClip.filePath,
-        startTime: startFormatted,
-        endTime: endFormatted,
-        outputFile: outputFilePath,
-      }).catch((err: Error) => {
-        console.error("Clipping failed:", err);
-        showPersistentNotification(popupId, {
-          mainText: `Clip failed: ${err}`,
-          progress: 100,
-          isComplete: true,
-        });
-      });
+    const processedClip: Clip = {
+      filePath: outputFilePath,
+      name: clipName,
+      game: currentClip.game,
+      date: new Date(),
+      formattedDate: currentClip.formattedDate,
+      isFavourite: currentClip.isFavourite,
+    };
 
-      const newClip: Clip = {
-        filePath: outputFilePath,
-        name: `${currentClip.name} Clip`,
-        game: currentClip.game,
-        date: new Date(),
-        formattedDate: currentClip.formattedDate,
-        isFavourite: false,
-      };
+    addClip(processedClip);
 
-      addClip(newClip);
-      return { response: true };
-    } catch (error) {
-      console.error(error);
-      return { response: false, error: `Error creating clip: ${error}` };
-    }
+    showPersistentNotification(popupId, {
+      mainText: "Clip created successfully!",
+      progress: 100,
+      isComplete: true,
+    });
+
+    return { response: true };
+  } catch (error) {
+    console.error(error);
+    return {
+      response: false,
+      error: `Error creating clip: ${error}`,
+    };
   }
-
-  // idk why typescript wants this
-  return { response: false, error: "Invalid clip parameters" };
 }
-
-export default createClipHandler;

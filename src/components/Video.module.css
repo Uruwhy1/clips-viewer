@@ -10,6 +10,7 @@
   overflow: hidden;
 
   z-index: 101;
+  margin-top: var(--title-bar-height);
 }
 
 video {
@@ -21,6 +22,7 @@ video {
 .videoContainer:hover .controls {
   opacity: 1;
 }
+
 .controls {
   position: absolute;
   bottom: 0;
@@ -33,11 +35,9 @@ video {
   flex-direction: column;
 
   color: white;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
+  background: linear-gradient(to top,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0) 100%);
 
   padding: 10px;
 
@@ -46,12 +46,12 @@ video {
 
   user-select: none;
 
-  > div {
+  >div {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
 
-    > div {
+    >div {
       display: flex;
       color: white;
       flex-grow: 1;
@@ -195,12 +195,10 @@ video {
 
   width: 70px;
 
-  background: linear-gradient(
-    to right,
-    var(--accent-washed) 0%,
-    var(--accent-washed) 50%,
-    var(--accent-white) 50%
-  );
+  background: linear-gradient(to right,
+      var(--accent-washed) 0%,
+      var(--accent-washed) 50%,
+      var(--accent-white) 50%);
 
   cursor: pointer;
   transition: background 0.15s ease;
@@ -218,11 +216,15 @@ video {
 }
 
 .volumeSlider input {
-  background: linear-gradient(
-    to right,
-    var(--accent-washed) 0%,
-    var(--accent-washed) calc(var(--volume) * 100%),
-    var(--accent-white) calc(var(--volume) * 100%),
-    var(--accent-white) 100%
-  );
+  background: linear-gradient(to right,
+      var(--accent-washed) 0%,
+      var(--accent-washed) calc(var(--volume) * 100%),
+      var(--accent-white) calc(var(--volume) * 100%),
+      var(--accent-white) 100%);
+}
+
+@media screen and (max-width: 1300px) {
+  .videoContainer {
+    margin-top: 0;
+  }
 }

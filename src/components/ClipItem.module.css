@@ -1,5 +1,5 @@
 .clipCard {
-  border: 1px solid var(--borders);
+  border: 2px solid var(--borders);
   border-radius: var(--radius-big);
   overflow: hidden;
 
@@ -25,7 +25,7 @@
     transform: scale(1.02);
 
     border-color: var(--accent-washed);
-    box-shadow: 0 4px 0 var(--accent-washed);
+    box-shadow: 2px var(--accent-washed);
   }
 }
 
