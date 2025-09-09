@@ -7,11 +7,12 @@
   height: 100vh;
 
   background-color: var(--page-cover);
+  color: var(--color);
 
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: 500;
 }
 
 .popup {

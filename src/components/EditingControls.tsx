@@ -1,4 +1,5 @@
 import React, { RefObject, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./EditingControls.module.css";
 import createClipHandler from "../helpers/createClip";
 import { usePopup } from "../contexts/PopupContext";
@@ -21,8 +22,7 @@ type EditingControlsProps = {
 
 const EditingControls = React.memo<EditingControlsProps>(
   ({ videoRef, onMarkersUpdate }) => {
-    const { currentClip, addClip, setCurrentClip, setAllClips, deleteClip } =
-      useClips();
+    const { currentClip, addClip } = useClips();
     const {
       showPopup,
       showPersistentNotification,
@@ -64,7 +64,6 @@ const EditingControls = React.memo<EditingControlsProps>(
         endTime,
         currentClip,
         name,
-
         addClip,
         showPersistentNotification,
         removePersistentNotification,
@@ -99,14 +98,18 @@ const EditingControls = React.memo<EditingControlsProps>(
           </button>
         </div>
 
-        <CreateClipPopup
-          isOpen={showCreateClipPopup}
-          onClose={() => setShowCreateClipPopup(false)}
-          onCreateNew={handleCreateNew}
-          currentClip={currentClip}
-          startTime={startTime}
-          endTime={endTime}
-        />
+        {showCreateClipPopup &&
+          createPortal(
+            <CreateClipPopup
+              isOpen={showCreateClipPopup}
+              onClose={() => setShowCreateClipPopup(false)}
+              onCreateNew={handleCreateNew}
+              currentClip={currentClip}
+              startTime={startTime}
+              endTime={endTime}
+            />,
+            document.getElementById("root") || document.body,
+          )}
       </>
     );
   },

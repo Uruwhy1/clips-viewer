@@ -237,6 +237,7 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     return true;
   };
 
+
   const isFavorite = (clipPath: string) => favorites.has(clipPath);
 
   const contextValue: ClipsContextType = {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "./CreateClipPopup.module.css";
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Clip } from "../types/clip";
 
 interface CreateClipPopupProps {
@@ -23,11 +23,11 @@ const CreateClipPopup: React.FC<CreateClipPopupProps> = ({
   const [clipName, setClipName] = useState("");
 
   useEffect(() => {
-    if (isOpen && currentClip) {
+    if (currentClip) {
       const defaultName = currentClip.name.replace(/\.[^/.]+$/, "") + " Clip";
       setClipName(defaultName);
     }
-  }, [isOpen, currentClip]);
+  }, [currentClip]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -50,7 +50,7 @@ const CreateClipPopup: React.FC<CreateClipPopupProps> = ({
     }
   };
 
-  if (!isOpen || !currentClip || !startTime || !endTime) return null;
+  if (!currentClip || !startTime || !endTime) return null;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -105,7 +105,6 @@ const CreateClipPopup: React.FC<CreateClipPopupProps> = ({
             onClick={handleCreateNew}
             disabled={!clipName.trim()}
           >
-            <Plus size={16} />
             Create New
           </button>
         </div>

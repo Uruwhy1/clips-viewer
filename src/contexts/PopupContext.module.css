@@ -20,7 +20,7 @@
   align-items: end;
   flex-direction: column;
   gap: 10px;
-  z-index: 1000;
+  z-index: 10000;
 }
 
 .popup {

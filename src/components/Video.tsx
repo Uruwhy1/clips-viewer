@@ -339,7 +339,7 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
               )}
           </div>
 
-          <div>
+          <div className={styles.controlBar}>
             <div>
               <button
                 onClick={togglePlayPause}
