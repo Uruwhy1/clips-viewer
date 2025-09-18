@@ -6,6 +6,7 @@ import {
   useContext,
   useCallback,
   ReactNode,
+  useRef,
 } from "react";
 import { getAllClips } from "../helpers/readFilesFromDirectory";
 import {
@@ -15,7 +16,6 @@ import {
 } from "../helpers/externalFiles";
 import { useSettings } from "./SettingsContext";
 import { Clip } from "../types/clip";
-import { invoke } from "@tauri-apps/api/core";
 
 interface ClipsContextType {
   allClips: Clip[];
@@ -39,6 +39,8 @@ interface ClipsContextType {
   toggleFavourite: (clipPath: string) => void;
   updateFavoritePath: (oldPath: string, newPath: string) => void;
   isFavorite: (clipPath: string) => boolean;
+
+  randomClips: Clip[];
 }
 
 const ClipsContext = createContext<ClipsContextType | undefined>(undefined);
@@ -53,6 +55,8 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
   const [allClips, setAllClips] = useState<Clip[]>([]);
   const [currentClip, setCurrentClip] = useState<Clip | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  const loadedClips = useRef(false);
 
   const [filter, setFilter] = useState<{
     game: string;
@@ -77,6 +81,7 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
         }));
 
         setAllClips(clipsWithFavorites);
+        loadedClips.current = true;
 
         const now = Math.floor(Date.now() / 1000);
         localStorage.setItem("lastCheckedTimestamp", now.toString());
@@ -108,6 +113,30 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
 
     return Array.from(new Set(filteredClipsForGames.map((clip) => clip.game)));
   }, [allClips, filter]);
+
+  // Random clips for recommendations
+  const randomClips = useMemo(() => {
+    if (!allClips.length || !currentClip || !loadedClips.current) return [];
+
+    const availableClips = allClips.filter(
+      (clip) =>
+        clip.filePath !== currentClip?.filePath && favorites.has(clip.filePath),
+    );
+
+    if (availableClips.length === 0) return [];
+
+    const randomSelected = [];
+    const maxClips = Math.min(6, availableClips.length);
+    const clipsCopy = [...availableClips];
+
+    for (let i = 0; i < maxClips; i++) {
+      const randomIndex = Math.floor(Math.random() * clipsCopy.length);
+      randomSelected.push(clipsCopy[randomIndex]);
+      clipsCopy.splice(randomIndex, 1);
+    }
+
+    return randomSelected;
+  }, [allClips, currentClip, favorites, loadedClips.current]);
 
   const addClip = (newClip: Clip) => {
     setAllClips((prevClips) => [newClip, ...prevClips]);
@@ -237,7 +266,6 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     return true;
   };
 
-
   const isFavorite = (clipPath: string) => favorites.has(clipPath);
 
   const contextValue: ClipsContextType = {
@@ -256,6 +284,7 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     toggleFavourite,
     updateFavoritePath,
     isFavorite,
+    randomClips,
   };
 
   return (

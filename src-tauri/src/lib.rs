@@ -252,7 +252,7 @@ pub fn run() {
             delete::calculate_total_size,
             delete::delete_older_clips,
             backup_favourite_clips,
-            get_new_clips_since
+            get_new_clips_since,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

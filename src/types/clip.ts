@@ -5,4 +5,5 @@ export type Clip = {
   date: Date;
   formattedDate: string;
   isFavourite: boolean;
+  thumbnail: string;
 };

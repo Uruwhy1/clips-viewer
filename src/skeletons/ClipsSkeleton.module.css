@@ -2,7 +2,7 @@
   height: 71px;
   border: 1px solid #ddd;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background-color: rgba(128, 128, 128, 0.311);
 
   overflow: hidden;
@@ -18,12 +18,10 @@
   width: 200%;
   height: 100%;
 
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.311),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.311),
+      transparent);
   animation: shimmer 3s ease infinite;
 }
 

@@ -6,6 +6,7 @@ import FavouriteButton from "./icons/StarButton";
 
 import { useClips } from "../contexts/ClipsContext";
 import { Clip } from "../types/clip";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 type ClipItemProps = {
   clip: Clip;
@@ -31,6 +32,11 @@ const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
 
   return (
     <div className={styles.clipCard} onClick={(e) => handleClick()}>
+      <img
+        className={styles.thumbnail}
+        src={convertFileSrc(clip.thumbnail)}
+        alt=""
+      ></img>
       <div className={styles.header}>
         <h3>{clip.name}</h3>
         <div

@@ -39,7 +39,7 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
       });
       setShowGames(false);
     },
-    [filter.game, updateFilter]
+    [filter.game, updateFilter],
   );
 
   const toggleFavorites = useCallback(() => {

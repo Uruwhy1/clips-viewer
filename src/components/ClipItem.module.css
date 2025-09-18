@@ -29,6 +29,14 @@
   }
 }
 
+.thumbnail {
+  object-fit: cover;
+
+  will-change: transform;
+  height: 200px;
+  background: var(--gray-color);
+}
+
 .header {
   h3 {
     font-size: var(--header-small-size);

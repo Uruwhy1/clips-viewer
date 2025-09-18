@@ -3,8 +3,8 @@ use dirs;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug, Serialize)]
@@ -16,6 +16,7 @@ pub struct ClipInfo {
     pub formatted_date: String,
     pub date: i64,
     pub is_favourite: bool,
+    pub thumbnail: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -46,13 +47,10 @@ fn parse_date_from_filename(filename: &str) -> Result<i64, String> {
     let time_part = parts[parts.len() - 1].split('.').next().unwrap_or("");
     let datetime_str = format!("{}_{}", date_part, time_part);
 
-    // Try parsing common formats as local time
     let formats = ["%d-%m-%Y_%H-%M-%S", "%m-%d-%Y_%H-%M-%S"];
     for fmt in formats {
         if let Ok(naive_dt) = NaiveDateTime::parse_from_str(&datetime_str, fmt) {
-            // Interpret as local time
             if let Some(local_dt) = Local.from_local_datetime(&naive_dt).single() {
-                // UTC timestamp for comparison
                 return Ok(local_dt.with_timezone(&Utc).timestamp());
             }
         }
@@ -105,16 +103,56 @@ fn load_favourites(app_name: &str) -> Result<HashSet<String>, String> {
     }
 }
 
+fn generate_thumbnail_if_missing(app_name: &str, video_path: &str) -> Result<String, String> {
+    let docs_dir = dirs::document_dir().ok_or("No documents directory found")?;
+    let thumb_dir = docs_dir.join(app_name).join("thumbnails");
+    fs::create_dir_all(&thumb_dir).map_err(|e| format!("Failed to create thumbnails dir: {}", e))?;
+
+    let video_path = Path::new(video_path);
+    let stem = video_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .ok_or("Invalid video filename")?;
+    let thumb_path = thumb_dir.join(format!("{stem}.jpg"));
+
+    if thumb_path.exists() {
+        return Ok(thumb_path.to_string_lossy().to_string());
+    }
+
+    let status = Command::new("ffmpeg")
+        .args([
+            "-ss",
+            "5",
+            "-i",
+            video_path.to_str().unwrap(),
+            "-frames:v",
+            "1",
+            "-vf",
+            "scale=320:-1",
+            "-q:v",
+            "3",
+            thumb_path.to_str().unwrap(),
+        ])
+        .status()
+        .map_err(|e| format!("Failed to spawn ffmpeg: {}", e))?;
+
+    if !status.success() {
+        return Err(format!("ffmpeg failed for {}", video_path.display()));
+    }
+
+    Ok(thumb_path.to_string_lossy().to_string())
+}
+
 fn process_file_entry(
+    app_name: &str,
     path: &Path,
     file_name: &str,
-) -> Result<(String, String, i64, String), String> {
+) -> Result<(String, String, i64, String, String), String> {
     let file_path_str = path.to_string_lossy().to_string();
     let name = extract_title_from_filename(file_name);
 
     let (unix_timestamp, formatted_date) = match parse_date_from_filename(file_name) {
         Ok(utc_timestamp) => {
-            // Convert UTC timestamp back to local for display
             let local_dt = Local
                 .timestamp_opt(utc_timestamp, 0)
                 .single()
@@ -125,7 +163,6 @@ fn process_file_entry(
             )
         }
         Err(_) => {
-            // fallback to file modification time
             let metadata = fs::metadata(path)
                 .map_err(|e| format!("Error getting metadata for {}: {}", path.display(), e))?;
             let mtime = metadata
@@ -139,10 +176,13 @@ fn process_file_entry(
         }
     };
 
-    Ok((file_path_str, name, unix_timestamp, formatted_date))
+    let thumbnail_path = generate_thumbnail_if_missing(app_name, &file_path_str)?;
+
+    Ok((file_path_str, name, unix_timestamp, formatted_date, thumbnail_path))
 }
 
 fn process_directory(
+    app_name: &str,
     dir_path: &Path,
     game: Option<String>,
     favourites_set: &HashSet<String>,
@@ -158,10 +198,10 @@ fn process_directory(
 
         if path.is_dir() {
             let current_game = game.clone().unwrap_or_else(|| file_name.clone());
-            process_directory(&path, Some(current_game), favourites_set, all_clips)?;
+            process_directory(app_name, &path, Some(current_game), favourites_set, all_clips)?;
         } else if let Some(current_game) = &game {
-            let (file_path_str, name, unix_timestamp, formatted_date) =
-                process_file_entry(&path, &file_name)?;
+            let (file_path_str, name, unix_timestamp, formatted_date, thumbnail_path) =
+                process_file_entry(app_name, &path, &file_name)?;
 
             all_clips.push(ClipInfo {
                 game: current_game.clone(),
@@ -170,6 +210,7 @@ fn process_directory(
                 formatted_date,
                 date: unix_timestamp,
                 is_favourite: favourites_set.contains(&file_path_str),
+                thumbnail: thumbnail_path,
             });
         }
     }
@@ -178,6 +219,7 @@ fn process_directory(
 }
 
 fn process_directory_newer(
+    app_name: &str,
     dir_path: &Path,
     game: Option<String>,
     since_timestamp: i64,
@@ -216,12 +258,11 @@ fn process_directory_newer(
 
         if path.is_dir() {
             let current_game = game.clone().unwrap_or_else(|| file_name.clone());
-            process_directory_newer(&path, Some(current_game), since_timestamp, all_clips)?;
+            process_directory_newer(app_name, &path, Some(current_game), since_timestamp, all_clips)?;
         } else if let Some(current_game) = &game {
-            let (file_path_str, name, unix_timestamp, formatted_date) =
-                process_file_entry(&path, &file_name)?;
+            let (file_path_str, name, unix_timestamp, formatted_date, thumbnail_path) =
+                process_file_entry(app_name, &path, &file_name)?;
 
-            // Compare local timestamps
             if unix_timestamp > since_timestamp {
                 all_clips.push(ClipInfo {
                     game: current_game.clone(),
@@ -230,6 +271,7 @@ fn process_directory_newer(
                     formatted_date,
                     date: unix_timestamp,
                     is_favourite: false,
+                    thumbnail: thumbnail_path,
                 });
             }
         }
@@ -253,7 +295,7 @@ pub fn get_all_clips(
     let favourites_set = load_favourites(&app_name)?;
 
     let mut all_clips = Vec::new();
-    process_directory(Path::new(&dir_path), None, &favourites_set, &mut all_clips)?;
+    process_directory(&app_name, Path::new(&dir_path), None, &favourites_set, &mut all_clips)?;
 
     all_clips.sort_by(|a, b| b.date.cmp(&a.date));
 
@@ -264,9 +306,20 @@ pub fn get_all_clips(
 }
 
 #[tauri::command]
-pub fn get_new_clips_since(dir: String, since_timestamp: i64) -> Result<Vec<ClipInfo>, String> {
+pub fn get_new_clips_since(
+    app_handle: tauri::AppHandle,
+    dir: String,
+    since_timestamp: i64,
+) -> Result<Vec<ClipInfo>, String> {
+    let app_name = app_handle
+        .config()
+        .product_name
+        .as_ref()
+        .ok_or("App product_name is not set")?
+        .as_str();
+
     let mut all_clips = Vec::new();
-    process_directory_newer(Path::new(&dir), None, since_timestamp, &mut all_clips)?;
+    process_directory_newer(&app_name, Path::new(&dir), None, since_timestamp, &mut all_clips)?;
 
     all_clips.sort_by(|a, b| b.date.cmp(&a.date));
 

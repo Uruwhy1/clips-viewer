@@ -1,19 +1,18 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Play } from "lucide-react";
 import styles from "./RandomVideos.module.css";
 import { useClips } from "../contexts/ClipsContext";
-import { useMedia } from "../contexts/MediaContext";
 import { Clip } from "../types/clip";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 const RandomVideos = () => {
-  const { setCurrentClip, currentClip } = useClips();
-  const { thumbnails, randomClips } = useMedia();
+  const { setCurrentClip, currentClip, randomClips } = useClips();
 
   const handleClipClick = useCallback(
     (clip: Clip) => {
       setCurrentClip(clip);
     },
-    [setCurrentClip]
+    [setCurrentClip],
   );
 
   if (randomClips.length === 0) {
@@ -26,22 +25,17 @@ const RandomVideos = () => {
         {randomClips.map((clip: Clip) => (
           <div
             key={clip.filePath}
-            className={`${styles.clipItem} ${
-              currentClip?.filePath == clip.filePath ? styles.active : ""
-            }`}
+            className={`${styles.clipItem} ${currentClip?.filePath === clip.filePath ? styles.active : ""
+              }`}
             onClick={() => handleClipClick(clip)}
           >
             <div
               className={styles.thumbnailContainer}
-              style={
-                thumbnails[clip.filePath]
-                  ? {
-                      backgroundImage: `url(${thumbnails[clip.filePath]})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }
-                  : {}
-              }
+              style={{
+                backgroundImage: `url(${convertFileSrc(clip.thumbnail)})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
             >
               <div className={styles.playIcon}>
                 <Play size={24} />
