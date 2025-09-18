@@ -198,9 +198,8 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
       setAllClips((prevClips) => {
         const newClips = prevClips.filter((clip) => clip.filePath !== clipPath);
 
-        // Update current clip if the deleted clip was selected
         if (currentClip && currentClip.filePath === clipPath) {
-          const newCurrentClip = newClips[0] || null;
+          const newCurrentClip = newClips[5] || null;
           setCurrentClip(newCurrentClip);
         }
 
@@ -244,13 +243,6 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
           : clip,
       ),
     );
-
-    if (currentClip && currentClip.filePath === clipPath) {
-      setCurrentClip({
-        ...currentClip,
-        isFavourite: newFavorites.has(clipPath),
-      });
-    }
 
     return newFavorites.has(clipPath);
   };

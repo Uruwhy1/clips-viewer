@@ -34,7 +34,7 @@
 
   will-change: transform;
   height: 200px;
-  background: var(--gray-color);
+  background: var(--page-cover);
 }
 
 .header {

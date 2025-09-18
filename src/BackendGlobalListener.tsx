@@ -14,6 +14,7 @@ const PersistentListener: React.FC<PersistentListenerProps> = ({
   useEffect(() => {
     let unlistenClip: () => void;
     let unlistenBackup: () => void;
+    let unlistenClipLoading: () => void;
 
     async function setupListeners() {
       // clip creation progress listener
@@ -26,6 +27,25 @@ const PersistentListener: React.FC<PersistentListenerProps> = ({
             is_complete: boolean;
           };
         const popupId = "clip-process";
+
+        showPersistentNotification(popupId, {
+          mainText: main_text,
+          progressText: [progress_text],
+          progress,
+          isComplete: is_complete,
+        });
+      });
+
+      // clip loading progress listener
+      unlistenClipLoading = await listen("clip-loading-progress", (event) => {
+        const { main_text, progress_text, progress, is_complete } =
+          event.payload as {
+            main_text: string;
+            progress_text: string;
+            progress: number;
+            is_complete: boolean;
+          };
+        const popupId = "clip-loading";
 
         showPersistentNotification(popupId, {
           mainText: main_text,
@@ -88,8 +108,9 @@ const PersistentListener: React.FC<PersistentListenerProps> = ({
     return () => {
       if (unlistenClip) unlistenClip();
       if (unlistenBackup) unlistenBackup();
+      if (unlistenClipLoading) unlistenClipLoading();
     };
-  }, [showPersistentNotification]);
+  }, []);
 
   return <>{children}</>;
 };

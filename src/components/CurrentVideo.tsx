@@ -46,7 +46,6 @@ const CurrentVideo: React.FC = React.memo(() => {
   }
 
   useEffect(() => {
-    console.log(coverCache);
     if (coverCache.has(currentClip.game)) {
       setCover(coverCache.get(currentClip.game) || "");
     }

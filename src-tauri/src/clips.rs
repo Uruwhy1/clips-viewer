@@ -4,8 +4,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
+use tauri::{Emitter, Window};
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -28,6 +29,14 @@ pub struct ClipsResult {
 
 #[derive(Deserialize, Serialize)]
 struct Favourites(Vec<String>);
+
+#[derive(Serialize, Clone)]
+struct ClipLoadProgress {
+    main_text: String,
+    progress_text: String,
+    progress: u8,
+    is_complete: bool,
+}
 
 fn format_date(timestamp: SystemTime) -> String {
     let datetime: DateTime<Utc> = timestamp.into();
@@ -106,7 +115,8 @@ fn load_favourites(app_name: &str) -> Result<HashSet<String>, String> {
 fn generate_thumbnail_if_missing(app_name: &str, video_path: &str) -> Result<String, String> {
     let docs_dir = dirs::document_dir().ok_or("No documents directory found")?;
     let thumb_dir = docs_dir.join(app_name).join("thumbnails");
-    fs::create_dir_all(&thumb_dir).map_err(|e| format!("Failed to create thumbnails dir: {}", e))?;
+    fs::create_dir_all(&thumb_dir)
+        .map_err(|e| format!("Failed to create thumbnails dir: {}", e))?;
 
     let video_path = Path::new(video_path);
     let stem = video_path
@@ -128,11 +138,12 @@ fn generate_thumbnail_if_missing(app_name: &str, video_path: &str) -> Result<Str
             "-frames:v",
             "1",
             "-vf",
-            "scale=320:-1",
+            "scale=640:-1",
             "-q:v",
-            "3",
+            "2",
             thumb_path.to_str().unwrap(),
         ])
+        .stdout(Stdio::null())
         .status()
         .map_err(|e| format!("Failed to spawn ffmpeg: {}", e))?;
 
@@ -178,7 +189,37 @@ fn process_file_entry(
 
     let thumbnail_path = generate_thumbnail_if_missing(app_name, &file_path_str)?;
 
-    Ok((file_path_str, name, unix_timestamp, formatted_date, thumbnail_path))
+    Ok((
+        file_path_str,
+        name,
+        unix_timestamp,
+        formatted_date,
+        thumbnail_path,
+    ))
+}
+
+fn count_files_in_directory(dir_path: &Path) -> Result<usize, String> {
+    let mut file_count = 0;
+
+    fn count_recursive(dir: &Path, count: &mut usize) -> Result<(), String> {
+        let entries = fs::read_dir(dir)
+            .map_err(|e| format!("Error reading directory {}: {}", dir.display(), e))?;
+
+        for entry in entries {
+            let entry = entry.map_err(|e| format!("Error reading entry: {}", e))?;
+            let path = entry.path();
+
+            if path.is_dir() {
+                count_recursive(&path, count)?;
+            } else {
+                *count += 1;
+            }
+        }
+        Ok(())
+    }
+
+    count_recursive(dir_path, &mut file_count)?;
+    Ok(file_count)
 }
 
 fn process_directory(
@@ -187,6 +228,9 @@ fn process_directory(
     game: Option<String>,
     favourites_set: &HashSet<String>,
     all_clips: &mut Vec<ClipInfo>,
+    window: Option<&Window>,
+    total_files: usize,
+    processed_files: &mut usize,
 ) -> Result<(), String> {
     let entries = fs::read_dir(dir_path)
         .map_err(|e| format!("Error reading directory {}: {}", dir_path.display(), e))?;
@@ -198,8 +242,39 @@ fn process_directory(
 
         if path.is_dir() {
             let current_game = game.clone().unwrap_or_else(|| file_name.clone());
-            process_directory(app_name, &path, Some(current_game), favourites_set, all_clips)?;
+            process_directory(
+                app_name,
+                &path,
+                Some(current_game),
+                favourites_set,
+                all_clips,
+                window,
+                total_files,
+                processed_files,
+            )?;
         } else if let Some(current_game) = &game {
+            *processed_files += 1;
+
+            if let Some(w) = window {
+                let progress = if total_files > 0 {
+                    ((*processed_files as f32 / total_files as f32) * 100.0) as u8
+                } else {
+                    0
+                };
+
+                let progress_update = ClipLoadProgress {
+                    main_text: "Loading clips...".to_string(),
+                    progress_text: format!(
+                        "Processing {} ({}/{})",
+                        current_game, processed_files, total_files
+                    ),
+                    progress,
+                    is_complete: *processed_files >= total_files,
+                };
+
+                let _ = w.emit("clip-loading-progress", progress_update);
+            }
+
             let (file_path_str, name, unix_timestamp, formatted_date, thumbnail_path) =
                 process_file_entry(app_name, &path, &file_name)?;
 
@@ -258,7 +333,13 @@ fn process_directory_newer(
 
         if path.is_dir() {
             let current_game = game.clone().unwrap_or_else(|| file_name.clone());
-            process_directory_newer(app_name, &path, Some(current_game), since_timestamp, all_clips)?;
+            process_directory_newer(
+                app_name,
+                &path,
+                Some(current_game),
+                since_timestamp,
+                all_clips,
+            )?;
         } else if let Some(current_game) = &game {
             let (file_path_str, name, unix_timestamp, formatted_date, thumbnail_path) =
                 process_file_entry(app_name, &path, &file_name)?;
@@ -284,6 +365,7 @@ fn process_directory_newer(
 pub fn get_all_clips(
     app_handle: tauri::AppHandle,
     dir_path: String,
+    window: Window,
 ) -> Result<ClipsResult, String> {
     let app_name = app_handle
         .config()
@@ -292,12 +374,40 @@ pub fn get_all_clips(
         .ok_or("App product_name is not set")?
         .as_str();
 
-    let favourites_set = load_favourites(&app_name)?;
+    let initial_progress = ClipLoadProgress {
+        main_text: "Initializing clip loading...".to_string(),
+        progress_text: "Scanning directories...".to_string(),
+        progress: 0,
+        is_complete: false,
+    };
+    let _ = window.emit("clip-loading-progress", initial_progress);
 
+    let total_files = count_files_in_directory(Path::new(&dir_path))?;
+
+    let favourites_set = load_favourites(&app_name)?;
     let mut all_clips = Vec::new();
-    process_directory(&app_name, Path::new(&dir_path), None, &favourites_set, &mut all_clips)?;
+    let mut processed_files = 0;
+
+    process_directory(
+        &app_name,
+        Path::new(&dir_path),
+        None,
+        &favourites_set,
+        &mut all_clips,
+        Some(&window),
+        total_files,
+        &mut processed_files,
+    )?;
 
     all_clips.sort_by(|a, b| b.date.cmp(&a.date));
+
+    let completion_progress = ClipLoadProgress {
+        main_text: format!("Loaded {} clips successfully!", all_clips.len()),
+        progress_text: format!("Completed ({}/{})", processed_files, total_files),
+        progress: 100,
+        is_complete: true,
+    };
+    let _ = window.emit("clip-loading-progress", completion_progress);
 
     Ok(ClipsResult {
         favourites_set: favourites_set.into_iter().collect(),
@@ -319,7 +429,13 @@ pub fn get_new_clips_since(
         .as_str();
 
     let mut all_clips = Vec::new();
-    process_directory_newer(&app_name, Path::new(&dir), None, since_timestamp, &mut all_clips)?;
+    process_directory_newer(
+        &app_name,
+        Path::new(&dir),
+        None,
+        since_timestamp,
+        &mut all_clips,
+    )?;
 
     all_clips.sort_by(|a, b| b.date.cmp(&a.date));
 
