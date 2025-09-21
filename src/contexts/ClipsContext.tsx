@@ -31,7 +31,7 @@ interface ClipsContextType {
   updateFilter: (
     newFilter: Partial<{ game: string; showFavourites: boolean }>,
   ) => void;
-  addClip: (newClip: Clip) => void;
+  addClip: (newClip: Clip) => () => void;
   editClip: (clip: Clip, newTitle: string) => Promise<boolean>;
   deleteClip: (clipPath: string, isFavourite: boolean) => Promise<boolean>;
 
@@ -136,10 +136,26 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     }
 
     return randomSelected;
-  }, [allClips, currentClip, favorites, loadedClips.current]);
+  }, [allClips, loadedClips.current]);
 
-  const addClip = (newClip: Clip) => {
+  type AddClipResult = {
+    setAsCurrent: () => void;
+    setAsCurrentAndRemoveOld: () => void;
+  };
+
+  const addClip = (newClip: Clip): AddClipResult => {
     setAllClips((prevClips) => [newClip, ...prevClips]);
+
+    const setAsCurrent = (): void => setCurrentClip(newClip);
+    const setAsCurrentAndRemoveOld = async (): Promise<void> => {
+      if (currentClip) {
+        await deleteClip(currentClip.filePath, currentClip.isFavourite);
+
+        setCurrentClip(newClip);
+      }
+    };
+
+    return { setAsCurrent, setAsCurrentAndRemoveOld };
   };
 
   const editClip = async (clip: Clip, newTitle: string): Promise<boolean> => {

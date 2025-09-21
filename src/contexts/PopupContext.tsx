@@ -5,27 +5,29 @@ import {
   useContext,
   ReactNode,
 } from "react";
-
 import styles from "./PopupContext.module.css";
-
-type PersistentNotificationInfo = {
-  mainText: string;
-  progressText?: string[];
-  progress: number | null;
-  isComplete?: boolean;
-};
+import Button from "../components/Button";
+import {
+  PopupButton,
+  PersistentNotificationInfo,
+  PopupData,
+} from "../types/popups";
 
 interface PopupContextTypes {
-  showPopup: (text: string, isSuccess: boolean) => void;
+  showPopup: (
+    text: string,
+    isSuccess: boolean,
+    buttons?: PopupButton[],
+  ) => void;
   showPersistentNotification: (
     id: string,
-    {}: PersistentNotificationInfo
+    info: PersistentNotificationInfo,
   ) => void;
   removePersistentNotification: (id: string) => void;
 }
 
 export const PopupContext = createContext<PopupContextTypes | undefined>(
-  undefined
+  undefined,
 );
 
 interface PopupProviderProps {
@@ -33,44 +35,33 @@ interface PopupProviderProps {
 }
 
 export const PopupProvider = ({ children }: PopupProviderProps) => {
-  const [popupQueue, setPopupQueue] = useState<
-    { text: string; type: string }[]
-  >([]);
-
-  const [popupActive, setPopupActive] = useState<boolean>(false);
-
-  const [currentPopup, setCurrentPopup] = useState<{
-    text: string;
-    type: string;
-  }>({ text: "", type: "" });
+  const [popupQueue, setPopupQueue] = useState<PopupData[]>([]);
+  const [popupActive, setPopupActive] = useState(false);
+  const [currentPopup, setCurrentPopup] = useState<PopupData | null>(null);
 
   const [persistentNotifications, setPersistentNotifications] = useState<
     Record<string, PersistentNotificationInfo & { timestamp: number }>
   >({});
 
-  const showPopup = (text: string, isSuccess: boolean) => {
+  const showPopup = (
+    text: string,
+    isSuccess: boolean,
+    buttons?: PopupButton[],
+  ) => {
     setPopupQueue((prevQueue) => [
       ...prevQueue,
-      { text, type: isSuccess ? "success" : "failure" },
+      { text, type: isSuccess ? "success" : "failure", buttons },
     ]);
   };
 
   const showPersistentNotification = (
     id: string,
-    {
-      mainText,
-      progressText,
-      progress = null,
-      isComplete = false,
-    }: PersistentNotificationInfo
+    info: PersistentNotificationInfo,
   ) => {
     setPersistentNotifications((prev) => ({
       ...prev,
       [id]: {
-        mainText,
-        progressText,
-        progress,
-        isComplete,
+        ...info,
         timestamp: Date.now(),
       },
     }));
@@ -91,14 +82,14 @@ export const PopupProvider = ({ children }: PopupProviderProps) => {
       setPopupActive(true);
       setCurrentPopup(popupQueue[0]);
 
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       setPopupQueue((prevQueue) => prevQueue.slice(1));
       setPopupActive(false);
+      setCurrentPopup(null);
     };
 
     processQueue();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [popupQueue, popupActive]);
 
   useEffect(() => {
@@ -110,7 +101,7 @@ export const PopupProvider = ({ children }: PopupProviderProps) => {
       const timers = completedIds.map((id) => {
         return setTimeout(() => {
           removePersistentNotification(id);
-        }, 2500);
+        }, 5000);
       });
 
       return () => {
@@ -128,12 +119,10 @@ export const PopupProvider = ({ children }: PopupProviderProps) => {
       }}
     >
       <div className={styles.notificationsContainer}>
-        {popupActive && (
+        {popupActive && currentPopup && (
           <div
             id="popup"
-            className={`${styles.popup} ${styles[currentPopup.type]} ${
-              styles.active
-            }`}
+            className={`${styles.popup} ${styles[currentPopup.type]} ${styles.active}`}
           >
             <div className={styles.icon}>
               {currentPopup.type === "success" ? (
@@ -170,56 +159,80 @@ export const PopupProvider = ({ children }: PopupProviderProps) => {
               )}
             </div>
             <p className={styles.text}>{currentPopup.text}</p>
+            {currentPopup.buttons && (
+              <div className={styles.buttons}>
+                {currentPopup.buttons.map((button, index) => (
+                  <Button
+                    key={index}
+                    onClick={button.func}
+                    protect={button.protect}
+                  >
+                    {button.text}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {Object.keys(persistentNotifications).length > 0 &&
-          Object.entries(persistentNotifications).map(([id, notification]) => (
-            <div
-              key={id}
-              className={`${styles.persistentNotification} ${
-                notification.isComplete ? styles.completed : ""
+        {Object.entries(persistentNotifications).map(([id, notification]) => (
+          <div
+            key={id}
+            className={`${styles.persistentNotification} ${notification.isComplete ? styles.completed : ""
               }`}
-            >
-              <div className={styles.persistentHeader}>
-                <div className={styles.icon}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                </div>
-                <h4>{notification.mainText}</h4>
+          >
+            <div className={styles.persistentHeader}>
+              <div className={styles.icon}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
               </div>
-
-              {notification.progressText && (
-                <div className={styles.progressTextContainer}>
-                  {notification.progressText.map((text, index) => (
-                    <p key={index} className={styles.text}>
-                      {text}
-                    </p>
-                  ))}
-                </div>
-              )}
-              {notification.progress !== null && (
-                <div className={styles.progressBarContainer}>
-                  <div
-                    className={styles.progressBar}
-                    style={{ width: `${notification.progress}%` }}
-                  ></div>
-                </div>
-              )}
+              <h4>{notification.mainText}</h4>
             </div>
-          ))}
+
+            {notification.progressText && (
+              <div className={styles.progressTextContainer}>
+                {notification.progressText.map((text, index) => (
+                  <p key={index} className={styles.text}>
+                    {text}
+                  </p>
+                ))}
+              </div>
+            )}
+            {notification.progress !== null && (
+              <div className={styles.progressBarContainer}>
+                <div
+                  className={styles.progressBar}
+                  style={{ width: `${notification.progress}%` }}
+                ></div>
+              </div>
+            )}
+            {notification.buttons && (
+              <div className={styles.buttons}>
+                {notification.buttons.map((button, index) => (
+                  <Button
+                    key={index}
+                    onClick={button.func}
+                    protect={button.protect}
+                  >
+                    {button.text}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
       {children}

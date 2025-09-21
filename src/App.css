@@ -55,6 +55,7 @@ body.no-radius {
 
   --sidebar-width: 50px;
   --title-bar-height: 32px;
+  --button-height: 2.125rem;
 
   --page-padding: 1.5rem;
   --page-padding-small: 0.25rem;

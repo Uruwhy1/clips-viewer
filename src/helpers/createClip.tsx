@@ -1,13 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { formatTime } from "./formatTime";
 import { Clip } from "../types/clip";
-
-interface NotificationOptions {
-  mainText: string;
-  progressText?: string[];
-  progress: number;
-  isComplete?: boolean;
-}
+import { PersistentNotificationInfo } from "../types/popups";
 
 interface ClipResult {
   response: boolean;
@@ -20,10 +14,10 @@ export default async function createClipHandler(
   currentClip: Clip,
   newName: string,
 
-  addClip: (clip: Clip) => void,
+  addClip: (clip: Clip) => () => void,
   showPersistentNotification: (
     id: string,
-    options: NotificationOptions,
+    options: PersistentNotificationInfo,
   ) => void,
   removePersistentNotification: (id: string) => void,
 ): Promise<ClipResult> {
@@ -74,14 +68,27 @@ export default async function createClipHandler(
       date: new Date(),
       formattedDate: currentClip.formattedDate,
       isFavourite: currentClip.isFavourite,
+      thumbnail: "",
     };
 
-    addClip(processedClip);
+    const setCurrent = addClip(processedClip);
 
     showPersistentNotification(popupId, {
       mainText: "Clip created successfully!",
       progress: 100,
       isComplete: true,
+      buttons: [
+        {
+          text: "Go to Clip",
+          func: setCurrent.setAsCurrent,
+          protect: false,
+        },
+        {
+          text: "Go and Delete Current",
+          func: setCurrent.setAsCurrentAndRemoveOld,
+          protect: true,
+        },
+      ],
     });
 
     return { response: true };

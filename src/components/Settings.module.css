@@ -229,7 +229,7 @@
 .form {
   nav-index: -1;
 
-  --settingButtonHeight: 2.125rem;
+  --settingButtonHeight: var(--buttonHeight);
   --inputGroupHeight: 4.1rem;
 
   display: flex;

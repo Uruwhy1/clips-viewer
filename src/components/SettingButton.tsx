@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./SettingButton.module.css";
+import Button from "../components/Button";
 
 type SettingButtonProps = {
   func: () => void;
@@ -11,16 +11,11 @@ type SettingButtonProps = {
 const SettingButton = React.memo<SettingButtonProps>(
   ({ func, text, tabIndex, disabled = false }) => {
     return (
-      <button
-        tabIndex={tabIndex}
-        className={styles.settingButton}
-        onClick={func}
-        disabled={disabled}
-      >
+      <Button onClick={func} tabIndex={tabIndex} disabled={disabled}>
         {text}
-      </button>
+      </Button>
     );
-  }
+  },
 );
 
 export default SettingButton;
