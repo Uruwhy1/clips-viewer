@@ -29,14 +29,8 @@ const RandomVideos = () => {
               }`}
             onClick={() => handleClipClick(clip)}
           >
-            <div
-              className={styles.thumbnailContainer}
-              style={{
-                backgroundImage: `url(${convertFileSrc(clip.thumbnail)})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
+            <div className={styles.thumbnailContainer}>
+              <img src={convertFileSrc(clip.thumbnail)} alt=""></img>
               <div className={styles.playIcon}>
                 <Play size={24} />
               </div>

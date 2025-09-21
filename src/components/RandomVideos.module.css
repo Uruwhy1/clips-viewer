@@ -1,7 +1,6 @@
 .container {
   padding: var(--padding-medium);
   background-color: var(--card-bg);
-  overflow-y: auto;
   max-height: 100%;
 
   flex-grow: 1;
@@ -20,7 +19,7 @@
   display: grid;
   place-content: center;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 50% 50%;
 
   gap: var(--gap-medium);
 }
@@ -30,9 +29,7 @@
   align-items: start;
   gap: var(--gap-small);
 
-  flex-grow: 1;
   height: 100%;
-
   padding: var(--padding-small);
   border-radius: var(--radius-small);
 
@@ -61,7 +58,11 @@
   align-items: center;
   position: relative;
 
-  flex-shrink: 0;
+  >img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
 }
 
 .playIcon {
