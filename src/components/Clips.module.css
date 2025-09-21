@@ -39,7 +39,7 @@
   border: 1px solid var(--borders);
 
   padding: var(--button-padding);
-  border-radius: var(--radius-big);
+  border-radius: var(--radius-small);
   cursor: pointer;
 
   border-width: 1px;
@@ -94,7 +94,7 @@
   flex-direction: column;
   justify-content: stretch;
 
-  border-radius: var(--radius-big);
+  border-radius: var(--radius-small);
   overflow: hidden;
 
   >button {
