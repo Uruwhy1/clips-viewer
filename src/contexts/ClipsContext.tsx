@@ -17,6 +17,18 @@ import {
 import { useSettings } from "./SettingsContext";
 import { Clip } from "../types/clip";
 
+type AddClipResult = {
+  setAsCurrent: () => void;
+  setAsCurrentAndRemoveOld: () => void;
+};
+
+type SortOrder = "newest" | "oldest";
+
+interface DateFilter {
+  startDate: string | null;
+  endDate: string | null;
+}
+
 interface ClipsContextType {
   allClips: Clip[];
   setAllClips: React.Dispatch<React.SetStateAction<Clip[]>>;
@@ -27,11 +39,18 @@ interface ClipsContextType {
   filter: {
     game: string;
     showFavourites: boolean;
+    sortOrder: SortOrder;
+    dateFilter: DateFilter;
   };
   updateFilter: (
-    newFilter: Partial<{ game: string; showFavourites: boolean }>,
+    newFilter: Partial<{
+      game: string;
+      showFavourites: boolean;
+      sortOrder: SortOrder;
+      dateFilter: DateFilter;
+    }>,
   ) => void;
-  addClip: (newClip: Clip) => () => void;
+  addClip: (newClip: Clip) => AddClipResult;
   editClip: (clip: Clip, newTitle: string) => Promise<boolean>;
   deleteClip: (clipPath: string, isFavourite: boolean) => Promise<boolean>;
 
@@ -61,9 +80,16 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
   const [filter, setFilter] = useState<{
     game: string;
     showFavourites: boolean;
+    sortOrder: SortOrder;
+    dateFilter: DateFilter;
   }>({
     game: "All",
     showFavourites: false,
+    sortOrder: "newest",
+    dateFilter: {
+      startDate: null,
+      endDate: null,
+    },
   });
 
   useEffect(() => {
@@ -97,12 +123,34 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
 
   const filteredClips = useMemo(() => {
     return allClips
-      .filter(
-        (clip) =>
-          (filter.game === "All" || clip.game === filter.game) &&
-          (!filter.showFavourites || clip.isFavourite),
-      )
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .filter((clip) => {
+        const gameMatch = filter.game === "All" || clip.game === filter.game;
+        const favouriteMatch = !filter.showFavourites || clip.isFavourite;
+
+        let dateMatch = true;
+        if (filter.dateFilter.startDate || filter.dateFilter.endDate) {
+          const clipDate = new Date(clip.date * 1000); // Convert timestamp to Date
+          const clipDateString = clipDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+
+          if (filter.dateFilter.startDate) {
+            dateMatch =
+              dateMatch && clipDateString >= filter.dateFilter.startDate;
+          }
+
+          if (filter.dateFilter.endDate) {
+            dateMatch =
+              dateMatch && clipDateString <= filter.dateFilter.endDate;
+          }
+        }
+
+        return gameMatch && favouriteMatch && dateMatch;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.date * 1000).getTime();
+        const dateB = new Date(b.date * 1000).getTime();
+
+        return filter.sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+      });
   }, [allClips, filter]);
 
   // Unique games calculation
@@ -112,7 +160,7 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
       : allClips;
 
     return Array.from(new Set(filteredClipsForGames.map((clip) => clip.game)));
-  }, [allClips, filter]);
+  }, [allClips, filter.showFavourites]);
 
   // Random clips for recommendations
   const randomClips = useMemo(() => {
@@ -137,11 +185,6 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
 
     return randomSelected;
   }, [allClips, loadedClips.current]);
-
-  type AddClipResult = {
-    setAsCurrent: () => void;
-    setAsCurrentAndRemoveOld: () => void;
-  };
 
   const addClip = (newClip: Clip): AddClipResult => {
     setAllClips((prevClips) => [newClip, ...prevClips]);
@@ -232,11 +275,22 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
   );
 
   const updateFilter = (
-    newFilter: Partial<{ game: string; showFavourites: boolean }>,
+    newFilter: Partial<{
+      game: string;
+      showFavourites: boolean;
+      sortOrder: SortOrder;
+      dateFilter: DateFilter;
+    }>,
   ) => {
     setFilter((prev) => ({
       ...prev,
       ...newFilter,
+      ...(newFilter.dateFilter && {
+        dateFilter: {
+          ...prev.dateFilter,
+          ...newFilter.dateFilter,
+        },
+      }),
     }));
   };
 

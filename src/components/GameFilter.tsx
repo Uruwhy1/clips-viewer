@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Tv } from "lucide-react";
-import styles from "./Clips.module.css";
+import styles from "./ClipFilters.module.css";
 
 type GameFilterProps = {
   showGames: boolean;
@@ -18,8 +18,8 @@ const GameFilter: React.FC<GameFilterProps> = ({
   onGameClick,
 }) => {
   return (
-    <div>
-      <button onClick={onFilterClick}>
+    <div className={styles.primaryFilter}>
+      <button className={styles.filterButton} onClick={onFilterClick}>
         <Tv size={17} />
         <p>{currentGame}</p>
       </button>

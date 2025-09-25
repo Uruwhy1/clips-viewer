@@ -9,7 +9,7 @@ export function usePagination(items: Clip[], itemsPerPage: number) {
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(items.length / itemsPerPage)),
-    [items.length, itemsPerPage]
+    [items.length, itemsPerPage],
   );
 
   const currentItems = useMemo(() => {

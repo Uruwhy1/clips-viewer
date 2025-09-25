@@ -1,0 +1,147 @@
+.filters {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  justify-content: stretch;
+  gap: var(--gap-small);
+  font-weight: 500;
+}
+
+.primaryFilter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+
+  button {
+    justify-content: start;
+    padding: var(--button-padding);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 0px 0px 0px 1px var(--accent-washed);
+      border-color: var(--accent-washed);
+    }
+  }
+}
+
+.secondaryFilters {
+  display: flex;
+  gap: var(--gap-small);
+  align-items: center;
+
+  >* {
+    min-width: 150px;
+  }
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--inline-gap);
+
+  background: var(--clips-filters-bg);
+  border: 1px solid var(--borders);
+  padding: var(--button-padding);
+  border-radius: var(--radius-small);
+
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-primary, currentColor);
+
+  transition:
+    border 0.15s,
+    box-shadow 0.15s,
+    background-color 0.15s,
+    color 0.15s;
+  white-space: nowrap;
+}
+
+.filterButton:hover {
+  box-shadow: 0px 0px 0px 1px var(--accent-washed);
+  border-color: var(--accent-washed);
+}
+
+.filterButton svg {
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.filterButton.active {
+  color: #fff;
+  background-color: var(--accent-washed);
+  border-color: var(--accent-washed);
+}
+
+.filterButton.active svg {
+  stroke: #fff;
+  fill: #fff;
+}
+
+.favouriteButton {
+  --favourite-color: gold;
+}
+
+.favouriteButton svg {
+  stroke: var(--favourite-color);
+  fill: transparent;
+  transition: fill 0.15s;
+}
+
+.favouriteButton:hover svg {
+  fill: var(--favourite-color);
+  opacity: 0.5;
+}
+
+.favouriteButton.active svg {
+  fill: var(--favourite-color);
+  stroke: var(--favourite-color);
+  opacity: 1;
+}
+
+.overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--page-cover, rgba(0, 0, 0, 0.3));
+  z-index: 2;
+  cursor: default;
+}
+
+.gamesList {
+  position: absolute;
+  z-index: 3;
+
+  top: 110%;
+
+  background-color: var(--clips-filters-bg);
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+
+  border-radius: var(--radius-small);
+  overflow: hidden;
+
+  >button {
+    border: none;
+    border-radius: 0;
+    width: 100%;
+    text-align: start;
+
+    &:hover {
+      box-shadow: none;
+      background-color: var(--accent-white);
+    }
+
+    &.active {
+      color: #fff;
+      background-color: var(--accent-washed);
+    }
+  }
+}

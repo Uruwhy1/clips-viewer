@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./CreateClipPopup.module.css";
 import { X } from "lucide-react";
 import { Clip } from "../types/clip";
+import { formatTime } from "../helpers/formatTime";
 
 interface CreateClipPopupProps {
   isOpen: boolean;
@@ -28,12 +29,6 @@ const CreateClipPopup: React.FC<CreateClipPopupProps> = ({
       setClipName(defaultName);
     }
   }, [currentClip]);
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
 
   const handleCreateNew = () => {
     if (clipName.trim()) {

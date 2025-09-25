@@ -1,0 +1,145 @@
+.datePickerContainer {
+  position: relative;
+}
+
+.dateButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--inline-gap, 0.5rem);
+
+  background: var(--clips-filters-bg);
+  border: 1px solid var(--borders);
+  padding: var(--button-padding);
+  border-radius: var(--radius-small);
+
+  cursor: pointer;
+  transition:
+    border 0.15s,
+    box-shadow 0.15s,
+    background-color 0.15s;
+
+  width: 100%;
+
+  color: var(--color);
+  font-weight: 500;
+}
+
+.dateButton:hover {
+  box-shadow: 0px 0px 0px 1px var(--accent-washed);
+  border-color: var(--accent-washed);
+}
+
+.dateButton.active {
+  color: #fff;
+  background-color: var(--accent-washed);
+  border-color: var(--accent-washed);
+}
+
+.dateButton svg {
+  stroke: currentColor;
+}
+
+.datePickerDropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  z-index: 10;
+
+  background: var(--clips-filters-bg, #fff);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-small);
+  padding: 1rem;
+
+  min-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.datePickerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--borders);
+}
+
+.datePickerHeader span {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color);
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+  padding: 0;
+
+  background: transparent;
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-small);
+
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.clearButton:hover {
+  background: var(--hover-bg, #f5f5f5);
+  border-color: var(--accent-washed);
+}
+
+.clearButton svg {
+  color: var(--gray-color);
+}
+
+.dateInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dateInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dateInputGroup label {
+  flex: 0 0 50px;
+  font-size: 0.85rem;
+  color: var(--gray-color);
+  font-weight: 500;
+}
+
+.dateInput {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-small);
+  background-color: var(--page-bg);
+  color: var(--color);
+  font-size: 0.85rem;
+
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--accent-washed);
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.1);
+}
+
+.dateInput::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(100%) brightness(50%);
+}
+
+.dateInput::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}

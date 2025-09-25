@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import styles from "./Clips.module.css";
 import ClipItem from "./ClipItem";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  CalendarDays,
+  X,
+} from "lucide-react";
 import ClipsSkeleton from "../skeletons/ClipsSkeleton";
 import FavouriteButton from "./icons/StarButton";
 import { useClips } from "../contexts/ClipsContext";
@@ -9,6 +15,7 @@ import { usePagination } from "../hooks/usePagination";
 import GameFilter from "./GameFilter";
 import { Clip } from "../types/clip";
 import { useSettings } from "../contexts/SettingsContext";
+import ClipFilters from "./ClipFilters";
 
 const CLIPS_PER_PAGE = 36;
 
@@ -19,6 +26,7 @@ type Clips = {
 const Clips: React.FC<Clips> = React.memo(({ setView }) => {
   const { filteredClips, games, filter, updateFilter } = useClips();
   const [showGames, setShowGames] = useState<boolean>(false);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const { settings } = useSettings();
 
   const {
@@ -27,26 +35,6 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
     currentItems: currentClips,
     goToPage,
   } = usePagination(filteredClips, CLIPS_PER_PAGE);
-
-  const handleFilterClick = useCallback(() => {
-    setShowGames((prev) => !prev);
-  }, []);
-
-  const handleGameClick = useCallback(
-    (game: string) => {
-      updateFilter({
-        game: game === filter.game ? "All" : game,
-      });
-      setShowGames(false);
-    },
-    [filter.game, updateFilter],
-  );
-
-  const toggleFavorites = useCallback(() => {
-    updateFilter({
-      showFavourites: !filter.showFavourites,
-    });
-  }, [filter.showFavourites, updateFilter]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -65,6 +53,10 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [currentPage, totalPages, goToPage]);
+
+  const onPageReset = () => {
+    goToPage(1);
+  };
 
   const PaginationControls = useMemo(() => {
     if (filteredClips.length <= CLIPS_PER_PAGE) return null;
@@ -94,27 +86,22 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
 
   return (
     <div className={styles.container}>
-      {showGames && (
-        <div className={styles.cover} onClick={() => setShowGames(false)}></div>
+      {(showGames || showDatePicker) && (
+        <div
+          className={styles.cover}
+          onClick={() => {
+            setShowGames(false);
+            setShowDatePicker(false);
+          }}
+        />
       )}
 
-      <div className={styles.filters}>
-        <GameFilter
-          showGames={showGames}
-          currentGame={filter.game}
-          games={games}
-          onFilterClick={handleFilterClick}
-          onGameClick={handleGameClick}
-        />
-
-        <button
-          className={filter.showFavourites ? styles.active : ""}
-          onClick={toggleFavorites}
-        >
-          <FavouriteButton active={filter.showFavourites} size={18} />
-          <p>Show Favourites</p>
-        </button>
-      </div>
+      <ClipFilters
+        games={games}
+        filter={filter}
+        onFilterChange={updateFilter}
+        onPageReset={onPageReset}
+      />
 
       {!settings.gamesDir ? (
         <div className={styles.noClips}>

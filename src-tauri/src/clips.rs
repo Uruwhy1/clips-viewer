@@ -18,6 +18,7 @@ pub struct ClipInfo {
     pub date: i64,
     pub is_favourite: bool,
     pub thumbnail: String,
+    pub video_duration: f64,
 }
 
 #[derive(Debug, Serialize)]
@@ -29,6 +30,13 @@ pub struct ClipsResult {
 
 #[derive(Deserialize, Serialize)]
 struct Favourites(Vec<String>);
+
+#[derive(Deserialize, Serialize)]
+struct VideoDurationCache {
+    duration: f64,
+    file_size: u64,
+    modified_time: i64,
+}
 
 #[derive(Serialize, Clone)]
 struct ClipLoadProgress {
@@ -131,6 +139,8 @@ fn generate_thumbnail_if_missing(app_name: &str, video_path: &str) -> Result<Str
 
     let status = Command::new("ffmpeg")
         .args([
+            "-loglevel",
+            "error",
             "-ss",
             "5",
             "-i",
@@ -154,11 +164,86 @@ fn generate_thumbnail_if_missing(app_name: &str, video_path: &str) -> Result<Str
     Ok(thumb_path.to_string_lossy().to_string())
 }
 
+fn get_cached_video_duration(app_name: &str, video_path: &str) -> Result<f64, String> {
+    let docs_dir = dirs::document_dir().ok_or("No documents directory found")?;
+    let video_data_dir = docs_dir.join(app_name).join("video_data");
+    fs::create_dir_all(&video_data_dir)
+        .map_err(|e| format!("Failed to create video_data dir: {}", e))?;
+
+    let video_path_obj = Path::new(video_path);
+    let stem = video_path_obj
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .ok_or("Invalid video filename")?;
+    let cache_path = video_data_dir.join(format!("{stem}.json"));
+
+    let video_metadata =
+        fs::metadata(video_path).map_err(|e| format!("Failed to get video metadata: {}", e))?;
+    let video_size = video_metadata.len();
+    let video_modified = video_metadata
+        .modified()
+        .map_err(|e| format!("Failed to get video modification time: {}", e))?
+        .duration_since(UNIX_EPOCH)
+        .map_err(|_| "Error calculating video timestamp".to_string())?
+        .as_secs() as i64;
+
+    if cache_path.exists() {
+        if let Ok(cache_content) = fs::read_to_string(&cache_path) {
+            if let Ok(cached_data) = serde_json::from_str::<VideoDurationCache>(&cache_content) {
+                // Validate cache by checking file size and modification time
+                if cached_data.file_size == video_size
+                    && cached_data.modified_time == video_modified
+                {
+                    return Ok(cached_data.duration);
+                }
+            }
+        }
+    }
+
+    let duration = get_video_duration(video_path)?;
+
+    let cache_data = VideoDurationCache {
+        duration,
+        file_size: video_size,
+        modified_time: video_modified,
+    };
+
+    let cache_content = serde_json::to_string_pretty(&cache_data)
+        .map_err(|e| format!("Failed to serialize cache data: {}", e))?;
+
+    fs::write(&cache_path, cache_content)
+        .map_err(|e| format!("Failed to write cache file: {}", e))?;
+
+    Ok(duration)
+}
+
+fn get_video_duration(path: &str) -> Result<f64, String> {
+    let output = Command::new("ffprobe")
+        .args([
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            path,
+        ])
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    }
+
+    let duration_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    duration_str.parse::<f64>().map_err(|e| e.to_string())
+}
+
 fn process_file_entry(
     app_name: &str,
     path: &Path,
     file_name: &str,
-) -> Result<(String, String, i64, String, String), String> {
+) -> Result<(String, String, i64, String, String, f64), String> {
     let file_path_str = path.to_string_lossy().to_string();
     let name = extract_title_from_filename(file_name);
 
@@ -188,6 +273,7 @@ fn process_file_entry(
     };
 
     let thumbnail_path = generate_thumbnail_if_missing(app_name, &file_path_str)?;
+    let video_duration = get_cached_video_duration(app_name, &file_path_str)?;
 
     Ok((
         file_path_str,
@@ -195,6 +281,7 @@ fn process_file_entry(
         unix_timestamp,
         formatted_date,
         thumbnail_path,
+        video_duration,
     ))
 }
 
@@ -275,8 +362,14 @@ fn process_directory(
                 let _ = w.emit("clip-loading-progress", progress_update);
             }
 
-            let (file_path_str, name, unix_timestamp, formatted_date, thumbnail_path) =
-                process_file_entry(app_name, &path, &file_name)?;
+            let (
+                file_path_str,
+                name,
+                unix_timestamp,
+                formatted_date,
+                thumbnail_path,
+                video_duration,
+            ) = process_file_entry(app_name, &path, &file_name)?;
 
             all_clips.push(ClipInfo {
                 game: current_game.clone(),
@@ -286,6 +379,7 @@ fn process_directory(
                 date: unix_timestamp,
                 is_favourite: favourites_set.contains(&file_path_str),
                 thumbnail: thumbnail_path,
+                video_duration,
             });
         }
     }
@@ -341,8 +435,14 @@ fn process_directory_newer(
                 all_clips,
             )?;
         } else if let Some(current_game) = &game {
-            let (file_path_str, name, unix_timestamp, formatted_date, thumbnail_path) =
-                process_file_entry(app_name, &path, &file_name)?;
+            let (
+                file_path_str,
+                name,
+                unix_timestamp,
+                formatted_date,
+                thumbnail_path,
+                video_duration,
+            ) = process_file_entry(app_name, &path, &file_name)?;
 
             if unix_timestamp > since_timestamp {
                 all_clips.push(ClipInfo {
@@ -353,6 +453,7 @@ fn process_directory_newer(
                     date: unix_timestamp,
                     is_favourite: false,
                     thumbnail: thumbnail_path,
+                    video_duration,
                 });
             }
         }

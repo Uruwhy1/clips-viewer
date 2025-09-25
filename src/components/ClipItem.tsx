@@ -1,12 +1,14 @@
 import React from "react";
 import styles from "./ClipItem.module.css";
+
 import type { LucideProps } from "lucide-react";
-import { Calendar, Tv } from "lucide-react";
+import { Calendar, Tv, Clock } from "lucide-react";
 import FavouriteButton from "./icons/StarButton";
 
 import { useClips } from "../contexts/ClipsContext";
 import { Clip } from "../types/clip";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { formatTime } from "../helpers/formatTime";
 
 type ClipItemProps = {
   clip: Clip;
@@ -14,10 +16,11 @@ type ClipItemProps = {
 };
 
 const MemoizedTv = React.memo((props: LucideProps) => <Tv {...props} />);
-
 const MemoizedCalendar = React.memo((props: LucideProps) => (
   <Calendar {...props} />
 ));
+const MemoizedClock = React.memo((props: LucideProps) => <Clock {...props} />);
+
 const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
   const { setCurrentClip, toggleFavourite, isFavorite } = useClips();
 
@@ -25,7 +28,6 @@ const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
     setCurrentClip(clip);
     setView("video");
   };
-
   const handleFavouriteClick = (path: string) => {
     toggleFavourite(path);
   };
@@ -52,6 +54,10 @@ const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
         <div>
           <MemoizedTv size={15} />
           <span>{clip.game}</span>
+        </div>
+        <div>
+          <MemoizedClock size={15} />
+          <span> {formatTime(clip.videoDuration)}</span>
         </div>
         <div>
           <MemoizedCalendar size={15} />
