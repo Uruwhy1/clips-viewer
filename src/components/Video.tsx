@@ -23,6 +23,7 @@ import {
 import styles from "./Video.module.css";
 import EditingControls from "./EditingControls";
 import { Clip } from "../types/clip";
+import { formatTime } from "../helpers/formatTime";
 
 const MemoizedPlay = React.memo(() => <Play size={20} />);
 const MemoizedPause = React.memo(() => <Pause size={20} />);
@@ -184,21 +185,6 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
       } else {
         handleVolumeChange(volume);
       }
-    };
-
-    const formatTime = (time: number): string => {
-      const hours = Math.floor(time / 3600);
-      const minutes = Math.floor((time % 3600) / 60)
-        .toString()
-        .padStart(2, "0");
-      const seconds = Math.floor(time % 60)
-        .toString()
-        .padStart(2, "0");
-
-      let string =
-        hours > 0 ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
-
-      return string;
     };
 
     const handleTimeUpdate = () => {

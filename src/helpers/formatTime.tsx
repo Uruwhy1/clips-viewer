@@ -1,10 +1,14 @@
-export const formatTime = (seconds: number) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secondsLeft = Math.floor(seconds % 60);
+export const formatTime = (time: number): string => {
+  const hours = Math.floor(time / 3600);
+  const minutes = Math.floor((time % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = Math.floor(time % 60)
+    .toString()
+    .padStart(2, "0");
 
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-    2,
-    "0"
-  )}:${String(secondsLeft).padStart(2, "0")}`;
+  let string =
+    hours > 0 ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
+
+  return string;
 };
