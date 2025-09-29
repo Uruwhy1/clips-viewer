@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { CalendarDays, X } from "lucide-react";
+import { CalendarDays, CalendarSearch, X } from "lucide-react";
 import styles from "./DatePicker.module.css";
 
 interface DateFilter {
@@ -39,14 +39,14 @@ const DatePicker: React.FC<DatePickerProps> = ({
   );
 
   return (
-    <div className={styles.datePickerContainer}>
+    <div className={styles.datePickerContainer} style={{ zIndex: isOpen ? 3 : "auto" }}>
       <button
         className={`${styles.dateButton} ${hasDateFilter ? styles.active : ""}`}
         onClick={onToggle}
         title="Filter by date range"
       >
-        <CalendarDays size={18} />
-        <span>Date {hasDateFilter ? "•" : ""}</span>
+        <CalendarSearch size={18} />
+        <span>Date</span>
       </button>
 
       {isOpen && (

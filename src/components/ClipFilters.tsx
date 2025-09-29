@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Calendar } from "lucide-react";
+import { ArrowDownNarrowWide, ArrowUpNarrowWide } from "lucide-react";
 import styles from "./ClipFilters.module.css";
 import DatePicker from "./DatePicker";
 import GameFilter from "./GameFilter";
 import FavouriteButton from "./icons/StarButton";
+import PageCover from "./PageCover";
 
 type SortOrder = "newest" | "oldest";
 
@@ -117,11 +118,7 @@ const ClipFilters: React.FC<FiltersProps> = ({
   return (
     <>
       {hasActiveDropdown && (
-        <div
-          className={styles.overlay}
-          onClick={handleOverlayClick}
-          aria-hidden="true"
-        />
+        <PageCover onClick={handleOverlayClick}></PageCover>
       )}
 
       <div className={styles.filters}>
@@ -147,7 +144,7 @@ const ClipFilters: React.FC<FiltersProps> = ({
             onClick={handleSortToggle}
             title={`Sort by ${filter.sortOrder === "newest" ? "oldest" : "newest"} first`}
           >
-            <Calendar size={18} />
+            {filter.sortOrder === "newest" ? <ArrowUpNarrowWide size={18} /> : <ArrowDownNarrowWide size={18} />}
             <span>{filter.sortOrder === "newest" ? "Newest" : "Oldest"}</span>
           </button>
 

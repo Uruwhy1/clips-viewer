@@ -53,9 +53,7 @@
 
   transition:
     border 0.15s,
-    box-shadow 0.15s,
-    background-color 0.15s,
-    color 0.15s;
+    box-shadow 0.15s;
   white-space: nowrap;
 }
 
@@ -85,14 +83,7 @@
 }
 
 .favouriteButton svg {
-  stroke: var(--favourite-color);
   fill: transparent;
-  transition: fill 0.15s;
-}
-
-.favouriteButton:hover svg {
-  fill: var(--favourite-color);
-  opacity: 0.5;
 }
 
 .favouriteButton.active svg {
@@ -118,6 +109,7 @@
 
   top: 110%;
 
+  border: 1px solid var(--borders);
   background-color: var(--clips-filters-bg);
   width: 100%;
 
@@ -133,6 +125,8 @@
     border-radius: 0;
     width: 100%;
     text-align: start;
+
+    background-color: var(--clips-filters-bg);
 
     &:hover {
       box-shadow: none;

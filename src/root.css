@@ -21,7 +21,10 @@
   --settings-bg: var(--dark-bg);
   --current-bg: var(--dark-bg);
 
-  --page-cover: rgba(0, 0, 0, 0.8);
+  --page-cover: rgba(0, 0, 0, 0.7);
+
+  --dark-bg-color: #ffffff;
+  --dark-bg-color-2: #ccc;
 }
 
 :root[data-theme="Latte"] {

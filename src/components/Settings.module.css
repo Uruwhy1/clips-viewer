@@ -1,17 +1,3 @@
-.settingsOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: var(--page-cover);
-  z-index: 999;
-
-  display: flex;
-
-  animation: appear 0.3s ease;
-}
-
 .settingsContainer {
   --width: 500px;
 

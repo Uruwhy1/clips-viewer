@@ -14,6 +14,7 @@ import { ThemeFamilyControl } from "./ThemeFamily";
 import { AppearanceModeControl } from "./ThemeAppearance";
 import AccentColor from "./AccentColor";
 import { RecordingMethod, SemanticColor } from "../types/settings";
+import PageCover from "./PageCover";
 
 type SettingsProps = {
   isOpen: boolean;
@@ -196,7 +197,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
 
     return (
       <>
-        {isOpen && <div className={styles.settingsOverlay} onClick={onClose} />}
+        {isOpen && <PageCover onClick={onClose} />}
 
         <div
           className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}

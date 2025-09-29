@@ -79,7 +79,7 @@
 .clipTitleContainer {
   justify-content: space-between;
   font-size: var(--header-medium-size);
-  color: #fff;
+  color: var(--dark-bg-color);
 
   flex-wrap: wrap;
 

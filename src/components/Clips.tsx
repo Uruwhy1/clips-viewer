@@ -4,17 +4,12 @@ import ClipItem from "./ClipItem";
 import {
   ChevronLeft,
   ChevronRight,
-  Calendar,
-  CalendarDays,
-  X,
 } from "lucide-react";
 import ClipsSkeleton from "../skeletons/ClipsSkeleton";
-import FavouriteButton from "./icons/StarButton";
 import { useClips } from "../contexts/ClipsContext";
 import { usePagination } from "../hooks/usePagination";
-import GameFilter from "./GameFilter";
-import { Clip } from "../types/clip";
 import { useSettings } from "../contexts/SettingsContext";
+import { Clip } from "../types/clip";
 import ClipFilters from "./ClipFilters";
 
 const CLIPS_PER_PAGE = 36;
@@ -86,16 +81,6 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
 
   return (
     <div className={styles.container}>
-      {(showGames || showDatePicker) && (
-        <div
-          className={styles.cover}
-          onClick={() => {
-            setShowGames(false);
-            setShowDatePicker(false);
-          }}
-        />
-      )}
-
       <ClipFilters
         games={games}
         filter={filter}
