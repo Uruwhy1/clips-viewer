@@ -181,6 +181,10 @@ fn parse_time_to_seconds(time_str: &str) -> Result<f64, String> {
         let minutes: f64 = parts[1].parse::<f64>().map_err(|e| e.to_string())?;
         let seconds: f64 = parts[2].parse::<f64>().map_err(|e| e.to_string())?;
         Ok(hours * 3600.0 + minutes * 60.0 + seconds)
+    } else if parts.len() == 2 {
+        let minutes: f64 = parts[0].parse::<f64>().map_err(|e| e.to_string())?;
+        let seconds: f64 = parts[1].parse::<f64>().map_err(|e| e.to_string())?;
+        Ok(minutes * 60.0 + seconds)
     } else {
         Err("Invalid time format".to_string())
     }

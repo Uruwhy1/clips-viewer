@@ -1,5 +1,3 @@
-// contexts/RecordingContext.tsx - Updated to support multiple recording methods
-
 import {
   createContext,
   useState,

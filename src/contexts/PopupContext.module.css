@@ -148,6 +148,11 @@
   transition: width 0.1s ease-in-out;
 }
 
+.buttons {
+  display: flex;
+  gap: var(--gap-small);
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
