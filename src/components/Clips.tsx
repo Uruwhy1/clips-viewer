@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import styles from "./Clips.module.css";
 import ClipItem from "./ClipItem";
 import {
@@ -12,7 +12,8 @@ import { useSettings } from "../contexts/SettingsContext";
 import { Clip } from "../types/clip";
 import ClipFilters from "./ClipFilters";
 
-const CLIPS_PER_PAGE = 36;
+const CLIPS_PER_PAGE = 12;
+const CLIP_HEIGHT = 300;
 
 type Clips = {
   setView: (view: string) => void;
@@ -20,9 +21,10 @@ type Clips = {
 
 const Clips: React.FC<Clips> = React.memo(({ setView }) => {
   const { filteredClips, games, filter, updateFilter } = useClips();
-  const [showGames, setShowGames] = useState<boolean>(false);
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const { settings } = useSettings();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [rowsPerContainer, setRowsPerContainer] = useState(0);
 
   const {
     currentPage,
@@ -30,6 +32,23 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
     currentItems: currentClips,
     goToPage,
   } = usePagination(filteredClips, CLIPS_PER_PAGE);
+
+  useEffect(() => {
+    const calculateRows = () => {
+      if (containerRef.current) {
+        const containerHeight = containerRef.current.offsetHeight;
+
+        const calculatedRows = Math.floor(containerHeight / CLIP_HEIGHT);
+        setRowsPerContainer(calculatedRows);
+      }
+    };
+
+    calculateRows();
+
+    window.addEventListener('resize', calculateRows);
+
+    return () => window.removeEventListener('resize', calculateRows);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -54,33 +73,48 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
   };
 
   const PaginationControls = useMemo(() => {
-    if (filteredClips.length <= CLIPS_PER_PAGE) return null;
+    if (filteredClips.length <= rowsPerContainer * 4) return null;
+    if (!rowsPerContainer) return null;
+
+    const totalPageCount = Math.ceil(filteredClips.length / (rowsPerContainer * 4));
+    const pageNumbers: (number | string)[] = [];
+
+    console.log(totalPageCount)
+
+    if (currentPage > 2) pageNumbers.push(1);
+    if (currentPage > 3) pageNumbers.push("...");
+
+    for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+      if (i > 0 && i <= totalPageCount) pageNumbers.push(i);
+    }
+
+    if (currentPage < totalPageCount - 2) pageNumbers.push("...");
+    if (currentPage < totalPageCount - 1) pageNumbers.push(totalPageCount);
 
     return (
       <div className={styles.pagination}>
-        <button
-          onClick={() => goToPage(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft size={16} />
-        </button>
-
-        <span>
-          {currentPage} / {totalPages}
-        </span>
-
-        <button
-          onClick={() => goToPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          <ChevronRight size={16} />
-        </button>
+        {pageNumbers.map((page, index) =>
+          typeof page === "number" ? (
+            <button
+              key={index}
+              onClick={() => goToPage(page)}
+              disabled={currentPage === page}
+              className={`${currentPage === page && styles.currentPage}`}
+            >
+              {page}
+            </button>
+          ) : (
+            <button key={index} className={styles.ellipsis} disabled={true}>
+              {page}
+            </button>
+          )
+        )}
       </div>
     );
-  }, [currentPage, totalPages, goToPage, filteredClips.length]);
+  }, [currentPage, filteredClips.length, rowsPerContainer, goToPage]);
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} ref={containerRef}>
       <ClipFilters
         games={games}
         filter={filter}

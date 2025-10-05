@@ -23,8 +23,6 @@ export function usePagination(items: Clip[], itemsPerPage: number) {
     setCurrentPage(validatedPage);
     localStorage.setItem("page", validatedPage.toString());
 
-    localStorage.setItem("position", "0");
-    window.scrollTo(0, 0);
   };
 
   useEffect(() => {

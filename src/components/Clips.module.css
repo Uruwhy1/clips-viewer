@@ -71,6 +71,12 @@
       width: 0.75rem;
     }
   }
+
+  &.currentPage {
+    color: var(--accent-washed);
+    opacity: 1 !important;
+    border-color: var(--accent-washed);
+  }
 }
 
 .pagination svg {

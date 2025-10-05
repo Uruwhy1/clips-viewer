@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./ClipItem.module.css";
 
 import type { LucideProps } from "lucide-react";
@@ -24,6 +24,8 @@ const MemoizedClock = React.memo((props: LucideProps) => <Clock {...props} />);
 const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
   const { setCurrentClip, toggleFavourite, isFavorite } = useClips();
 
+  const [imgError, setImgError] = useState<boolean>(false);
+
   const handleClick = () => {
     setCurrentClip(clip);
     setView("video");
@@ -34,11 +36,18 @@ const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
 
   return (
     <div className={styles.clipCard} onClick={(e) => handleClick()}>
-      <img
-        className={styles.thumbnail}
-        src={convertFileSrc(clip.thumbnail)}
-        alt=""
-      ></img>
+
+      {!imgError ? (
+        <img
+          className={styles.thumbnail}
+          src={convertFileSrc(clip.thumbnail)}
+          onError={() => setImgError(true)}
+          alt=""
+        />
+      ) : (
+        <div className={styles.thumbnail}></div>
+      )}
+
       <div className={styles.header}>
         <h3>{clip.name}</h3>
         <div
