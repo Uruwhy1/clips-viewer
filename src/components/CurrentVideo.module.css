@@ -168,6 +168,8 @@
   }
 
   .imageDiv {
+    height: 120px;
+    width: 100px;
     flex-shrink: 0;
     padding-left: var(--padding-slightly-bigger);
   }
@@ -177,8 +179,8 @@
   }
 
   .imageDiv img {
-    height: 120px;
-    width: auto;
+    height: 100%;
+    width: 100%;
     background-color: gray;
 
     flex-shrink: 0;

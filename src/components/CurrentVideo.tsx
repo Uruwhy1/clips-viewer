@@ -36,7 +36,6 @@ const CurrentVideo: React.FC = React.memo(() => {
   const { coverCache } = useMedia();
   const { showPopup } = usePopup();
 
-  const [cover, setCover] = useState<string>("");
   const [imageError, setImageError] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [renaming, setRenaming] = useState<boolean>(false);
@@ -44,13 +43,6 @@ const CurrentVideo: React.FC = React.memo(() => {
   if (currentClip == null) {
     return <div>There's no clip. This should not be possible.</div>;
   }
-
-  useEffect(() => {
-    if (coverCache.has(currentClip.game)) {
-      setCover(coverCache.get(currentClip.game) || "");
-    }
-    setRenaming(false);
-  }, [currentClip, coverCache]);
 
   const handleFavouriteClick = (path: string) => toggleFavourite(path);
 
@@ -95,7 +87,7 @@ const CurrentVideo: React.FC = React.memo(() => {
     [editClip],
   );
 
-  const handleImageError = (e) => {
+  const handleImageError = (e: any) => {
     const target = e.currentTarget as HTMLImageElement;
     target.onerror = null; // prevent infinite loop
     target.src = coverCache.get("default") || "";
@@ -157,15 +149,13 @@ const CurrentVideo: React.FC = React.memo(() => {
             </p>
           </div>
         </div>
-        {!imageError && cover && (
-          <div className={styles.imageDiv}>
-            <img
-              src={cover}
-              alt={`${currentClip.game} Cover`}
-              onError={(e) => handleImageError(e)}
-            />
-          </div>
-        )}
+        <div className={styles.imageDiv}>
+          <img
+            src={coverCache.get(currentClip.game)}
+            alt={`${currentClip.game} Cover`}
+            onError={(e) => handleImageError(e)}
+          />
+        </div>
       </div>
       <RandomVideos />
     </main>

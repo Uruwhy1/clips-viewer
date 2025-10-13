@@ -286,7 +286,6 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
           alt=""
           className={styles.videoPlaceholder}
           style={{
-            viewTransitionName: `clip-${safeId}`,
             opacity: isVideoLoaded ? 0 : 1,
             transition: "opacity 200ms ease-in-out 200ms",
           }}
