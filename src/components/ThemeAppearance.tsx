@@ -1,3 +1,4 @@
+import { startTransition } from "react";
 import { ThemeModeType } from "../types/settings";
 import styles from "./Settings.module.css";
 import { ThemeMode } from "./ThemeMode";
@@ -20,13 +21,15 @@ export const AppearanceModeControl: React.FC<{
   const selectedMode = getCurrentMode();
 
   const handleModeChange = (mode: ThemeModeType) => {
-    if (mode === "System") {
-      switchTheme("System (Catppuccin)");
-    } else if (mode === "Light") {
-      switchTheme("Latte");
-    } else if (mode === "Dark") {
-      switchTheme("Mocha");
-    }
+    document.startViewTransition(() => {
+      if (mode === "System") {
+        switchTheme("System (Catppuccin)");
+      } else if (mode === "Light") {
+        switchTheme("Latte");
+      } else if (mode === "Dark") {
+        switchTheme("Mocha");
+      }
+    })
   };
 
   return (
@@ -54,8 +57,7 @@ export const AppearanceModeControl: React.FC<{
       <div className={styles.themeDescription}>
         {selectedMode === "System" && (
           <p>
-            Uses your system preferences to automatically switch between light
-            and dark.
+            Uses your system preferences to automatically switch.
           </p>
         )}
         {selectedMode === "Light" && (

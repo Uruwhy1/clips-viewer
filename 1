@@ -6,29 +6,37 @@ body {
   scroll-behavior: smooth;
 }
 
-::view-transition-group(root) {
-  animation-duration: 1.5s;
-}
-      
+  
+
 ::view-transition-new(root) {
-  animation-name: reveal;
+  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="40" cy="40" r="18" fill="white"/></svg>')
+    bottom right / 0 no-repeat;
+  mask-origin: content-box;
+  animation: scale 1s;
   animation-fill-mode: both;
+  transform-origin: bottom right;
 }
 
-::view-transition-old(root)
- {
-  animation: none;
+::view-transition-old(root) {
+  animation: scale 1s;
   animation-fill-mode: both;
+  transform-origin: bottom right;
   z-index: -1;
 }
 
+@keyframes scale {
+  to {
+    mask-size: 350vmax;
+  }
+}
 
-@keyframes reveal{
+
+@keyframes radial-reveal {
   from {
-    clip-path: polygon(171% 50%, 50% 171%, 50% 171%, 171% 50%);
+    clip-path: circle(0% at left center);
   }
   to {
-    clip-path: polygon(171% 50%, 50% 171%, -50% 71%, 50% -71%);
+    clip-path: circle(150% at left center); /* 150% ensures full coverage */
   }
 }
 

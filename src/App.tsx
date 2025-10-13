@@ -187,7 +187,9 @@ function App() {
           onClear={handleClearNewClips}
         />
       )}
-      {currentView()}
+      <ViewTransition>
+        {currentView()}
+      </ViewTransition>
       <Settings
         ref={settingsRef}
         isOpen={isSettingsOpen}

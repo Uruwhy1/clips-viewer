@@ -1,4 +1,4 @@
-import React, { startTransition, useState } from "react";
+import React, { useState } from "react";
 import styles from "./ClipItem.module.css";
 
 import type { LucideProps } from "lucide-react";
@@ -29,10 +29,7 @@ const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
 
   const handleClick = () => {
     setCurrentClip(clip);
-
-    startTransition(() => {
-      setView("video");
-    });
+    setView("video");
   };
   const handleFavouriteClick = (path: string) => {
     toggleFavourite(path);
@@ -43,7 +40,6 @@ const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
       {!imgError ? (
         <img
           className={styles.thumbnail}
-          style={{ viewTransitionName: `clip-${safeId}` }}
           src={convertFileSrc(clip.thumbnail)}
           onError={() => setImgError(true)}
           alt=""
