@@ -6,6 +6,29 @@ body {
   scroll-behavior: smooth;
 }
 
+
+/* Optional: smooth the transition by easing */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.6s;
+  animation-timing-function: ease-in-out;
+}
+
+/* Animate the new view with a radial clip starting from the left */
+::view-transition-new(root) {
+  clip-path: circle(0% at left center);
+  animation-name: radial-reveal;
+}
+
+@keyframes radial-reveal {
+  from {
+    clip-path: circle(0% at left center);
+  }
+  to {
+    clip-path: circle(150% at left center); /* 150% ensures full coverage */
+  }
+}
+
 body.hide-scroll {
   &&::-webkit-scrollbar {
     display: none;

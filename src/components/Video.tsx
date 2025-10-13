@@ -45,6 +45,7 @@ interface VideoProps {
 const Video = forwardRef<HTMLVideoElement, VideoProps>(
   ({ currentClip }, ref: ForwardedRef<HTMLVideoElement>) => {
     const [isPlaying, setIsPlaying] = useState<boolean>(true);
+    const [isVideoLoaded, setIsVideoLoaded] = useState(false);
     const [isMuted, setIsMuted] = useState<boolean>(true);
     const [volume, setVolume] = useState<number>(1);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -278,11 +279,26 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
 
     return (
       <div className={styles.videoContainer} ref={divRef}>
+        <img
+          src={convertFileSrc(currentClip.thumbnail)}
+          alt=""
+          className={styles.videoPlaceholder}
+          style={{
+            viewTransitionName: `clip-${currentClip.date}`,
+            opacity: isVideoLoaded ? 0 : 1,
+            transition: "opacity 200ms ease-in-out 200ms",
+          }}
+        />
         <video
           ref={ref}
           id="video"
           muted={isMuted}
           src={convertFileSrc(currentClip.filePath)}
+          style={{
+            opacity: isVideoLoaded ? 1 : 0,
+            transition: "opacity 200ms ease-in-out 200ms",
+          }}
+          onLoadedData={() => setIsVideoLoaded(true)}
           onTimeUpdate={handleTimeUpdate}
           className={styles.video}
           onClick={togglePlayPause}

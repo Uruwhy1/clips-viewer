@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useContext } from "react";
+import { useEffect, useState, useRef, useContext, ViewTransition } from "react";
 import "./reset.css";
 import "./root.css";
 import "./App.css";
@@ -187,7 +187,9 @@ function App() {
           onClear={handleClearNewClips}
         />
       )}
-      {currentView()}
+      <ViewTransition>
+        {currentView()}
+      </ViewTransition>
       <Settings
         ref={settingsRef}
         isOpen={isSettingsOpen}
