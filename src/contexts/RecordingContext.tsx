@@ -199,12 +199,9 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
         console.log(newClips);
 
         if (newClips.length > 0) {
-          setAllClips((prev) => [...newClips, ...prev]);
-
           const now = Math.floor(Date.now() / 1000);
           localStorage.setItem("lastCheckedTimestamp", now.toString());
 
-          console.log("xd");
           window.dispatchEvent(
             new CustomEvent("newClipsDetected", { detail: newClips }),
           );

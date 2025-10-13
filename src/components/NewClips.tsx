@@ -15,7 +15,7 @@ const NewClipsPopup: React.FC<NewClipsPopupProps> = ({
   newClips,
   setView,
   onClose,
-  onClear, // Add this prop
+  onClear,
 }) => {
   if (newClips.length === 0) return null;
 

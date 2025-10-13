@@ -3,6 +3,7 @@ use dirs;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
+use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -19,6 +20,7 @@ pub struct ClipInfo {
     pub is_favourite: bool,
     pub thumbnail: String,
     pub video_duration: f64,
+    pub new_clip: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -138,6 +140,7 @@ fn generate_thumbnail_if_missing(app_name: &str, video_path: &str) -> Result<Str
     }
 
     let status = Command::new("ffmpeg")
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
         .args([
             "-loglevel",
             "error",
@@ -219,6 +222,7 @@ fn get_cached_video_duration(app_name: &str, video_path: &str) -> Result<f64, St
 
 fn get_video_duration(path: &str) -> Result<f64, String> {
     let output = Command::new("ffprobe")
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
         .args([
             "-v",
             "error",
@@ -380,6 +384,7 @@ fn process_directory(
                 is_favourite: favourites_set.contains(&file_path_str),
                 thumbnail: thumbnail_path,
                 video_duration,
+                new_clip: false,
             });
         }
     }
@@ -454,6 +459,7 @@ fn process_directory_newer(
                     is_favourite: false,
                     thumbnail: thumbnail_path,
                     video_duration,
+                    new_clip: true,
                 });
             }
         }

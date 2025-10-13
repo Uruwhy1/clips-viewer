@@ -23,7 +23,6 @@ function App() {
   const [view, setView] = useState("clips");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const [newClips, setNewClips] = useState<Clip[]>([]);
   const [showNewClipsPopup, setShowNewClipsPopup] = useState(false);
 
   const settingsRef = useRef<HTMLDivElement | null>(null);
@@ -97,9 +96,10 @@ function App() {
     };
 
     const handleNewClips = (event: CustomEvent<Clip[]>) => {
-      setNewClips(event.detail);
+      setAllClips((current) => [...current, ...event.detail]);
       setShowNewClipsPopup(true);
     };
+
 
     window.addEventListener("keydown", handleEscapeKey);
     window.addEventListener("click", handleClick);
@@ -124,7 +124,6 @@ function App() {
   };
 
   const handleClearNewClips = () => {
-    setNewClips([]);
     setShowNewClipsPopup(false);
   };
 
@@ -175,14 +174,14 @@ function App() {
         setView={setView}
         settingsState={isSettingsOpen}
         newClipsState={showNewClipsPopup}
-        newClipsNumber={newClips.length}
+        newClipsNumber={allClips.filter((clip) => clip.newClip).length}
         setNewClipsState={setShowNewClipsPopup}
         openSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
       {showNewClipsPopup && (
         <NewClipsPopup
           setView={setView}
-          newClips={newClips}
+          newClips={allClips.filter((clip) => clip.newClip)}
           onClose={handleCloseNewClipsPopup}
           onClear={handleClearNewClips}
         />

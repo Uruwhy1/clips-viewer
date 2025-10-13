@@ -7,4 +7,5 @@ export type Clip = {
   isFavourite: boolean;
   thumbnail: string;
   videoDuration: number;
+  newClip?: boolean;
 };
