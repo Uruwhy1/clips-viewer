@@ -34,23 +34,6 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
   } = usePagination(filteredClips, CLIPS_PER_PAGE);
 
   useEffect(() => {
-    const calculateRows = () => {
-      if (containerRef.current) {
-        const containerHeight = containerRef.current.offsetHeight;
-
-        const calculatedRows = Math.floor(containerHeight / CLIP_HEIGHT);
-        setRowsPerContainer(calculatedRows);
-      }
-    };
-
-    calculateRows();
-
-    window.addEventListener('resize', calculateRows);
-
-    return () => window.removeEventListener('resize', calculateRows);
-  }, []);
-
-  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement) {
         const tagName = document.activeElement.tagName.toLowerCase();
@@ -73,23 +56,17 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
   };
 
   const PaginationControls = useMemo(() => {
-    if (filteredClips.length <= rowsPerContainer * 4) return null;
-    if (!rowsPerContainer) return null;
-
-    const totalPageCount = Math.ceil(filteredClips.length / (rowsPerContainer * 4));
     const pageNumbers: (number | string)[] = [];
-
-    console.log(totalPageCount)
 
     if (currentPage > 2) pageNumbers.push(1);
     if (currentPage > 3) pageNumbers.push("...");
 
     for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-      if (i > 0 && i <= totalPageCount) pageNumbers.push(i);
+      if (i > 0 && i <= totalPages) pageNumbers.push(i);
     }
 
-    if (currentPage < totalPageCount - 2) pageNumbers.push("...");
-    if (currentPage < totalPageCount - 1) pageNumbers.push(totalPageCount);
+    if (currentPage < totalPages - 2) pageNumbers.push("...");
+    if (currentPage < totalPages - 1) pageNumbers.push(totalPages);
 
     return (
       <div className={styles.pagination}>
@@ -111,7 +88,7 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
         )}
       </div>
     );
-  }, [currentPage, filteredClips.length, rowsPerContainer, goToPage]);
+  }, [currentPage, filteredClips.length, goToPage]);
 
   return (
     <div className={styles.container} ref={containerRef}>

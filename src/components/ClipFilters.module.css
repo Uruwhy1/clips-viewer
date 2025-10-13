@@ -139,3 +139,14 @@
     }
   }
 }
+
+@media screen and (max-width: 800px) {
+  .filters {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .secondaryFilters > * {
+    min-width: 100px;
+  }
+}

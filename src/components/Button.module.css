@@ -1,8 +1,8 @@
 .button {
-  --border: var(--dark-bg-within-border);
+  --border: var(--borders);
 
   background-color: transparent;
-  border: 1px solid var(--borders);
+  border: 1px solid var(--border);
   border-radius: var(--radius-small);
 
   padding: 0.25rem 1rem;
@@ -19,7 +19,7 @@
   &:focus-visible {
     --border: var(--accent-washed);
 
-    box-shadow: 0px 0px 0px 2px var(--border) !important;
+    box-shadow: 0px 0px 0px 1px var(--border) !important;
     outline: none;
   }
 

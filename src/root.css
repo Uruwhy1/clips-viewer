@@ -15,6 +15,8 @@
   --title-bar-bg: var(--dark-bg);
   --title-bar-color: #fff;
 
+  --buttonHeight: 2.25rem;
+
   /* common styles */
   --clips-filters-bg: var(--page-bg);
   --clips-bg: var(--page-bg);
