@@ -58,6 +58,8 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
     const [startMarker, setStartMarker] = useState<number | null>(null);
     const [endMarker, setEndMarker] = useState<number | null>(null);
 
+
+    const safeId = currentClip.filePath.replace(/[^a-zA-Z0-9]/g, "-");
     useEffect(() => {
       handleVolumeChange(false);
     }, []);
@@ -284,7 +286,7 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
           alt=""
           className={styles.videoPlaceholder}
           style={{
-            viewTransitionName: `clip-${currentClip.date}`,
+            viewTransitionName: `clip-${safeId}`,
             opacity: isVideoLoaded ? 0 : 1,
             transition: "opacity 200ms ease-in-out 200ms",
           }}

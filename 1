@@ -43,7 +43,7 @@ const ClipItem: React.FC<ClipItemProps> = React.memo(({ clip, setView }) => {
       {!imgError ? (
         <img
           className={styles.thumbnail}
-          style={{ viewTransitionName: `clip-${safeId}` }}
+          style={{ viewTransitionName: `clip-${clip.date}` }}
           src={convertFileSrc(clip.thumbnail)}
           onError={() => setImgError(true)}
           alt=""
