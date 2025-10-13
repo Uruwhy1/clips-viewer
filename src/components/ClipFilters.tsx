@@ -118,7 +118,7 @@ const ClipFilters: React.FC<FiltersProps> = ({
   return (
     <>
       {hasActiveDropdown && (
-        <PageCover onClick={handleOverlayClick}></PageCover>
+        <PageCover onClick={handleOverlayClick} z={'var(--gameFilterCoverZ)'}></PageCover>
       )}
 
       <div className={styles.filters}>

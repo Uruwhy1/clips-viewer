@@ -27,6 +27,17 @@
 
   --dark-bg-color: #ffffff;
   --dark-bg-color-2: #ccc;
+
+  /* z-indxeds */
+
+  --settingsZ: 1000;
+  --settingsCoverZ: 998;
+
+  --titleBarZ: 999;
+
+  --gameFilterZ: 900;
+  --gameFilterCoverZ: 899;
+
 }
 
 :root[data-theme="Latte"] {

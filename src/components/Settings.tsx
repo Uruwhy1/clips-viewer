@@ -197,7 +197,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
 
     return (
       <>
-        {isOpen && <PageCover onClick={onClose} />}
+        {isOpen && <PageCover onClick={onClose} z={'var(--settingsCoverZ)'} />}
 
         <div
           className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}

@@ -92,20 +92,8 @@
   opacity: 1;
 }
 
-.overlay {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: var(--page-cover, rgba(0, 0, 0, 0.3));
-  z-index: 2;
-  cursor: default;
-}
-
 .gamesList {
   position: absolute;
-  z-index: 3;
 
   top: 110%;
 
@@ -146,7 +134,7 @@
     grid-template-rows: 1fr 1fr;
   }
 
-  .secondaryFilters > * {
+  .secondaryFilters>* {
     min-width: 100px;
   }
 }

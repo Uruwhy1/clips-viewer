@@ -20,7 +20,7 @@ const GameFilter: React.FC<GameFilterProps> = ({
   return (
     <div
       className={styles.primaryFilter}
-      style={{ zIndex: showGames ? 3 : "auto" }}
+      style={{ zIndex: showGames ? 'var(--gameFilterZ)' : "auto" }}
     >
       <button className={styles.filterButton} onClick={onFilterClick}>
         <Tv size={17} />

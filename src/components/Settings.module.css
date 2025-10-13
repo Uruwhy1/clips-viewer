@@ -23,7 +23,7 @@
   border-right: 1px solid var(--borders);
 
   transition: transform 0.5s ease;
-  z-index: 1000;
+  z-index: var(--settingsZ);
 
   user-select: none;
   scrollbar-gutter: stable;

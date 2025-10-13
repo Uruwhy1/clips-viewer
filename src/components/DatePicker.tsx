@@ -39,7 +39,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   );
 
   return (
-    <div className={styles.datePickerContainer} style={{ zIndex: isOpen ? 3 : "auto" }}>
+    <div className={styles.datePickerContainer} style={{ zIndex: isOpen ? "var(--gameFilterZ)" : "auto" }}>
       <button
         className={`${styles.dateButton} ${hasDateFilter ? styles.active : ""}`}
         onClick={onToggle}
