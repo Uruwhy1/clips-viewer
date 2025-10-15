@@ -139,13 +139,20 @@ fn generate_thumbnail_if_missing(app_name: &str, video_path: &str) -> Result<Str
         return Ok(thumb_path.to_string_lossy().to_string());
     }
 
+    let duration = get_cached_video_duration(app_name, video_path.to_str().unwrap())?;
+    let half_duration = duration / 2.0;
+
+    let seek_time = half_duration;
+
+    let seek_time_str = format!("{:.3}", seek_time);
+
     let status = Command::new("ffmpeg")
-        .creation_flags(0x08000000) // CREATE_NO_WINDOW
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW (Windows-specific flag)
         .args([
             "-loglevel",
             "error",
             "-ss",
-            "5",
+            &seek_time_str,
             "-i",
             video_path.to_str().unwrap(),
             "-frames:v",
