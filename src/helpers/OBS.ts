@@ -9,7 +9,7 @@ export const obs = new OBSWebSocket();
 
 export async function connectOBS(
   port: string,
-  password: string
+  password: string,
 ): Promise<{ success: boolean; version?: string; error?: string }> {
   try {
     await obs.connect(`ws://localhost:${port}`, password);
@@ -22,7 +22,7 @@ export async function connectOBS(
 
 export async function setOutputPathForGame(
   gameName: string,
-  GAMES_DIR: string
+  GAMES_DIR: string,
 ): Promise<boolean> {
   try {
     const gameDir = await join(GAMES_DIR, gameName);
@@ -46,9 +46,8 @@ export async function setOutputPathForGame(
 }
 
 export async function setSceneForGame(gameName: string): Promise<void> {
-  const response: OBSResponseTypes["GetSceneList"] = await obs.call(
-    "GetSceneList"
-  );
+  const response: OBSResponseTypes["GetSceneList"] =
+    await obs.call("GetSceneList");
   const scenes = response.scenes;
 
   let sceneName = "Default";
@@ -57,7 +56,7 @@ export async function setSceneForGame(gameName: string): Promise<void> {
     scenes.some(
       (scene) =>
         typeof scene.sceneName === "string" &&
-        scene.sceneName.includes(gameName)
+        scene.sceneName.includes(gameName),
     )
   ) {
     sceneName = gameName;
@@ -74,7 +73,7 @@ export async function startOBSRecording(
   currentGame: string,
   record: boolean,
   recordingSoundEnabled: boolean,
-  playSound: () => void
+  playSound: () => void,
 ): Promise<{ success: boolean; message?: string }> {
   try {
     await setSceneForGame(currentGame);
@@ -94,12 +93,25 @@ export async function startOBSRecording(
 }
 
 export async function stopOBSRecording(
-  record: boolean
+  record: boolean,
 ): Promise<{ success: boolean; message?: string }> {
   try {
     if (record) {
       await obs.call("StopRecord");
+
+      // wait obs event
+      await new Promise<void>((resolve, reject) => {
+        const onRecordStateChanged = (data: any) => {
+          if (data.outputState === "OBS_WEBSOCKET_OUTPUT_STOPPED") {
+            obs.off("RecordStateChanged", onRecordStateChanged);
+            resolve();
+          }
+        };
+
+        obs.on("RecordStateChanged", onRecordStateChanged);
+      });
     }
+
     await obs.call("StopReplayBuffer");
 
     return { success: true };

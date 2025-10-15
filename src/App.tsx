@@ -35,23 +35,6 @@ function App() {
   const { showPopup } = usePopup();
 
   useEffect(() => {
-    (async () => {
-      let window = getCurrentWindow();
-      await window.show();
-      if (firstLoadRef.current && settings.clipDeletion && allClips.length) {
-        let result = await checkAndDeleteOldClips(
-          settings,
-          allClips,
-          setAllClips,
-        );
-        firstLoadRef.current = false;
-
-        if (result) showPopup(result[1], result[0]);
-      }
-    })();
-  }, [settings.clipDeletion, allClips.length]);
-
-  useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         if (isSettingsOpen) {

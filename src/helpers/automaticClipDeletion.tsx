@@ -16,13 +16,6 @@ export const checkAndDeleteOldClips = async (
   }
 
   try {
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(
-        () => reject(new Error("delete_older_clips timed out")),
-        50000,
-      ),
-    );
-
     const result = (await invoke("delete_older_clips", {
       clips: allClips,
       thresholdGb: settings.clipsDeleteThreshold,

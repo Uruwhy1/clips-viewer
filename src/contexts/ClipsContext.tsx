@@ -16,6 +16,8 @@ import {
 } from "../helpers/externalFiles";
 import { useSettings } from "./SettingsContext";
 import { Clip } from "../types/clip";
+import { checkAndDeleteOldClips } from "../helpers/automaticClipDeletion";
+import { usePopup } from "./PopupContext";
 
 type AddClipResult = {
   setAsCurrent: () => void;
@@ -70,6 +72,7 @@ interface ClipsProviderProps {
 
 export const ClipsProvider = ({ children }: ClipsProviderProps) => {
   const { settings } = useSettings();
+  const { showPopup } = usePopup();
 
   const [allClips, setAllClips] = useState<Clip[]>([]);
   const [currentClip, setCurrentClip] = useState<Clip | null>(null);
@@ -114,6 +117,16 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
 
         if (clipsWithFavorites.length > 0 && !currentClip) {
           setCurrentClip(clipsWithFavorites[0]);
+        }
+
+        if (settings.clipDeletion && clipsWithFavorites.length) {
+          let result = await checkAndDeleteOldClips(
+            settings,
+            clipsWithFavorites,
+            setAllClips,
+          );
+
+          if (result) showPopup(result[1], result[0]);
         }
       }
     };

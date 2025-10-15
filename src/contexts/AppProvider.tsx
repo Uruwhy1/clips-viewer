@@ -11,14 +11,14 @@ type AppProviderProps = {
 
 export const AppProvider = ({ children }: AppProviderProps) => {
   return (
-    <SettingsProvider>
-      <ClipsProvider>
-        <PopupProvider>
+    <PopupProvider>
+      <SettingsProvider>
+        <ClipsProvider>
           <RecordingProvider>
             <MediaProvider>{children}</MediaProvider>
           </RecordingProvider>
-        </PopupProvider>
-      </ClipsProvider>
-    </SettingsProvider>
+        </ClipsProvider>
+      </SettingsProvider>
+    </PopupProvider>
   );
 };
