@@ -13,7 +13,6 @@ import { Clip } from "../types/clip";
 import ClipFilters from "./ClipFilters";
 
 const CLIPS_PER_PAGE = 12;
-const CLIP_HEIGHT = 300;
 
 type Clips = {
   setView: (view: string) => void;
@@ -24,7 +23,6 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
   const { settings } = useSettings();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [rowsPerContainer, setRowsPerContainer] = useState(0);
 
   const {
     currentPage,

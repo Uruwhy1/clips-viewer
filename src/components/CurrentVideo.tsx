@@ -31,14 +31,30 @@ const MemoizedTrash2 = React.memo((props: LucideProps) => (
 ));
 
 const CurrentVideo: React.FC = React.memo(() => {
-  const { currentClip, deleteClip, editClip, isFavorite, toggleFavourite } =
+  const { currentClip, deleteClip, editClip, isFavorite, toggleFavourite, goToNextClip, goToPrevClip } =
     useClips();
   const { coverCache } = useMedia();
   const { showPopup } = usePopup();
 
-  const [imageError, setImageError] = useState<boolean>(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [renaming, setRenaming] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      if (e.key === "ArrowLeft") {
+        goToPrevClip()
+      } else if (e.key === "ArrowRight") {
+        goToNextClip()
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [currentClip]);
 
   if (currentClip == null) {
     return <div>There's no clip. This should not be possible.</div>;

@@ -28,30 +28,33 @@ struct ProcessInfo {
 }
 
 #[tauri::command]
-fn get_running_processes() -> Result<ProcessInfo, String> {
-    let output = Command::new("tasklist")
-        .creation_flags(CREATE_NO_WINDOW)
-        .output()
-        .map_err(|e| format!("Error executing tasklist: {}", e))?;
+async fn get_running_processes() -> Result<ProcessInfo, String> {
+    tokio::task::spawn_blocking(|| {
+        let output = Command::new("tasklist")
+            .creation_flags(CREATE_NO_WINDOW)
+            .output()
+            .map_err(|e| format!("Error executing tasklist: {}", e))?;
 
-    if !output.status.success() {
-        return Err("Failed to get processes".into());
-    }
+        if !output.status.success() {
+            return Err("Failed to get processes".into());
+        }
 
-    let processes = String::from_utf8_lossy(&output.stdout);
-    let process_set: HashSet<String> = processes
-        .lines()
-        .skip(3)
-        .filter_map(|line| {
-            let name = line.get(0..=24)?.trim().to_lowercase();
+        let processes = String::from_utf8_lossy(&output.stdout);
+        let process_set: HashSet<String> = processes
+            .lines()
+            .skip(3)
+            .filter_map(|line| {
+                let name = line.get(0..=24)?.trim().to_lowercase();
+                Some(name)
+            })
+            .collect();
 
-            Some(name)
+        Ok(ProcessInfo {
+            running_processes: process_set,
         })
-        .collect();
-
-    Ok(ProcessInfo {
-        running_processes: process_set,
     })
+    .await
+    .map_err(|e| format!("Join error: {}", e))?
 }
 
 #[tauri::command]

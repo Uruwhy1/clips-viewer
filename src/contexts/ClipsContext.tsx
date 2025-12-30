@@ -55,7 +55,8 @@ interface ClipsContextType {
   addClip: (newClip: Clip) => AddClipResult;
   editClip: (clip: Clip, newTitle: string) => Promise<boolean>;
   deleteClip: (clipPath: string, isFavourite: boolean) => Promise<boolean>;
-
+  goToNextClip: () => void;
+  goToPrevClip: () => void;
   favorites: Set<string>;
   toggleFavourite: (clipPath: string) => void;
   updateFavoritePath: (oldPath: string, newPath: string) => void;
@@ -271,7 +272,7 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
         const newClips = prevClips.filter((clip) => clip.filePath !== clipPath);
 
         if (currentClip && currentClip.filePath === clipPath) {
-          const newCurrentClip = newClips[5] || null;
+          const newCurrentClip = newClips[0] || null;
           setCurrentClip(newCurrentClip);
         }
 
@@ -286,6 +287,37 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     },
     [currentClip],
   );
+
+
+  const goToNextClip = useCallback(() => {
+    if (!currentClip || filteredClips.length === 0) return;
+
+    const currentIndex = filteredClips.findIndex(
+      (clip) => clip.filePath === currentClip.filePath,
+    );
+
+    if (currentIndex === -1) return;
+
+    const nextIndex = (currentIndex + 1) % filteredClips.length;
+    setCurrentClip(filteredClips[nextIndex]);
+  }, [currentClip, filteredClips]);
+
+  const goToPrevClip = useCallback(() => {
+    if (!currentClip || filteredClips.length === 0) return;
+
+    const currentIndex = filteredClips.findIndex(
+      (clip) => clip.filePath === currentClip.filePath,
+    );
+
+    if (currentIndex === -1) return;
+
+    const prevIndex =
+      (currentIndex - 1 + filteredClips.length) % filteredClips.length;
+
+    console.log(prevIndex, currentIndex)
+
+    setCurrentClip(filteredClips[prevIndex]);
+  }, [currentClip, filteredClips]);
 
   const updateFilter = (
     newFilter: Partial<{
@@ -352,6 +384,8 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     games,
     filter,
     updateFilter,
+    goToNextClip,
+    goToPrevClip,
     addClip,
     editClip,
     deleteClip,

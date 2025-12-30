@@ -25,7 +25,6 @@ const RenameInput = memo<RenameInputProps>(({ clip, onRename }) => {
         type="text"
         value={title}
         onChange={(e) => {
-          console.log(title);
           setTitle(e.target.value);
         }}
       />
