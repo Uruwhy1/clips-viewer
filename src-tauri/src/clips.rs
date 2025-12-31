@@ -159,9 +159,16 @@ fn generate_thumbnail_if_missing(app_name: &str, video_path: &str) -> Result<Str
             "1",
             "-vf",
             "scale=640:-1",
+            "-c:v",
+            "libwebp", 
+            "-lossless",
+            "0",
+            "-compression_level",
+            "6", 
             "-q:v",
-            "2",
-            thumb_path.to_str().unwrap(),
+            "75", 
+            "-y",
+            thumb_path.to_str().unwrap(), 
         ])
         .stdout(Stdio::null())
         .status()
