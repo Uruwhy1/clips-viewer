@@ -1,4 +1,3 @@
 ![clipsViewer](https://github.com/user-attachments/assets/3bea25d1-92a8-4771-b519-ce0c739a709b)
-![clipsViewerDark1](https://github.com/user-attachments/assets/29d61537-8e14-4ed2-b8d7-5fac250f577d)
-![clipsViewerDark](https://github.com/user-attachments/assets/fb75c606-cbe0-4ade-8425-148dafc3772c)
-![clipsViewerLight](https://github.com/user-attachments/assets/a2d89fef-1fbb-43dc-a56d-c4e11fa2f556)
+<img width="1900" height="1025" alt="clipsViewerDark" src="https://github.com/user-attachments/assets/b6222ce8-5a46-4698-b300-597d992ce88a" />
+<img width="1900" height="1025" alt="image" src="https://github.com/user-attachments/assets/33595775-8be9-4f77-9f3a-4ec81cd4776b" />
