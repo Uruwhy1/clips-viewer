@@ -9,17 +9,4 @@
   backdrop-filter: blur(5px);
 
   cursor: default;
-
-  animation: appear 0.25s ease;
-}
-
-
-@keyframes appear {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
 }

@@ -1,36 +1,38 @@
 .settingsContainer {
-  --width: 500px;
+  --width: 75vw;
 
   background-color: var(--settings-bg);
   color: #fff;
 
   padding: var(--padding-big);
 
-  height: 100vh;
+  height: 75vh;
   width: var(--width);
-  max-width: 800px;
 
   overflow-y: auto;
 
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-big);
-
   position: fixed;
-  left: var(--sidebar-width);
-  top: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 
-  border-right: 1px solid var(--borders);
+  border: 2px solid var(--accent);
 
-  transition: transform 0.5s ease;
   z-index: var(--settingsZ);
 
   user-select: none;
   scrollbar-gutter: stable;
-}
 
-.closed {
-  transform: translateX(calc(var(--width) * -1));
+  /* this wrapper is needed because columns doesn't let me scroll otherwise */
+  >div {
+    columns: 2;
+    column-gap: var(--gap-big);
+
+    >div {
+      break-inside: avoid;
+      margin-bottom: var(--gap-big);
+    }
+  }
 }
 
 .mainTitle {

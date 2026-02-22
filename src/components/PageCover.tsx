@@ -1,3 +1,4 @@
+import { motion } from "motion/react"
 import styles from "./PageCover.module.css"
 
 type PageCoverProps = {
@@ -6,8 +7,13 @@ type PageCoverProps = {
 }
 
 const PageCover: React.FC<PageCoverProps> = ({ onClick, z = 2 }) => {
-  return <div onClick={onClick} style={{ zIndex: z }} className={styles.cover}></div>
+  return (
+    <div
+      onClick={onClick}
+      style={{ zIndex: z }}
+      className={styles.cover}
+    />
+  )
 }
 
 export default PageCover
-

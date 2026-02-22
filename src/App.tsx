@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef, useContext } from "react";
+import { AnimatePresence } from "motion/react"
+
 import "./reset.css";
 import "./root.css";
 import "./App.css";
@@ -14,10 +16,10 @@ import { useClips } from "./contexts/ClipsContext";
 import { useMedia } from "./contexts/MediaContext";
 
 import { usePopup } from "./contexts/PopupContext.js";
-import { checkAndDeleteOldClips } from "./helpers/automaticClipDeletion";
 import SplashScreen from "./SplashScreen";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Clip } from "./types/clip";
+import PageCover from "./components/PageCover";
+import OverlayModal from "./components/OverlayModal";
 
 function App() {
   const [view, setView] = useState("clips");
@@ -170,11 +172,23 @@ function App() {
         />
       )}
       {currentView()}
-      <Settings
-        ref={settingsRef}
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
+
+      <AnimatePresence mode="wait">
+        {isSettingsOpen && (
+          <>
+            <OverlayModal
+              zIndex="var(--settingsZ)"
+              onClick={() => setIsSettingsOpen(false)}
+            >
+              <Settings
+                ref={settingsRef}
+                onClose={() => setIsSettingsOpen(false)}
+              />
+            </OverlayModal>
+
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

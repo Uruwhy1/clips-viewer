@@ -1,7 +1,9 @@
 import React, { forwardRef, useCallback, useEffect, useState } from "react";
+import { motion } from "motion/react";
+
 import styles from "./Settings.module.css";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Aperture, Folder, LucideSettings2, Palette } from "lucide-react";
+import { Aperture, Folder, LucideSettings2 } from "lucide-react";
 import SettingButton from "./SettingButton";
 
 import ObsConnectionForm from "./ObsConnectionForm";
@@ -13,16 +15,14 @@ import { useSettings } from "../contexts/SettingsContext";
 import { ThemeFamilyControl } from "./ThemeFamily";
 import { AppearanceModeControl } from "./ThemeAppearance";
 import AccentColor from "./AccentColor";
-import { RecordingMethod, SemanticColor } from "../types/settings";
-import PageCover from "./PageCover";
+import { SemanticColor } from "../types/settings";
 
 type SettingsProps = {
-  isOpen: boolean;
   onClose: () => void;
 };
 
 const Settings = forwardRef<HTMLDivElement, SettingsProps>(
-  ({ isOpen, onClose }, ref) => {
+  ({ onClose }, ref) => {
     const { settings, setSettings } = useSettings();
 
     const [removingIndex, setRemovingIndex] = useState<number | null>(null);
@@ -196,17 +196,15 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
     };
 
     return (
-      <>
-        {isOpen && <PageCover onClick={onClose} z={'var(--settingsCoverZ)'} />}
-
-        <div
-          className={`${styles.settingsContainer} ${isOpen ? "" : styles.closed}`}
-          ref={ref}
-          onClick={(e) => {
-            e.stopPropagation();
-            setRemovingIndex(null);
-          }}
-        >
+      <div
+        className={`${styles.settingsContainer}`}
+        ref={ref}
+        onClick={(e) => {
+          e.stopPropagation();
+          setRemovingIndex(null);
+        }}
+      >
+        <div className={styles.columns}>
           <div className={`${styles.settingCategory}`}>
             <div className={styles.title}>
               <Folder />
@@ -323,7 +321,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
             />
           </div>
         </div>
-      </>
+      </div>
     );
   },
 );
