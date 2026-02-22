@@ -6,7 +6,6 @@
   height: 100vh;
 
   background-color: var(--page-cover);
-  backdrop-filter: blur(5px);
 
   cursor: default;
 }

@@ -1,4 +1,5 @@
 :root {
+  /* colors */
   --red: #f38ba8;
   --blue: #89b4fa;
   --green: #a6e3a1;
@@ -11,36 +12,35 @@
   --accent-var: var(--red);
 
   --page-bg: #303030;
-
-  --title-bar-bg: var(--dark-bg);
-  --title-bar-color: #fff;
+  --dark-bg: #1a1a1a;
+  --content-bg: #1a1a1a;
 
   --buttonHeight: 2.25rem;
 
-  /* common styles */
   --clips-filters-bg: var(--page-bg);
   --clips-bg: var(--page-bg);
-  --settings-bg: var(--dark-bg);
-  --current-bg: var(--dark-bg);
+  --settings-bg: var(--page-bg);
+  --popup-bg: var(--content-bg);
+  
+  --current-bg: #000;
+  --current-color: #fff;
+  --title-bar-bg: #000;
+  --title-bar-color: #Fff;
 
   --page-cover: rgba(0, 0, 0, 0.7);
 
-  --dark-bg-color: #ffffff;
-  --dark-bg-color-2: #ccc;
-
-  /* z-indxeds */
-
-  --settingsZ: 1000;
-  --settingsCoverZ: 998;
-
-  --titleBarZ: 999;
-
-  --gameFilterZ: 900;
-  --gameFilterCoverZ: 899;
-
+  --sidebarZ: 1001;
+  --titleBarZ: 1000;
+  --settingsZ: 999;
+  /* modals that take all screen */
+  --filtersZ: 998;
+  /* smaller modals/dropdowns */
+  --filtersModalZ: 997;
 }
 
+
 :root[data-theme="Latte"] {
+  /* colors */
   --red: var(--ctp-latte-red);
   --blue: var(--ctp-latte-blue);
   --green: var(--ctp-latte-green);
@@ -50,22 +50,25 @@
   --teal: var(--ctp-latte-teal);
   --lavender: var(--ctp-latte-lavender);
 
-  --blue: var(--ctp-latte-blue);
-  --red: var(--ctp-latte-red);
-
+  /* backgrounds */
   --page-bg: var(--ctp-latte-base);
+  --content-bg: var(--ctp-latte-surface0);
+  --dark-bg: var(--ctp-latte-crust);
+
+  /* text */
   --color: var(--ctp-latte-text);
-
-  /* --- */
   --gray-color: var(--ctp-latte-subtext0);
-  --borders: var(--ctp-latte-surface0);
 
+  /* misc */
+  --borders: var(--ctp-latte-surface0);
   --accent: var(--accent-var);
   --accent-washed: var(--accent-var);
   --accent-white: color-mix(in srgb, var(--accent-var) 30%, white);
 }
 
+
 :root[data-theme="Mocha"] {
+  /* colors */
   --red: var(--ctp-mocha-red);
   --blue: var(--ctp-mocha-blue);
   --green: var(--ctp-mocha-green);
@@ -75,24 +78,28 @@
   --teal: var(--ctp-mocha-teal);
   --lavender: var(--ctp-mocha-lavender);
 
-  --blue: var(--ctp-mocha-blue);
-  --red: var(--ctp-mocha-red);
-
+  /* backgrounds */
   --page-bg: var(--ctp-mocha-base);
+  --content-bg: var(--ctp-mocha-surface0);
+  --dark-bg: var(--ctp-mocha-crust);
+
+  /* text */
   --color: var(--ctp-mocha-text);
-
-  /* --- */
   --gray-color: var(--ctp-mocha-subtext0);
-  --borders: var(--ctp-mocha-surface0);
 
+  /* misc */
+  --borders: var(--ctp-mocha-surface0);
   --accent: var(--accent-var);
   --accent-washed: var(--accent-var);
   --accent-white: color-mix(in srgb, var(--accent-var) 50%, black);
 }
 
-/* catpuccin general styles */
+
+/* catppuccin palette — shared across themes */
 :root[data-theme="Mocha"],
 :root[data-theme="Latte"] {
+
+  /* latte palette */
   --ctp-latte-rosewater: #dc8a78;
   --ctp-latte-flamingo: #dd7878;
   --ctp-latte-pink: #ea76cb;
@@ -107,6 +114,7 @@
   --ctp-latte-sapphire: #209fb5;
   --ctp-latte-blue: #1e66f5;
   --ctp-latte-lavender: #7287fd;
+
   --ctp-latte-text: #4c4f69;
   --ctp-latte-subtext1: #5c5f77;
   --ctp-latte-subtext0: #6c6f85;
@@ -119,8 +127,8 @@
   --ctp-latte-base: #eff1f5;
   --ctp-latte-mantle: #e6e9ef;
   --ctp-latte-crust: #dce0e8;
-  --ctp-mocha-crust: #11111b;
 
+  /* mocha palette */
   --ctp-mocha-rosewater: #f5e0dc;
   --ctp-mocha-flamingo: #f2cdcd;
   --ctp-mocha-pink: #f5c2e7;
@@ -135,8 +143,9 @@
   --ctp-mocha-sapphire: #74c7ec;
   --ctp-mocha-blue: #89b4fa;
   --ctp-mocha-lavender: #b4befe;
+
   --ctp-mocha-text: #cdd6f4;
-  --ctp-mocha-subtext1: #bac2e;
+  --ctp-mocha-subtext1: #bac2e8;
   --ctp-mocha-subtext0: #a6adc8;
   --ctp-mocha-overlay2: #9399b2;
   --ctp-mocha-overlay1: #7f849c;
@@ -147,8 +156,4 @@
   --ctp-mocha-base: #1e1e2e;
   --ctp-mocha-mantle: #181825;
   --ctp-mocha-crust: #11111b;
-  --ctp-latte-surface0: #ccd0da;
-  --ctp-latte-text: #4c4f69;
-
-  --dark-bg: var(--ctp-mocha-crust);
 }

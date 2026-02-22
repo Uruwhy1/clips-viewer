@@ -10,7 +10,7 @@
     "edit info";
 
   background-color: var(--current-bg);
-  color: var(--dark-bg-color);
+  color: var(--current-color);
 
   >div {
     overflow: hidden;

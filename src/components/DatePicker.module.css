@@ -41,17 +41,13 @@
 }
 
 .datePickerDropdown {
-  position: absolute;
-  top: 110%;
-  left: 0;
-  z-index: 10;
-
   background: var(--clips-filters-bg, #fff);
+
   border: 1px solid var(--borders);
   border-radius: var(--radius-small);
   padding: 1rem;
-
-  min-width: 280px;
+  
+  min-width: 300px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -142,4 +138,116 @@
 
 .dateInput::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
+}
+/* DatePicker.module.css */
+
+/* ... keep all existing rules above ... */
+
+/* Widen dropdown to fit the calendar */
+
+
+/* ── react-day-picker overrides ── */
+.rdpRoot {
+  --rdp-accent-color: var(--accent-washed);
+  --rdp-background-color: var(--clips-filters-bg);
+  font-size: 0.85rem;
+  color: var(--color);
+
+}
+
+.rdpMonths {
+  position: relative;
+}
+
+.rdpCaption {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 0.5rem;
+}
+
+
+.rdpTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rdpHead {
+  font-size: 0.75rem;
+  color: var(--gray-color);
+  font-weight: 500;
+  padding-bottom: 0.25rem;
+}
+
+.rdpDay {
+  text-align: center;
+  padding: 1px;
+}
+
+.rdpDayButton {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-small);
+  border: none;
+  background: transparent;
+  color: var(--color);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.12s, color 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rdpDayButton:hover {
+  background: var(--hover-bg, #f0f0f0);
+}
+
+.rdpToday .rdpDayButton {
+  font-weight: 700;
+  color: var(--accent-washed);
+}
+
+.rdpSelected .rdpDayButton,
+.rdpRangeStart .rdpDayButton,
+.rdpRangeEnd .rdpDayButton {
+  background: var(--accent-washed);
+  color: #fff;
+}
+
+.rdpRangeMiddle .rdpDayButton {
+  background: color-mix(in srgb, var(--accent-washed) 18%, transparent);
+  border-radius: 0;
+  color: var(--color);
+}
+
+.rdpRangeStart .rdpDayButton {
+  border-radius: var(--radius-small) 0 0 var(--radius-small);
+}
+
+.rdpRangeEnd .rdpDayButton {
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+}
+
+.rdpOutside .rdpDayButton {
+  color: var(--gray-color);
+  opacity: 0.45;
+}
+
+.rdpDisabled .rdpDayButton {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Small label showing the active range below the calendar */
+.selectedRange {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--borders);
+  font-size: 0.8rem;
+  color: var(--gray-color);
+  text-align: center;
 }

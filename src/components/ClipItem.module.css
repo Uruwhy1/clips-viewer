@@ -4,6 +4,7 @@
   overflow: hidden;
 
   padding: var(--inline-padding);
+  background-color: var(--page-bg);
 
   display: flex;
   justify-content: space-between;

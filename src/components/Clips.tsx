@@ -22,6 +22,8 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
   const { filteredClips, games, filter, updateFilter } = useClips();
   const { settings } = useSettings();
 
+
+  console.log(filteredClips)
   const containerRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -31,6 +33,9 @@ const Clips: React.FC<Clips> = React.memo(({ setView }) => {
     goToPage,
   } = usePagination(filteredClips, CLIPS_PER_PAGE);
 
+  
+  
+  console.log(currentClips)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement) {

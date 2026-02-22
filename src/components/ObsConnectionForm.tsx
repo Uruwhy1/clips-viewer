@@ -1,5 +1,6 @@
 import { useRecording } from "../contexts/RecordingContext";
 import React, { useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
 
@@ -25,7 +26,6 @@ const ObsConnectionForm = React.memo(() => {
     }
 
     const success = await connect(obsPort, obsPassword);
-
     if (success) {
       setObsSetting({
         port: obsPort,
@@ -55,41 +55,43 @@ const ObsConnectionForm = React.memo(() => {
           func={toggleFormVisibility}
         />
       </div>
-      <div
-        className={`${styles.form} ${isFormVisible && styles.active} ${
-          styles.addWebsocketForm
-        }`}
-      >
-        <div className={styles.inputGroup}>
-          <label htmlFor="obsPort">Port</label>
-          <input
-            autoComplete="off"
-            id="obsPort"
-            type="text"
-            value={obsPort}
-            onChange={(e) => setObsPort(e.target.value)}
-            placeholder={obsSetting.port || ""}
-            tabIndex={isFormVisible ? 0 : -1}
-          />
-        </div>
-        <div className={styles.inputGroup}>
-          <label htmlFor="obsPassword">Password</label>
-          <input
-            autoComplete="off"
-            id="obsPassword"
-            type="password"
-            placeholder="Password here..."
-            value={obsPassword}
-            onChange={(e) => setObsPassword(e.target.value)}
-            tabIndex={isFormVisible ? 0 : -1}
-          />
-        </div>
-        <SettingButton
-          tabIndex={isFormVisible ? 0 : -1}
-          func={handleObsClick}
-          text="Connect"
-        />
-      </div>
+
+      <AnimatePresence initial={false}>
+        {isFormVisible && (
+          <motion.div
+            className={styles.form}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            style={{ overflow: "hidden" }}
+          >
+            <div className={styles.inputGroup}>
+              <label htmlFor="obsPort">Port</label>
+              <input
+                autoComplete="off"
+                id="obsPort"
+                type="text"
+                value={obsPort}
+                onChange={(e) => setObsPort(e.target.value)}
+                placeholder={obsSetting.port || ""}
+              />
+            </div>
+            <div className={styles.inputGroup}>
+              <label htmlFor="obsPassword">Password</label>
+              <input
+                autoComplete="off"
+                id="obsPassword"
+                type="password"
+                placeholder="Password here..."
+                value={obsPassword}
+                onChange={(e) => setObsPassword(e.target.value)}
+              />
+            </div>
+            <SettingButton func={handleObsClick} text="Connect" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className={styles.currentSetting}>{getConnectionStatus()}</div>
     </div>
   );

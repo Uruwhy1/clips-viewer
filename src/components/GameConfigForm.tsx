@@ -1,4 +1,5 @@
 import React, { useState, useCallback, Dispatch, SetStateAction } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
 import { Settings } from "../types/settings";
@@ -89,13 +90,15 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
     const toggleForm = useCallback(() => {
       setIsFormVisible((prev) => !prev);
       setEditingGame(null);
-      setTimeout(() => {
-        setGameName("");
-        setProcessNames("");
-        setWindowTitle("");
-        setRecordBool(false);
-      }, 500);
-    }, []);
+      if (isFormVisible) {
+        setTimeout(() => {
+          setGameName("");
+          setProcessNames("");
+          setWindowTitle("");
+          setRecordBool(false);
+        }, 500);
+      }
+    }, [isFormVisible]);
 
     return (
       <div className={styles.settingIndividual}>
@@ -107,85 +110,90 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
           />
         </div>
 
-        <div
-          className={`${styles.form} ${isFormVisible && styles.active} ${styles.addGameForm
-            }`}
-        >
-          <div className={styles.inputGroup}>
-            <label htmlFor="gameName">Game Name</label>
-            <input
-              autoComplete="off"
-              id="gameName"
-              type="text"
-              value={gameName}
-              onChange={(e) => setGameName(e.target.value)}
-              placeholder="Enter game name"
-              tabIndex={isFormVisible ? 0 : -1}
-            />
-          </div>
-          <div className={styles.inputGroup}>
-            <label htmlFor="processNames">Game Processes</label>
-            <input
-              autoComplete="off"
-              id="processNames"
-              type="text"
-              value={processNames}
-              onChange={(e) => setProcessNames(e.target.value)}
-              placeholder="Enter process names, separated by commas"
-              tabIndex={isFormVisible ? 0 : -1}
-            />
-          </div>
-          <div className={styles.inputGroup}>
-            <label htmlFor="windowTitle">Window Title</label>
-            <input
-              autoComplete="off"
-              id="windowTitle"
-              type="text"
-              value={windowTitle}
-              onChange={(e) => setWindowTitle(e.target.value)}
-              placeholder="Enter window title (optional, defaults to game name)"
-              tabIndex={isFormVisible ? 0 : -1}
-            />
-          </div>
-          <div className={styles.inputGroup}>
-            <label htmlFor="recordBool">Record Full Sessions</label>
-            <input
-              autoComplete="off"
-              id="recordBool"
-              type="checkbox"
-              checked={recordBool}
-              className={styles.checkboxInput}
-              onChange={(e) => setRecordBool(e.target.checked)}
-              tabIndex={isFormVisible ? 0 : -1}
-            />
-          </div>
+        <AnimatePresence initial={false}>
+          {isFormVisible && (
+            <motion.div
+              className={`${styles.form} ${styles.addGameForm}`}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              style={{ overflow: "hidden" }}
+            >
+              <div className={styles.inputGroup}>
+                <label htmlFor="gameName">Game Name</label>
+                <input
+                  autoComplete="off"
+                  id="gameName"
+                  type="text"
+                  value={gameName}
+                  onChange={(e) => setGameName(e.target.value)}
+                  placeholder="Enter game name"
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <label htmlFor="processNames">Game Processes</label>
+                <input
+                  autoComplete="off"
+                  id="processNames"
+                  type="text"
+                  value={processNames}
+                  onChange={(e) => setProcessNames(e.target.value)}
+                  placeholder="Enter process names, separated by commas"
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <label htmlFor="windowTitle">Window Title</label>
+                <input
+                  autoComplete="off"
+                  id="windowTitle"
+                  type="text"
+                  value={windowTitle}
+                  onChange={(e) => setWindowTitle(e.target.value)}
+                  placeholder="Enter window title (optional, defaults to game name)"
+                />
+              </div>
+              <div className={styles.inputGroup}>
+                <label htmlFor="recordBool">Record Full Sessions</label>
+                <input
+                  autoComplete="off"
+                  id="recordBool"
+                  type="checkbox"
+                  checked={recordBool}
+                  className={styles.checkboxInput}
+                  onChange={(e) => setRecordBool(e.target.checked)}
+                />
+              </div>
 
-          <SettingButton
-            tabIndex={isFormVisible ? 0 : -1}
-            func={handleSave}
-            text={editingGame ? "Update Game" : "Save Game"}
-          />
-        </div>
+              <SettingButton
+                func={handleSave}
+                text={editingGame ? "Update Game" : "Save Game"}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className={styles.gamesContainer}>
           {settings.gamesConfig &&
             Object.keys(settings.gamesConfig).length > 0 ? (
             Object.entries(settings.gamesConfig).map(
               ([gameName, config], index) => (
                 <div
-                  className={`${styles.gameItem} ${styles.currentSetting} ${index == removingIndex ? styles.remove : ""
-                    } ${gameName == editingGame ? styles.editing : ""}
-                    ${config.record ? styles.recording : ""}`}
+                  className={`${styles.gameItem} ${styles.currentSetting} ${
+                    index === removingIndex ? styles.remove : ""
+                  } ${gameName === editingGame ? styles.editing : ""} ${
+                    config.record ? styles.recording : ""
+                  }`}
                   key={index}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (index != removingIndex) {
+                    if (index !== removingIndex) {
                       handleGameClick(index);
                     }
                   }}
                 >
                   <strong>{gameName}</strong>
                   <p>{config.processes.join(", ")}</p>
-                  {index == removingIndex ? (
+                  {index === removingIndex ? (
                     <>
                       <button onClick={() => removeGame(gameName)}>
                         Remove
@@ -200,9 +208,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
                         Edit
                       </button>
                     </>
-                  ) : (
-                    ""
-                  )}
+                  ) : null}
                 </div>
               ),
             )
@@ -210,6 +216,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
             <p>No games added yet.</p>
           )}
         </div>
+
         {settings.recordingMethod === "wgc" && (
           <div className={styles.themeDescription}>
             <p>WGC is selected. All sessions will be fully recorded.</p>

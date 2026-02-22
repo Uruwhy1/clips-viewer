@@ -29,6 +29,7 @@ const GameFilter: React.FC<GameFilterProps> = ({
       </button>
 
       <Dropdown isOpen={showGames} onClose={onFilterClick}>
+      {showGames && (
         <div className={styles.gamesList}>
           {games.map((game) => (
             <button
@@ -40,6 +41,7 @@ const GameFilter: React.FC<GameFilterProps> = ({
             </button>
           ))}
         </div>
+      )})
       </Dropdown>
     </div>
   );

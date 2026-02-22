@@ -1,8 +1,8 @@
 .settingsContainer {
   --width: 75vw;
 
-  background-color: var(--settings-bg);
-  color: #fff;
+  background-color: var(--content-bg);
+  color: var(--settings-color);
 
   padding: var(--padding-big);
 
@@ -25,7 +25,7 @@
 
   /* this wrapper is needed because columns doesn't let me scroll otherwise */
   >div {
-    columns: 2;
+    columns: 500px;
     column-gap: var(--gap-big);
 
     >div {
@@ -55,6 +55,7 @@
   border: 1px solid rgba(128, 128, 128, 0.325);
   border-radius: var(--radius-small);
   padding: var(--padding-big);
+  background-color: var(--page-bg);
 
   display: flex;
   flex-direction: column;
@@ -71,6 +72,7 @@
   gap: var(--gap-small);
 
   padding: var(--padding-medium);
+  border: 1px solid var(--borders);
   background-color: var(--page-bg);
   color: var(--color);
 
@@ -215,29 +217,13 @@
 }
 
 .form {
-  nav-index: -1;
-
-  --settingButtonHeight: var(--buttonHeight);
-  --inputGroupHeight: 4.1rem;
-
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: var(--gap-small);
 
-  height: 0px;
-  overflow: hidden;
-
-  >button {
+  > button {
     width: calc(100% - 2px);
-  }
-
-  margin-bottom: calc(var(--gap-small) * -1);
-  transition: height 0.5s ease;
-
-  &.active {
-    margin: 0;
-    height: calc((var(--inputGroupHeight) + var(--gap-small)) * var(--inputsNumber) + (var(--settingButtonHeight) + 2px));
   }
 }
 
@@ -390,11 +376,9 @@
 }
 
 .currentThemeBadge {
-  color: var(--dark-bg-accent);
   font-size: 0.8rem;
 
   border-radius: var(--radius-small);
-  background-color: var(--dark-bg-accent-white);
   padding: 2px 6px;
 }
 

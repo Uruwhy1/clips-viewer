@@ -143,8 +143,8 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
 
         let dateMatch = true;
         if (filter.dateFilter.startDate || filter.dateFilter.endDate) {
-          const clipDate = new Date(clip.date * 1000); // Convert timestamp to Date
-          const clipDateString = clipDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+          const d = new Date(clip.date * 1000);
+          const clipDateString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
           if (filter.dateFilter.startDate) {
             dateMatch =
@@ -154,6 +154,10 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
           if (filter.dateFilter.endDate) {
             dateMatch =
               dateMatch && clipDateString <= filter.dateFilter.endDate;
+          }
+
+          if (clipDateString == '2026-02-04') {
+            console.log(dateMatch)
           }
         }
 
@@ -169,12 +173,26 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
 
   // Unique games calculation
   const games = useMemo(() => {
-    const filteredClipsForGames = filter.showFavourites
-      ? allClips.filter((clip) => clip.isFavourite)
-      : allClips;
+    return Array.from(
+      new Set(
+        allClips
+          .filter((clip) => {
+            if (filter.showFavourites && !clip.isFavourite) return false;
 
-    return Array.from(new Set(filteredClipsForGames.map((clip) => clip.game)));
-  }, [allClips, filter.showFavourites]);
+            if (filter.dateFilter.startDate || filter.dateFilter.endDate) {
+              const d = new Date(clip.date * 1000);
+              const clipDateString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+              if (filter.dateFilter.startDate && clipDateString < filter.dateFilter.startDate) return false;
+              if (filter.dateFilter.endDate && clipDateString > filter.dateFilter.endDate) return false;
+            }
+
+            return true;
+          })
+          .map((clip) => clip.game),
+      ),
+    );
+  }, [allClips, filter.showFavourites, filter.dateFilter]);
 
   // Random clips for recommendations
   const randomClips = useMemo(() => {

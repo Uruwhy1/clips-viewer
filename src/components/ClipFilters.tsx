@@ -1,10 +1,14 @@
 import React, { useState, useCallback, useEffect } from "react";
+import { AnimatePresence } from 'motion/react'
+
 import { ArrowDownNarrowWide, ArrowUpNarrowWide } from "lucide-react";
 import styles from "./ClipFilters.module.css";
 import DatePicker from "./DatePicker";
 import GameFilter from "./GameFilter";
 import FavouriteButton from "./icons/StarButton";
 import PageCover from "./PageCover";
+import FadeInItem from "./FadeInItem";
+
 
 type SortOrder = "newest" | "oldest";
 
@@ -117,9 +121,13 @@ const ClipFilters: React.FC<FiltersProps> = ({
 
   return (
     <>
-      {hasActiveDropdown && (
-        <PageCover onClick={handleOverlayClick} z={'var(--gameFilterCoverZ)'}></PageCover>
-      )}
+      <AnimatePresence>
+        {hasActiveDropdown && (
+          <FadeInItem style={{ position: 'absolute', zIndex: 'var(--filtersZ)' }}>
+            <PageCover onClick={handleOverlayClick} />
+          </FadeInItem>
+        )}
+      </AnimatePresence>
 
       <div className={styles.filters}>
         <GameFilter
