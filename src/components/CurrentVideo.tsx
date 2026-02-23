@@ -39,23 +39,6 @@ const CurrentVideo: React.FC = React.memo(() => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [renaming, setRenaming] = useState<boolean>(false);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      if (e.key === "ArrowLeft") {
-        goToPrevClip()
-      } else if (e.key === "ArrowRight") {
-        goToNextClip()
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [currentClip]);
-
   if (currentClip == null) {
     return <div>There's no clip. This should not be possible.</div>;
   }

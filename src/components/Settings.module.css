@@ -23,15 +23,18 @@
   user-select: none;
   scrollbar-gutter: stable;
 
-  /* this wrapper is needed because columns doesn't let me scroll otherwise */
-  >div {
-    columns: 500px;
-    column-gap: var(--gap-big);
+  .columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-big);
+  }
 
-    >div {
-      break-inside: avoid;
-      margin-bottom: var(--gap-big);
-    }
+  .column {
+    flex: 1 1 500px;
+    min-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-big);
   }
 }
 

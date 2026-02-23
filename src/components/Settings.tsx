@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 
 import styles from "./Settings.module.css";
@@ -21,9 +21,13 @@ type SettingsProps = {
   onClose: () => void;
 };
 
+const MIN_COLUMN_WIDTH = 500;
+
 const Settings = forwardRef<HTMLDivElement, SettingsProps>(
   ({ onClose }, ref) => {
     const { settings, setSettings } = useSettings();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [columnCount, setColumnCount] = useState(2);
 
     const [removingIndex, setRemovingIndex] = useState<number | null>(null);
     const [tempThreshold, setTempThreshold] = useState(
@@ -36,6 +40,26 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
       showPersistentNotification,
       removePersistentNotification,
     } = usePopup();
+
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const updateColumnCount = () => {
+        const width = container.clientWidth;
+        const gap = parseFloat(getComputedStyle(container).getPropertyValue("--gap-big") || "16px");
+        const availableWidth = width + gap;
+        const count = Math.max(1, Math.floor(availableWidth / (MIN_COLUMN_WIDTH + gap)));
+        setColumnCount(count);
+      };
+
+      updateColumnCount();
+
+      const resizeObserver = new ResizeObserver(updateColumnCount);
+      resizeObserver.observe(container);
+
+      return () => resizeObserver.disconnect();
+    }, []);
 
     function debounce<T extends (...args: any[]) => void>(
       func: T,
@@ -195,17 +219,11 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
       showPopup(`Accent color changed to ${semanticColor.name}.`, true);
     };
 
-    return (
-      <div
-        className={`${styles.settingsContainer}`}
-        ref={ref}
-        onClick={(e) => {
-          e.stopPropagation();
-          setRemovingIndex(null);
-        }}
-      >
-        <div className={styles.columns}>
-          <div className={`${styles.settingCategory}`}>
+    const settingCategories = [
+      {
+        id: "storage",
+        content: (
+          <div className={styles.settingCategory}>
             <div className={styles.title}>
               <Folder />
               <h3>Storage</h3>
@@ -223,9 +241,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
                   text={"Change Directory"}
                 />
               </div>
-              <div
-                className={`${styles.currentSetting} ${styles.currentDirectory}`}
-              >
+              <div className={`${styles.currentSetting} ${styles.currentDirectory}`}>
                 <p>{settings.gamesDir}</p>
               </div>
             </div>
@@ -237,10 +253,7 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
                   func={handleToggleClipDeletion}
                 />
               </div>
-              <div
-                className={`${styles.currentSetting} ${!settings.clipDeletion ? styles.inactive : ""
-                  } `}
-              >
+              <div className={`${styles.currentSetting} ${!settings.clipDeletion ? styles.inactive : ""}`}>
                 <input
                   type="range"
                   min={1}
@@ -252,8 +265,12 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
               </div>
             </div>
           </div>
-
-          <div className={`${styles.settingCategory}`}>
+        ),
+      },
+      {
+        id: "recording",
+        content: (
+          <div className={styles.settingCategory}>
             <div className={styles.title}>
               <Aperture />
               <h3>Recording</h3>
@@ -278,8 +295,12 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
               </div>
             </div>
           </div>
-
-          <div className={`${styles.settingCategory}`}>
+        ),
+      },
+      {
+        id: "ui-tweaks",
+        content: (
+          <div className={styles.settingCategory}>
             <div className={styles.title}>
               <LucideSettings2 />
               <h3>UI Tweaks</h3>
@@ -320,6 +341,31 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
               onAccentChange={handleAccentChange}
             />
           </div>
+        ),
+      },
+    ];
+
+    const columns = Array.from({ length: columnCount }, (_, i) => (
+      <div key={i} className={styles.column}>
+        {settingCategories
+          .filter((_, idx) => idx % columnCount === i)
+          .map((cat) => (
+            <React.Fragment key={cat.id}>{cat.content}</React.Fragment>
+          ))}
+      </div>
+    ));
+
+    return (
+      <div
+        className={styles.settingsContainer}
+        ref={ref}
+        onClick={(e) => {
+          e.stopPropagation();
+          setRemovingIndex(null);
+        }}
+      >
+        <div className={styles.columns} ref={containerRef}>
+          {columns}
         </div>
       </div>
     );
