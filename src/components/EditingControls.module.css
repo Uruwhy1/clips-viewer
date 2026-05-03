@@ -1,0 +1,17 @@
+.clipControls {
+  margin: auto;
+
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.clipControls button {
+  background-color: transparent;
+  border: none;
+}
+
+.clipControls button:hover {
+  color: var(--accent-washed);
+  cursor: pointer;
+}

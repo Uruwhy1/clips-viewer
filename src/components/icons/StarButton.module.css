@@ -1,0 +1,26 @@
+.favouriteButton {
+  cursor: pointer;
+  fill: none;
+
+  &.animate {
+    animation: favourite 0.5s 1 ease;
+  }
+
+  &.active {
+    stroke: rgb(255, 208, 0);
+    fill: rgb(255, 208, 0);
+  }
+}
+
+@keyframes favourite {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

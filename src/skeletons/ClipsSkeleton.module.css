@@ -1,0 +1,41 @@
+.skeletonItem {
+  border: 1px solid var(--borders);
+  padding: 16px;
+  border-radius: var(--radius);
+
+  overflow: hidden;
+  position: relative;
+}
+
+.thumbnail {
+  height: 200px;
+  background-color: rgba(128, 128, 128, 0.311);
+}
+
+.text {
+  margin-top: 10px;
+  height: 50px;
+  background-color: rgba(128, 128, 128, 0.311);
+}
+
+.skeletonItem::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -200%;
+
+  width: 200%;
+  height: 100%;
+
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.111),
+      transparent);
+  animation: shimmer 3s ease infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    left: 200%;
+  }
+}

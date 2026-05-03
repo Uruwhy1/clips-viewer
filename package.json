@@ -1,25 +1,42 @@
 {
   "name": "gaming-clips-viewer",
   "version": "1.2.5",
+  "description": "A desktop app for managing gaming clips",
   "main": "main.js",
-  "scripts": {
-    "start": "cross-env APP_DEV=true electron .",
-    "build": "electron-builder"
-  },
   "author": "",
   "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "cross-env": "^7.0.3",
-    "electron": "^33.2.0",
-    "electron-builder": "^25.1.8",
-    "electron-reload": "^2.0.0-alpha.1"
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env DEV=true electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "electron:start": "electron ."
   },
   "dependencies": {
     "date-fns": "^4.1.0",
     "fs": "^0.0.1-security",
+    "lucide-react": "^0.468.0",
+    "motion": "^12.34.3",
     "obs-websocket-js": "^5.0.6",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "react": "^19.2.3",
+    "react-day-picker": "^9.13.2",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-reload": "^2.0.0-alpha.1",
+    "electron-vite": "^3.0.0",
+    "typescript": "^5.8.3",
+    "vite": "^5.3.1",
+    "wait-on": "^8.0.3"
   },
   "build": {
     "appId": "com.facundo.clipsviewer",
@@ -28,17 +45,10 @@
       "output": "dist"
     },
     "files": [
-      "build/**/*",
-      "node_modules/**/*",
+      "dist/**/*",
+      "dist-electron/**/*",
       "main.js",
-      "preload.js",
-      "index.html",
-      "renderer.js",
-      "helpers.js",
-      "reset.css",
-      "variables.css",
-      "index.css",
-      "obs-recording.js"
+      "package.json"
     ],
     "extraResources": [
       {
@@ -51,6 +61,10 @@
     ],
     "win": {
       "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility"
     }
   }
 }

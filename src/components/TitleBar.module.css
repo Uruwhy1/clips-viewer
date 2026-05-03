@@ -1,0 +1,54 @@
+.titleBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background-color: var(--title-bar-bg);
+  color: var(--title-bar-color);
+
+  height: var(--title-bar-height);
+  user-select: none;
+
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+
+  z-index: var(--titleBarZ);
+}
+
+.dragRegion {
+  flex: 1;
+  -webkit-app-region: drag;
+  cursor: grab;
+}
+
+.windowControls {
+  height: 100%;
+  display: flex;
+}
+
+.controlButton {
+  cursor: pointer;
+
+  border: none;
+  margin: auto;
+
+  width: 50px;
+  height: 100%;
+  transition: background 0.2s;
+
+  background: none;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.controlButton:hover {
+  background: #85858564;
+}
+
+.closeButton:hover {
+  background: #ff0015;
+}

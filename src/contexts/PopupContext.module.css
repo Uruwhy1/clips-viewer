@@ -1,0 +1,166 @@
+.notificationsContainer {
+  --success: var(--green);
+  --success-text: #ffffff;
+
+  --error: var(--red);
+  --error-text: #ffffff;
+
+  --info: var(--blue);
+  --info-text: #ffffff;
+
+  --background: #1e1e1e;
+  --border-radius: var(--radius-small);
+}
+
+.notificationsContainer {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: end;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10000;
+}
+
+.popup {
+  font-size: 0.9rem;
+  background-color: var(--background);
+
+  border: 1px solid #333333;
+  border-radius: var(--border-radius);
+  padding: 1rem 1.2rem;
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  transform: translateY(100px);
+  opacity: 0;
+
+  &.active {
+    animation: 3s ease-out popup;
+  }
+
+  &.success {
+    border-left: 4px solid var(--success);
+    color: var(--success-text);
+    font-weight: normal;
+
+    >p::before {
+      content: "Success:";
+      font-weight: bold;
+      margin-right: 5px;
+      color: var(--success);
+    }
+  }
+
+  &.failure {
+    border-left: 4px solid var(--error);
+    color: var(--error-text);
+    font-weight: normal;
+
+    >p::before {
+      content: "Failure:";
+      font-weight: bold;
+      margin-right: 5px;
+      color: var(--error);
+    }
+  }
+}
+
+.popup svg {
+  height: 20px;
+  width: 20px;
+}
+
+@keyframes popup {
+  0% {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  90% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+}
+
+.persistentNotification {
+  border-left: 4px solid var(--info);
+  background-color: var(--background);
+  color: white;
+
+  padding: 15px;
+  border-radius: var(--border-radius);
+  width: 400px;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.persistentHeader {
+  display: flex;
+  gap: var(--gap-small);
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+
+  svg {
+    stroke: var(--info);
+  }
+}
+
+.progressTextContainer p {
+  font-size: 14px;
+
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.progressBarContainer {
+  width: 100%;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progressBar {
+  height: 100%;
+  background-color: var(--accent-washed);
+  border-radius: var(--border-radius);
+  transition: width 0.1s ease-in-out;
+}
+
+.buttons {
+  display: flex;
+  gap: var(--gap-small);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

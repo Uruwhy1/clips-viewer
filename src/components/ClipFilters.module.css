@@ -1,0 +1,144 @@
+.filters {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  justify-content: stretch;
+  gap: var(--gap-small);
+  font-weight: 500;
+
+  z-index: var(--filtersZ);
+}
+
+.primaryFilter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  z-index: var(--filtersZ);
+
+  button {
+    justify-content: start;
+    padding: var(--button-padding);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 0px 0px 0px 1px var(--accent-washed);
+      border-color: var(--accent-washed);
+    }
+  }
+}
+
+.secondaryFilters {
+  display: flex;
+  gap: var(--gap-small);
+  align-items: center;
+
+  z-index: var(--filtersZ);
+
+  >* {
+    min-width: 150px;
+  }
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--inline-gap);
+
+  background: var(--clips-filters-bg);
+  border: 1px solid var(--borders);
+  padding: var(--button-padding);
+  border-radius: var(--radius-small);
+
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-primary, currentColor);
+
+  transition:
+    border 0.15s,
+    box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+.filterButton:hover {
+  box-shadow: 0px 0px 0px 1px var(--accent-washed);
+  border-color: var(--accent-washed);
+}
+
+.filterButton svg {
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.filterButton.active {
+  color: #fff;
+  background-color: var(--accent-washed);
+  border-color: var(--accent-washed);
+}
+
+.filterButton.active svg {
+  stroke: #fff;
+  fill: #fff;
+}
+
+.favouriteButton {
+  --favourite-color: gold;
+}
+
+.favouriteButton svg {
+  fill: transparent;
+}
+
+.favouriteButton.active svg {
+  fill: var(--favourite-color);
+  stroke: var(--favourite-color);
+  opacity: 1;
+}
+
+.gamesList {
+  border: 1px solid var(--borders);
+  background-color: var(--clips-filters-bg);
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+
+  border-radius: var(--radius-small);
+  overflow: hidden;
+
+  >button {
+    border: none;
+    border-radius: 0;
+    width: 100%;
+    text-align: start;
+
+    padding: var(--button-padding);
+    border-radius: var(--radius-small);
+
+    background-color: var(--clips-filters-bg);
+
+    &:hover {
+      box-shadow: none;
+      background-color: var(--accent-white);
+    }
+
+    &.active {
+      color: #fff;
+      background-color: var(--accent-washed);
+    }
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .filters {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .secondaryFilters>* {
+    min-width: 100px;
+  }
+}

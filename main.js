@@ -1,4 +1,13 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Tray,
+  Menu,
+  dialog,
+  shell,
+  protocol,
+} = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
 const { exec } = require("child_process");
@@ -9,11 +18,10 @@ const obs = new OBSWebSocket();
 let mainWindow;
 let tray = null;
 
-let isDev = process.env.APP_DEV ? process.env.APP_DEV.trim() == "true" : false;
+let isDev = process.env.DEV ? process.env.DEV.trim() == "true" : false;
 if (isDev) {
   require("electron-reload")(__dirname, {
     electron: path.join(__dirname, "node_modules", ".bin", "electron"),
-    ignored: /node_modules|[\/\\]\.|favourites.json/,
   });
 }
 
@@ -25,57 +33,224 @@ function getAssetPath(asset) {
   }
 }
 
-const GAMES_DIR = "E:/Clips";
-const CONFIG_PATH = path.join(app.getPath("userData"), "gameConfig.json");
+const CONFIG_PATH = path.join(app.getPath("userData"), "settings.json");
 const FAVOURITES_PATH = path.join(app.getPath("userData"), "favourites.json");
-console.log("Config files in: " + CONFIG_PATH);
+const CLIP_META_DIR = path.join(app.getPath("userData"), "clip-meta");
+const THUMBNAIL_CACHE_DIR = path.join(app.getPath("userData"), "thumbnails");
 
-const DEFAULT_GAME_CONFIG = {
-  "League of Legends": ["League of Legends.exe"],
-  "Rocket League": ["RocketLeague.exe", "RocketLeague_DX11.exe"],
-  "Football Manager": ["fm.exe", "FootballManager.exe"],
-  "Crusader Kings II": ["ck2.exe", "CrusaderKings2.exe"],
+const DEFAULT_SETTINGS = {
+  gamesDir: "",
+  gamesConfig: {},
+  scrollbarOff: false,
+  borderRadiusOff: false,
+  clipsDeleteThreshold: 0,
+  clipDeletion: false,
+  obs: {},
+  theme: "System (Catppuccin)",
+  accentVariable: "--blue",
+  recordingSoundEnabled: false,
+  recordingMethod: "obs",
 };
-let GAME_PROCESSES = null;
 
-async function loadGameConfig() {
+let GAME_PROCESSES = null;
+let settings = DEFAULT_SETTINGS;
+
+// In-memory duration cache to avoid redundant ffprobe calls within a session
+const durationCache = new Map();
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fileKey(filePath) {
+  return Buffer.from(filePath).toString("base64url");
+}
+
+function formatDate(timestamp) {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// Parse date from filename - flexible regex like Tauri branch
+// Returns unix timestamp or null if not found
+function parseDateFromFilename(filename) {
+  const match = filename.match(/_([\d-]+_[\d-]+(?:\.?\d*)?)(?:\.\w+)?$/);
+  if (!match) return null;
+
+  const datetimeStr = match[1];
+  const parts = datetimeStr.split(/_/);
+  if (!parts || parts.length < 2) return null;
+
+  const dateParts = parts[0].split("-");
+  const timeParts = parts[1].split("-");
+
+  if (dateParts.length < 3 || timeParts.length < 2) return null;
+
+  const day = parseInt(dateParts[0], 10);
+  const month = parseInt(dateParts[1], 10);
+  const year = parseInt(dateParts[2], 10);
+  const hour = parseInt(timeParts[0], 10);
+  const minute = parseInt(timeParts[1], 10);
+  const second = timeParts[2] ? parseInt(timeParts[2], 10) : 0;
+
+  const date = new Date(year, month - 1, day, hour, minute, second);
+  if (isNaN(date.getTime())) return null;
+
+  return Math.floor(date.getTime() / 1000);
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+
+async function loadSettings() {
   try {
-    const configExists = await fs
+    const exists = await fs
       .access(CONFIG_PATH)
       .then(() => true)
       .catch(() => false);
-
-    if (!configExists) {
+    if (!exists) {
       await fs.writeFile(
         CONFIG_PATH,
-        JSON.stringify(DEFAULT_GAME_CONFIG, null, 2)
+        JSON.stringify(DEFAULT_SETTINGS, null, 2),
       );
-      return DEFAULT_GAME_CONFIG;
+      return DEFAULT_SETTINGS;
     }
-
-    const configData = await fs.readFile(CONFIG_PATH, "utf8");
-    return JSON.parse(configData);
+    const data = await fs.readFile(CONFIG_PATH, "utf8");
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
   } catch (error) {
-    console.error("Error loading game configuration:", error);
-    return DEFAULT_GAME_CONFIG;
+    console.error("Error loading settings:", error);
+    return DEFAULT_SETTINGS;
   }
 }
 
-async function setOutputPathForGame(gameName) {
+async function saveSettings(newSettings) {
   try {
-    const gameDir = path.join(GAMES_DIR, gameName);
+    settings = { ...settings, ...newSettings };
+    await fs.writeFile(CONFIG_PATH, JSON.stringify(settings, null, 2));
+    return true;
+  } catch (error) {
+    console.error("Error saving settings:", error);
+    return false;
+  }
+}
+
+// ─── Per-file Clip Metadata ───────────────────────────────────────────────────
+
+async function ensureClipMetaDir() {
+  await fs.mkdir(CLIP_META_DIR, { recursive: true });
+}
+
+function clipMetaPath(filePath) {
+  return path.join(CLIP_META_DIR, `${fileKey(filePath)}.json`);
+}
+
+async function loadClipMeta(filePath) {
+  try {
+    const data = await fs.readFile(clipMetaPath(filePath), "utf8");
+    return JSON.parse(data);
+  } catch {
+    return null;
+  }
+}
+
+async function saveClipMeta(filePath, meta) {
+  await ensureClipMetaDir();
+  await fs.writeFile(clipMetaPath(filePath), JSON.stringify(meta, null, 2));
+}
+
+async function deleteClipMeta(filePath) {
+  try {
+    await fs.unlink(clipMetaPath(filePath));
+  } catch {
+  }
+}
+
+async function renameClipMeta(oldPath, newPath) {
+  try {
+    await fs.rename(clipMetaPath(oldPath), clipMetaPath(newPath));
+  } catch {
+  }
+}
+
+// ─── Thumbnails ───────────────────────────────────────────────────────────────
+
+async function ensureThumbnailDir() {
+  await fs.mkdir(THUMBNAIL_CACHE_DIR, { recursive: true });
+}
+
+function thumbnailPath(filePath) {
+  return path.join(THUMBNAIL_CACHE_DIR, `${fileKey(filePath)}.jpg`);
+}
+
+async function generateThumbnail(filePath) {
+  await ensureThumbnailDir();
+  const thumbPath = thumbnailPath(filePath);
+
+  try {
+    await fs.access(thumbPath);
+    return thumbPath; // Already cached
+  } catch {
+    return new Promise((resolve) => {
+      // Try seeking to 5s in, fall back to first frame if video is shorter
+      exec(
+        `ffmpeg -ss 5 -i "${filePath}" -vframes 1 -q:v 3 "${thumbPath}" -y 2>/dev/null || ` +
+          `ffmpeg -i "${filePath}" -vframes 1 -q:v 3 "${thumbPath}" -y`,
+        (err) => resolve(err ? "" : thumbPath),
+      );
+    });
+  }
+}
+
+async function deleteThumbnail(filePath) {
+  try {
+    await fs.unlink(thumbnailPath(filePath));
+  } catch {
+    // Thumbnail may not exist, ignore
+  }
+}
+
+// ─── Duration ─────────────────────────────────────────────────────────────────
+
+function getVideoDuration(filePath) {
+  if (durationCache.has(filePath)) {
+    return Promise.resolve(durationCache.get(filePath));
+  }
+  return new Promise((resolve) => {
+    exec(
+      `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`,
+      (err, stdout) => {
+        const duration = err ? 0 : parseFloat(stdout.trim()) || 0;
+        durationCache.set(filePath, duration);
+        resolve(duration);
+      },
+    );
+  });
+}
+
+// ─── Game Config ──────────────────────────────────────────────────────────────
+
+async function loadGameConfig() {
+  if (!settings.gamesConfig) {
+    settings.gamesConfig = DEFAULT_SETTINGS.gamesConfig;
+  }
+  return settings.gamesConfig;
+}
+
+async function setOutputPathForGame(gameName) {
+  if (!settings.gamesDir) return false;
+  try {
+    const gameDir = path.join(settings.gamesDir, gameName);
     await fs.mkdir(gameDir, { recursive: true });
 
-    await obs.call("SetRecordDirectory", {
-      recordDirectory: gameDir,
-    });
-
+    await obs.call("SetRecordDirectory", { recordDirectory: gameDir });
     await obs.call("SetProfileParameter", {
       parameterCategory: "Output",
       parameterName: "FilenameFormatting",
       parameterValue: `${gameName}_%DD-%MM-%CCYY_%hh-%mm-%ss%`,
     });
-
     return true;
   } catch (error) {
     console.error("Error setting output path:", error.message);
@@ -83,36 +258,59 @@ async function setOutputPathForGame(gameName) {
   }
 }
 
+// ─── Process Detection ────────────────────────────────────────────────────────
+
+function getRunningProcesses() {
+  return new Promise((resolve, reject) => {
+    if (process.platform === "win32") {
+      exec("tasklist", (err, stdout) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(stdout.toLowerCase());
+      });
+    } else {
+      try {
+        const procs = [];
+        const procDir = fs.readdir("/proc");
+        for (const p of procDir) {
+          if (/^\d+$/.test(p)) {
+            try {
+              const cmdline = fs.readFile(
+                path.join("/proc", p, "cmdline"),
+                "utf8",
+              );
+              if (cmdline)
+                procs.push(cmdline.toLowerCase().replace(/\0/g, " "));
+            } catch (e) {}
+          }
+        }
+        resolve(procs.join("\n"));
+      } catch (e) {
+        reject(e);
+      }
+    }
+  });
+}
+
 async function checkGameRunning() {
   if (!GAME_PROCESSES) {
     GAME_PROCESSES = await loadGameConfig();
   }
-  const gameProcesses = GAME_PROCESSES;
 
-  return new Promise((resolve, reject) => {
-    exec("tasklist", (err, stdout) => {
-      if (err) {
-        console.error("Error checking processes:", err);
-        resolve(null);
-        return;
-      }
-
-      const runningProcesses = stdout.toLowerCase();
-
-      for (const [gameName, processNames] of Object.entries(gameProcesses)) {
-        const gameRunning = processNames.some((process) =>
-          runningProcesses.includes(process.toLowerCase())
-        );
-
-        if (gameRunning) {
-          resolve(gameName);
-          return;
-        }
-      }
-
-      resolve(null);
-    });
-  });
+  try {
+    const runningProcesses = await getRunningProcesses();
+    for (const [gameName, config] of Object.entries(GAME_PROCESSES)) {
+      const gameRunning = config.processes.some((p) =>
+        runningProcesses.includes(p.toLowerCase()),
+      );
+      if (gameRunning) return gameName;
+    }
+  } catch (error) {
+    console.error("Error checking processes:", error);
+  }
+  return null;
 }
 
 function startGameDetection() {
@@ -123,29 +321,170 @@ function startGameDetection() {
 
     if (currentGame && currentGame !== lastDetectedGame) {
       console.log(`${currentGame} detected! Starting OBS recording.`);
-
       try {
         await setOutputPathForGame(currentGame);
-        mainWindow.webContents.send("start-obs-recording");
-
-        console.log(`Started recording for ${currentGame}`);
+        mainWindow?.webContents.send("start-obs-recording");
       } catch (error) {
         console.error("Failed to start recording:", error);
       }
-
       lastDetectedGame = currentGame;
     } else if (!currentGame && lastDetectedGame) {
       try {
-        mainWindow.webContents.send("stop-obs-recording");
-        console.log(`Stopped recording for ${lastDetectedGame}`);
+        mainWindow?.webContents.send("stop-obs-recording");
       } catch (error) {
         console.error("Failed to stop recording:", error);
       }
-
       lastDetectedGame = null;
     }
   }, 10000);
 }
+
+// ─── Clips ────────────────────────────────────────────────────────────────────
+
+async function getAllClipsWithMetadata(dirPath, totalGames = 0, sendProgress) {
+  if (!dirPath) return [];
+  const allClips = [];
+  const favourites = await loadFavourites();
+
+  let processedGames = 0;
+
+  try {
+    const items = await fs.readdir(dirPath);
+    for (const item of items) {
+      const fullPath = path.join(dirPath, item);
+      try {
+        const stat = await fs.stat(fullPath);
+        if (stat.isDirectory()) {
+          processedGames++;
+
+          // Count items in this game directory for progress
+          let gameItemsCount = 0;
+          try {
+            const gameItems = await fs.readdir(fullPath);
+            gameItemsCount = gameItems.filter(async (f) => {
+              try {
+                const s = await fs.stat(path.join(fullPath, f));
+                return s.isFile() && (f.endsWith(".mp4") || f.endsWith(".mkv"));
+              } catch {
+                return false;
+              }
+            }).length;
+          } catch {}
+
+          // Track processed items for progress
+          let itemsProcessed = 0;
+
+          // Send progress update
+          mainWindow.webContents.send("clip-loading-progress", {
+            current: processedGames,
+            total: totalGames,
+            game: item,
+            itemsTotal: gameItemsCount,
+            itemsProcessed: 0,
+          });
+
+          const clips = await getClipsFromDirectoryWithMetadata(
+            fullPath,
+            item,
+            favourites,
+            0,
+            gameItemsCount,
+          );
+          allClips.push(...clips);
+        }
+      } catch (error) {
+        console.warn(`Skipping ${fullPath}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error("Error reading clips directory:", error);
+  }
+
+  return allClips;
+}
+
+async function getClipsFromDirectoryWithMetadata(
+  dirPath,
+  game,
+  favourites,
+  processedCount = 0,
+  totalItems = 0,
+) {
+  const clipFiles = [];
+  let itemsProcessed = processedCount;
+  try {
+    const items = await fs.readdir(dirPath);
+    for (const item of items) {
+      const fullPath = path.join(dirPath, item);
+      const name = item.match(/[\sA-Za-z0-9]+/)?.[0] || item;
+      try {
+        const stat = await fs.stat(fullPath);
+        if (stat.isDirectory()) {
+          const subClips = await getClipsFromDirectoryWithMetadata(
+            fullPath,
+            game,
+            favourites,
+          );
+          clipFiles.push(...subClips);
+        } else if (
+          stat.isFile() &&
+          (item.endsWith(".mp4") || item.endsWith(".mkv"))
+        ) {
+          itemsProcessed++;
+
+          // Send progress update with item count
+          mainWindow.webContents.send("clip-loading-progress", {
+            current: 1, // game index - will be set by caller
+            total: 1, // total games - will be set by caller
+            game: game,
+            itemsTotal: totalItems,
+            itemsProcessed: itemsProcessed,
+          });
+
+          const fileDate = Math.floor(stat.mtime.getTime() / 1000);
+
+          // Parse date from filename (e.g., "name_2026-04-26_14-30.mp4")
+          const parsedDate = parseDateFromFilename(item);
+          // Use parsed date if found, otherwise fall back to file stat mtime
+          const effectiveDate = parsedDate || fileDate;
+
+          const meta = await loadClipMeta(fullPath);
+
+          // Use cached duration if the file hasn't changed, otherwise re-probe
+          let duration;
+          if (meta?.date === effectiveDate) {
+            duration = meta.duration;
+            durationCache.set(fullPath, duration); // Warm in-memory cache
+          } else {
+            duration = await getVideoDuration(fullPath);
+            await saveClipMeta(fullPath, { date: effectiveDate, duration });
+          }
+
+          const thumbnail = await generateThumbnail(fullPath);
+
+          clipFiles.push({
+            game,
+            name: name,
+            filePath: fullPath,
+            mediaPath: `clips://${encodeURIComponent(fullPath)}`,
+            date: effectiveDate,
+            formattedDate: formatDate(effectiveDate),
+            isFavourite: favourites.includes(fullPath),
+            thumbnail: `clips://${encodeURIComponent(thumbnail)}`,
+            videoDuration: duration,
+          });
+        }
+      } catch (error) {
+        console.warn(`Skipping ${fullPath}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error(`Error reading directory ${dirPath}:`, error);
+  }
+  return clipFiles;
+}
+
+// ─── Window ───────────────────────────────────────────────────────────────────
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -155,13 +494,18 @@ function createWindow() {
       sandbox: false,
       nodeIntegration: false,
       contextIsolation: true,
+      devTools: true,
       preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  mainWindow.loadFile("index.html");
+  if (isDev) {
+    mainWindow.loadURL("http://localhost:5173");
+  } else {
+    mainWindow.loadFile(path.join(__dirname, "dist", "index.html"));
+  }
 
-  mainWindow.on("minimize", (event) => {
+  mainWindow.on("minimize", () => {
     mainWindow.hide();
   });
 }
@@ -172,35 +516,47 @@ function handleQuit() {
   }
 }
 
+// ─── App Lifecycle ────────────────────────────────────────────────────────────
+
 app.whenReady().then(async () => {
+  protocol.registerFileProtocol("clips", (request, callback) => {
+    const url = request.url.replace("clips://", "");
+    try {
+      const decoded = decodeURIComponent(url);
+      callback(decoded);
+    } catch (err) {
+      console.error("Failed to decode clips URL:", err);
+    }
+  });
+
+  settings = await loadSettings();
   createWindow();
-  startGameDetection();
+
   const iconPath = getAssetPath("icon.png");
-  console.log("Loading tray icon from:", iconPath);
-  tray = new Tray(iconPath);
-
-  const contextMenu = Menu.buildFromTemplate([
-    { label: "Quit", type: "normal", click: handleQuit },
-  ]);
-  tray.setToolTip("This is my application.");
-  tray.setContextMenu(contextMenu);
-
-  tray.addListener("click", () => mainWindow.show());
+  try {
+    tray = new Tray(iconPath);
+    const contextMenu = Menu.buildFromTemplate([
+      { label: "Show", click: () => mainWindow.show() },
+      { label: "Quit", type: "normal", click: handleQuit },
+    ]);
+    tray.setToolTip("Clips Viewer");
+    tray.setContextMenu(contextMenu);
+    tray.addListener("click", () => mainWindow.show());
+  } catch (error) {
+    console.error("Error creating tray:", error);
+  }
 });
 
-app.on("window-all-closed", () => {
-  handleQuit();
-});
+app.on("window-all-closed", handleQuit);
+app.on("activate", () => mainWindow.show());
 
-app.on("activate", () => {
-  mainWindow.show();
-});
+// ─── Favourites ───────────────────────────────────────────────────────────────
 
 async function loadFavourites() {
   try {
     const data = await fs.readFile(FAVOURITES_PATH, "utf8");
     return JSON.parse(data);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -209,105 +565,38 @@ async function saveFavourites(favourites) {
   await fs.writeFile(FAVOURITES_PATH, JSON.stringify(favourites));
 }
 
-async function getAllClipsWithMetadata(dirPath) {
-  const allClips = [];
-  const favourites = await loadFavourites();
-
-  try {
-    const items = await fs.readdir(dirPath);
-
-    for (const item of items) {
-      const fullPath = path.join(dirPath, item);
-
-      try {
-        const stat = await fs.stat(fullPath);
-
-        if (stat.isDirectory()) {
-          const clips = await getClipsFromDirectoryWithMetadata(
-            fullPath,
-            item,
-            favourites
-          );
-          allClips.push(...clips);
-        }
-      } catch (error) {
-        console.warn(`Skipping item ${fullPath} due to error:`, error);
-        continue;
-      }
-    }
-  } catch (error) {
-    console.error("Error reading clips directory:", error);
-  }
-
-  return allClips;
-}
-
-async function getClipsFromDirectoryWithMetadata(dirPath, game, favourites) {
-  const clipFiles = [];
-
-  try {
-    const items = await fs.readdir(dirPath);
-
-    for (const item of items) {
-      const fullPath = path.join(dirPath, item);
-      const name = item.match(/[\sA-Za-z0-9]+/);
-
-      try {
-        const stat = await fs.stat(fullPath);
-
-        if (stat.isDirectory()) {
-          const subClips = await getClipsFromDirectoryWithMetadata(
-            fullPath,
-            game,
-            favourites
-          );
-          clipFiles.push(...subClips);
-        } else if (
-          stat.isFile() &&
-          (item.endsWith(".mp4") || item.endsWith(".mkv"))
-        ) {
-          clipFiles.push({
-            game,
-            fileName: name || item,
-            filePath: fullPath,
-            date: stat.mtime,
-            isFavourite: favourites.includes(fullPath),
-          });
-        }
-      } catch (error) {
-        console.warn(`Skipping item ${fullPath} due to error:`, error);
-        continue;
-      }
-    }
-  } catch (error) {
-    console.error(`Error reading directory ${dirPath}:`, error);
-  }
-
-  return clipFiles;
-}
+// ─── IPC Handlers ─────────────────────────────────────────────────────────────
 
 ipcMain.handle("get-all-clips", async () => {
+  const gamesDir = settings.gamesDir;
+  if (!gamesDir) return [];
+
+  // Count game directories first for progress tracking
+  let gameCount = 0;
   try {
-    const allClips = await getAllClipsWithMetadata(GAMES_DIR);
-    const sortedClips = allClips.sort((a, b) => b.date - a.date);
-    return sortedClips;
-  } catch (error) {
-    console.error("Error loading clips:", error);
-    return [];
-  }
+    const items = await fs.readdir(gamesDir);
+    for (const item of items) {
+      const fullPath = path.join(gamesDir, item);
+      try {
+        const stat = await fs.stat(fullPath);
+        if (stat.isDirectory()) gameCount++;
+      } catch (e) {}
+    }
+  } catch (e) {}
+
+  const allClips = await getAllClipsWithMetadata(gamesDir, gameCount);
+  return allClips.sort((a, b) => b.date - a.date);
 });
 
 ipcMain.handle("toggle-favourite", async (event, filePath) => {
   try {
-    const favourites = await loadFavourites();
+    let favourites = await loadFavourites();
     const index = favourites.indexOf(filePath);
-
     if (index > -1) {
       favourites.splice(index, 1);
     } else {
       favourites.push(filePath);
     }
-
     await saveFavourites(favourites);
     return favourites;
   } catch (error) {
@@ -316,20 +605,66 @@ ipcMain.handle("toggle-favourite", async (event, filePath) => {
   }
 });
 
-ipcMain.handle("connect-obs", async () => {
+ipcMain.handle("delete-clip", async (event, filePath) => {
   try {
-    await obs.connect("ws://localhost:4455", "bolso02");
-    return { connected: true, message: "Successfully connected to OBS" };
+    await fs.unlink(filePath);
+    await deleteClipMeta(filePath);
+    await deleteThumbnail(filePath);
+    durationCache.delete(filePath);
+    return true;
+  } catch (error) {
+    console.error("Error deleting clip:", error);
+    return false;
+  }
+});
+
+ipcMain.handle("rename-clip", async (event, oldPath, newName) => {
+  try {
+    const dir = path.dirname(oldPath);
+    const oldFileName = path.basename(oldPath);
+    const ext = path.extname(oldPath);
+
+    // Format: Title_DATE_TIME.mp4
+    const dateMatch = oldFileName.match(
+      /^(.+?)_([\d-]+_[\d-]+(?:\.?\d*)?)\.mp4$/
+    );
+
+    const dateTimePart = dateMatch?.[2] || "";
+    const newFileName = dateTimePart 
+      ? `${newName}_${dateTimePart}${ext}` 
+      : `${newName}${ext}`;
+    const newPath = path.join(dir, newFileName);
+
+    await fs.rename(oldPath, newPath);
+
+    await renameClipMeta(oldPath, newPath);
+    if (durationCache.has(oldPath)) {
+      durationCache.set(newPath, durationCache.get(oldPath));
+      durationCache.delete(oldPath);
+    }
+    await deleteThumbnail(oldPath);
+
+    return { newPath, newName: newName };
+  } catch (error) {
+    console.error("Error renaming clip:", error);
+    return null;
+  }
+});
+
+ipcMain.handle("connect-obs", async (event, port, password) => {
+  try {
+    await obs.connect(`ws://localhost:${port}`, password);
+    return { connected: true, message: "Connected to OBS" };
   } catch (error) {
     console.error("OBS Connection Error:", error);
     return { connected: false, message: error.message };
   }
 });
 
-ipcMain.handle("start-obs-recording", async () => {
+ipcMain.handle("start-obs-recording", async (event, currentGame, record) => {
   try {
-    const response = await obs.call("StartRecord");
-    const response2 = await obs.call("StartReplayBuffer");
+    await obs.call("StartRecord");
+    await obs.call("StartReplayBuffer");
     return { success: true };
   } catch (error) {
     console.error("OBS Recording Start Error:", error);
@@ -337,10 +672,10 @@ ipcMain.handle("start-obs-recording", async () => {
   }
 });
 
-ipcMain.handle("stop-obs-recording", async () => {
+ipcMain.handle("stop-obs-recording", async (event, record) => {
   try {
-    const response = await obs.call("StopRecord");
-    const response2 = await obs.call("StopReplayBuffer");
+    await obs.call("StopRecord");
+    await obs.call("StopReplayBuffer");
     return { success: true };
   } catch (error) {
     console.error("OBS Recording Stop Error:", error);
@@ -357,7 +692,49 @@ ipcMain.handle("check-obs-status", async () => {
       websocketVersion: version.obsWebSocketVersion,
     };
   } catch (error) {
-    console.error("OBS Status Check Error:", error);
     return { connected: false, message: error.message };
   }
+});
+
+ipcMain.handle("get-settings", async () => {
+  return settings;
+});
+
+ipcMain.handle("save-settings", async (event, newSettings) => {
+  return await saveSettings(newSettings);
+});
+
+ipcMain.handle("select-directory", async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ["openDirectory"],
+  });
+  return result.canceled ? null : result.filePaths[0];
+});
+
+ipcMain.handle("select-file", async (event, filters) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ["openFile"],
+    filters: filters || [],
+  });
+  return result.canceled ? null : result.filePaths[0];
+});
+
+ipcMain.handle("show-in-folder", async (event, filePath) => {
+  shell.showItemInFolder(filePath);
+});
+
+ipcMain.handle("window-minimize", () => {
+  mainWindow?.minimize();
+});
+
+ipcMain.handle("window-maximize", async () => {
+  if (mainWindow?.isMaximized()) {
+    mainWindow.unmaximize();
+  } else {
+    mainWindow?.maximize();
+  }
+});
+
+ipcMain.handle("window-close", () => {
+  mainWindow?.hide();
 });

@@ -1,0 +1,253 @@
+.datePickerContainer {
+  position: relative;
+}
+
+.dateButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--inline-gap, 0.5rem);
+
+  background: var(--clips-filters-bg);
+  border: 1px solid var(--borders);
+  padding: var(--button-padding);
+  border-radius: var(--radius-small);
+
+  cursor: pointer;
+  transition:
+    border 0.15s,
+    box-shadow 0.15s,
+    background-color 0.15s;
+
+  width: 100%;
+
+  color: var(--color);
+  font-weight: 500;
+}
+
+.dateButton:hover {
+  box-shadow: 0px 0px 0px 1px var(--accent-washed);
+  border-color: var(--accent-washed);
+}
+
+.dateButton.active {
+  color: #fff;
+  background-color: var(--accent-washed);
+  border-color: var(--accent-washed);
+}
+
+.dateButton svg {
+  stroke: currentColor;
+}
+
+.datePickerDropdown {
+  background: var(--clips-filters-bg, #fff);
+
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-small);
+  padding: 1rem;
+  
+  min-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.datePickerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--borders);
+}
+
+.datePickerHeader span {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color);
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+  padding: 0;
+
+  background: transparent;
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-small);
+
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.clearButton:hover {
+  background: var(--hover-bg, #f5f5f5);
+  border-color: var(--accent-washed);
+}
+
+.clearButton svg {
+  color: var(--gray-color);
+}
+
+.dateInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dateInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dateInputGroup label {
+  flex: 0 0 50px;
+  font-size: 0.85rem;
+  color: var(--gray-color);
+  font-weight: 500;
+}
+
+.dateInput {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-small);
+  background-color: var(--page-bg);
+  color: var(--color);
+  font-size: 0.85rem;
+
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--accent-washed);
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.1);
+}
+
+.dateInput::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(100%) brightness(50%);
+}
+
+.dateInput::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+/* DatePicker.module.css */
+
+/* ... keep all existing rules above ... */
+
+/* Widen dropdown to fit the calendar */
+
+
+/* ── react-day-picker overrides ── */
+.rdpRoot {
+  --rdp-accent-color: var(--accent-washed);
+  --rdp-background-color: var(--clips-filters-bg);
+  font-size: 0.85rem;
+  color: var(--color);
+
+}
+
+.rdpMonths {
+  position: relative;
+}
+
+.rdpCaption {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 0.5rem;
+}
+
+
+.rdpTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rdpHead {
+  font-size: 0.75rem;
+  color: var(--gray-color);
+  font-weight: 500;
+  padding-bottom: 0.25rem;
+}
+
+.rdpDay {
+  text-align: center;
+  padding: 1px;
+}
+
+.rdpDayButton {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-small);
+  border: none;
+  background: transparent;
+  color: var(--color);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.12s, color 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rdpDayButton:hover {
+  background: var(--hover-bg, #f0f0f0);
+}
+
+.rdpToday .rdpDayButton {
+  font-weight: 700;
+  color: var(--accent-washed);
+}
+
+.rdpSelected .rdpDayButton,
+.rdpRangeStart .rdpDayButton,
+.rdpRangeEnd .rdpDayButton {
+  background: var(--accent-washed);
+  color: #fff;
+}
+
+.rdpRangeMiddle .rdpDayButton {
+  background: color-mix(in srgb, var(--accent-washed) 18%, transparent);
+  border-radius: 0;
+  color: var(--color);
+}
+
+.rdpRangeStart .rdpDayButton {
+  border-radius: var(--radius-small) 0 0 var(--radius-small);
+}
+
+.rdpRangeEnd .rdpDayButton {
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+}
+
+.rdpOutside .rdpDayButton {
+  color: var(--gray-color);
+  opacity: 0.45;
+}
+
+.rdpDisabled .rdpDayButton {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Small label showing the active range below the calendar */
+.selectedRange {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--borders);
+  font-size: 0.8rem;
+  color: var(--gray-color);
+  text-align: center;
+}

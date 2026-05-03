@@ -1,0 +1,210 @@
+.container {
+  padding: var(--padding-medium);
+  background-color: var(--card-bg);
+  max-height: 100%;
+
+  flex-grow: 1;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clipsList {
+  flex-grow: 1;
+  height: 100%;
+
+  padding: var(--padding-medium);
+
+  display: grid;
+  place-content: center;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 50% 50%;
+
+  gap: var(--gap-medium);
+}
+
+.clipItem {
+  display: flex;
+  align-items: start;
+  gap: var(--gap-small);
+
+  height: 100%;
+  padding: var(--padding-small);
+  border-radius: var(--radius-small);
+
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  will-change: auto;
+}
+
+.clipItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.thumbnailContainer {
+  width: 50%;
+  height: 100%;
+
+  background-color: var(--current-bg);
+  border-radius: var(--radius-small);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+
+  >img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
+.playIcon {
+  position: absolute;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: rgb(255, 255, 255);
+  opacity: 0.8;
+  transition: opacity 0.2s;
+
+  >svg {
+    fill: currentColor;
+  }
+}
+
+.clipItem:hover .playIcon {
+  opacity: 1;
+  color: var(--accent-washed);
+}
+
+.clipInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.clipName {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clipGame {
+  font-size: 0.85em;
+  color: #ccc;
+}
+
+.active {
+  background-color: var(--accent-washed) !important;
+
+  .clipGame {
+    color: #ebebeb;
+  }
+
+  .playIcon {
+    display: none;
+  }
+}
+
+.noClips {
+  padding: var(--padding-medium);
+  background-color: var(--card-bg);
+  color: #ccc;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-style: italic;
+}
+
+@media screen and (max-width: 1700px) {
+  .clipItem {
+    flex-direction: column;
+    align-items: start;
+
+    padding: var(--padding-medium);
+  }
+
+  .thumbnailContainer {
+    height: 50%;
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 1300px) and (min-width: 1000px) {
+  .clipInfo {
+    display: none;
+  }
+
+  .thumbnailContainer {
+    height: 100%;
+  }
+}
+
+@media screen and (max-height: 970px) {
+  .clipGame {
+    display: none;
+  }
+
+  .thumbnailContainer {
+    flex-grow: 1;
+  }
+}
+
+@media screen and (max-height: 875px) and (min-height: 650px),
+screen and (max-height: 550px) {
+
+  .clipItem:nth-child(4),
+  .clipItem:nth-child(5),
+  .clipItem:nth-child(6) {
+    display: none;
+  }
+
+  .clipsList {
+    grid-template-rows: 1fr;
+  }
+}
+
+@media screen and (max-height: 800px) {
+  .clipInfo {
+    display: none;
+  }
+}
+
+@media screen and (max-height: 750px) {
+  .clipGame {
+    display: none;
+  }
+
+  .container {
+    display: none;
+  }
+}
+
+@media screen and (max-height: 650px) {
+  .container {
+    display: flex;
+  }
+}
+
+@media screen and (max-width: 890px) and (min-height: 900px) {
+
+  .clipItem:nth-child(3),
+  .clipItem:nth-child(6) {
+    display: none;
+  }
+
+  .clipsList {
+    grid-template-columns: 1fr 1fr;
+  }
+}

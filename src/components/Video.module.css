@@ -1,0 +1,239 @@
+.videoContainer {
+  position: relative;
+
+  aspect-ratio: 16 / 9;
+  background-color: var(--card-bg);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+
+  z-index: 101;
+  margin-top: var(--title-bar-height);
+}
+
+.videoPlaceholder,
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+video {
+  aspect-ratio: 16 / 9;
+
+  overflow: hidden;
+}
+
+.videoContainer:hover .controls {
+  opacity: 1;
+}
+
+.controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+
+  display: flex;
+  gap: var(--gap-small);
+  flex-direction: column;
+
+  color: white;
+  background: linear-gradient(to top,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0) 100%);
+
+  padding: 10px;
+
+  opacity: 0;
+  transition: opacity 0.1s;
+
+  user-select: none;
+
+  >.controlBar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    >div {
+      display: flex;
+      color: white;
+      flex-grow: 1;
+    }
+  }
+
+  * svg {
+    fill: currentColor;
+  }
+}
+
+.rightControls {
+  justify-content: end;
+}
+
+.time {
+  white-space: nowrap;
+
+  min-width: 100px;
+  text-align: center;
+}
+
+.controlButton {
+  background: none;
+  border: none;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.controlButton:hover {
+  color: var(--accent-washed);
+}
+
+.progressBarContainer {
+  position: relative;
+  height: 5px;
+
+  background: #ffffff66;
+
+  cursor: pointer;
+
+  overflow: hidden;
+}
+
+.progress {
+  position: absolute;
+  height: 100%;
+  width: 0%;
+
+  background: var(--accent-washed);
+  pointer-events: none;
+
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
+
+.marker {
+  position: absolute;
+  top: -5px;
+  width: 3px;
+  height: 15px;
+  background-color: #ffffff;
+  z-index: 2;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.selectedRange {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.3);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.playbackActive {
+  stroke: var(--accent-washed);
+}
+
+.playbackContainer {
+  --size: 100px;
+  display: grid;
+  grid-template-columns: 0 auto;
+  gap: var(--gap-smallest);
+
+  transition: 0.35s ease;
+}
+
+.playbackOptions {
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: repeat(3, calc(var(--size) / 3));
+}
+
+.playbackContainer:hover {
+  grid-template-columns: var(--size) auto;
+}
+
+.playback {
+  background-color: transparent;
+  color: #fff;
+
+  cursor: pointer;
+
+  &:hover {
+    color: var(--accent-washed);
+  }
+}
+
+.volumeControl {
+  display: flex;
+}
+
+.volumeSlider {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-right: var(--gap-smallest);
+
+  width: 0px;
+  overflow: hidden;
+
+  transition: width 0.15s ease;
+}
+
+.volumeControl:hover .volumeSlider {
+  width: 70px;
+}
+
+.volumeSlider input {
+  -webkit-appearance: none;
+  height: 3px;
+
+  width: 70px;
+
+  background: linear-gradient(to right,
+      var(--accent-washed) 0%,
+      var(--accent-washed) 50%,
+      var(--accent-white) 50%);
+
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.volumeSlider input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+
+  width: 10px;
+  height: 10px;
+  background-color: var(--accent-washed);
+
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.volumeSlider input {
+  background: linear-gradient(to right,
+      var(--accent-washed) 0%,
+      var(--accent-washed) calc(var(--volume) * 100%),
+      var(--accent-white) calc(var(--volume) * 100%),
+      var(--accent-white) 100%);
+}
+
+@media screen and (max-width: 1300px) {
+  .videoContainer {
+    margin-top: 0;
+  }
+}

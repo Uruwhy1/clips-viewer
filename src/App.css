@@ -1,0 +1,113 @@
+body {
+  background-color: var(--page-bg);
+  color: var(--color);
+
+  font-family: system-ui;
+  scroll-behavior: smooth;
+}
+
+::view-transition-group(root) {
+  animation-duration: 1.5s;
+}
+      
+::view-transition-new(root) {
+  animation-name: reveal;
+  animation-fill-mode: both;
+}
+
+::view-transition-old(root)
+ {
+  animation: none;
+  animation-fill-mode: both;
+  z-index: -1;
+}
+
+
+@keyframes reveal{
+  from {
+    clip-path: polygon(171% 50%, 50% 171%, 50% 171%, 171% 50%);
+  }
+  to {
+    clip-path: polygon(171% 50%, 50% 171%, -50% 71%, 50% -71%);
+  }
+}
+
+body.hide-scroll {
+  &&::-webkit-scrollbar {
+    display: none;
+  }
+
+  * {
+    &&::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+body.no-radius {
+  --radius-big: 0px;
+  --radius-small: 0px;
+}
+
+* {
+  &&::-webkit-scrollbar {
+    width: 10px !important;
+  }
+
+  &&::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  &&::-webkit-scrollbar-thumb {
+    background-color: #999;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  &&::-webkit-scrollbar-thumb:hover {
+    width: 10px !important;
+    background-color: var(--accent-washed);
+  }
+}
+
+#root {
+  margin-left: 50px;
+}
+
+:root {
+  --value: 0;
+  --curent-game-cover: "";
+
+  --sidebar-width: 50px;
+  --title-bar-height: 32px;
+  --button-height: 2.125rem;
+
+  --page-padding: 1.5rem;
+  --page-padding-small: 0.25rem;
+
+  --button-padding: 10px;
+  --radius-big: 8px;
+  --radius-small: 4px;
+
+  --padding-bigger: 1.5rem;
+  --padding-big: 1rem;
+  --padding-slightly-bigger: 0.75rem;
+  --padding-medium: 0.5rem;
+  --padding-small: 0.25rem;
+
+  --inline-padding: 0.5rem;
+  --inline-gap: 0.5rem;
+  --inline-gap-small: 0.25rem;
+
+  --gap-big: 20px;
+  --gap-medium: 1rem;
+  --gap-small: 10px;
+  --gap-smallest: 0.3rem;
+
+  --header-medium-size: 1.5rem;
+  --header-small-size: 1.1rem;
+  --header-small-weight: 500;
+
+  --font-size-small: 0.8rem;
+}

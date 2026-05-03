@@ -1,0 +1,96 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--page-cover);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.popup {
+  background: var(--page-bg);
+  border-radius: var(--radius-small);
+
+  width: 100%;
+  max-width: 65vw;
+  max-height: 80vh;
+
+  display: flex;
+  flex-direction: column;
+
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--borders);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--padding-medium);
+
+  padding: var(--padding-big);
+  border-bottom: 1px solid var(--borders);
+}
+
+.content {
+  padding: var(--padding-medium) var(--padding-big);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-small);
+
+  overflow-y: auto;
+}
+
+.subtitle {
+  color: var(--gray-color);
+  text-align: center;
+  font-size: 1rem;
+}
+
+.clipsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--gap-small);
+
+
+  padding: var(--padding-medium);
+}
+
+.footer {
+  padding: 24px;
+  border-top: 1px solid var(--borders);
+  display: flex;
+  justify-content: center;
+  gap: var(--gap-small);
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: var(--inline-gap);
+
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid var(--borders);
+
+  padding: var(--padding-slightly-bigger) var(--padding-bigger);
+  border-radius: var(--radius-big);
+
+  cursor: pointer;
+
+  transition:
+    border 0.15s,
+    box-shadow 0.15s;
+
+  &:hover {
+    box-shadow: 0px 0px 0px 1px var(--accent-washed);
+    border-color: var(--accent-washed);
+  }
+}
