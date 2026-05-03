@@ -20,6 +20,8 @@ connectOBS: (port, password) => ipcRenderer.invoke("connect-obs", port, password
 
     stopOBSRecording: (record) => ipcRenderer.invoke("stop-obs-recording", record),
   checkOBSStatus: () => ipcRenderer.invoke("check-obs-status"),
+  scanForNewClips: (scanTimestamp, gameName) => ipcRenderer.invoke("scan-for-new-clips", scanTimestamp, gameName),
+  getGameDetectionStatus: () => ipcRenderer.invoke("get-game-detection-status"),
 
   getSettings: () => ipcRenderer.invoke("get-settings"),
   saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
@@ -32,7 +34,9 @@ connectOBS: (port, password) => ipcRenderer.invoke("connect-obs", port, password
 
   onStartRecording: (callback) =>
     ipcRenderer.on("start-obs-recording", callback),
-  onStopRecording: (callback) => ipcRenderer.on("stop-obs-recording", callback),
+  onStopRecording: (callback) => ipcRenderer.on("stop-obs-recording", (event, data) => callback(data)),
+  onNewClipsDetected: (callback) =>
+    ipcRenderer.on("new-clips-detected", (event, clips) => callback(clips)),
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
 });
 

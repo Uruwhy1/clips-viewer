@@ -10,6 +10,7 @@ import GameConfigForm from "./GameConfigForm";
 
 import { usePopup } from "../contexts/PopupContext";
 import { useSettings } from "../contexts/SettingsContext";
+import { useRecording } from "../contexts/RecordingContext";
 import { ThemeFamilyControl } from "./ThemeFamily";
 import { AppearanceModeControl } from "./ThemeAppearance";
 import AccentColor from "./AccentColor";
@@ -256,7 +257,10 @@ const Settings = forwardRef<HTMLDivElement, SettingsProps>(
             <div className={styles.title}>
               <Aperture />
               <h3>Recording</h3>
-              <SettingButton text={"OBS"} func={() => console.log("Xd")} />
+              <SettingButton
+                text={"OBS"}
+                func={() => console.log("Xd")}
+              />
             </div>
 
             {settings.recordingMethod === "obs" && <ObsConnectionForm />}

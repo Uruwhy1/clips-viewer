@@ -11,6 +11,9 @@ const {
 const path = require("path");
 const fs = require("fs").promises;
 const { exec } = require("child_process");
+const { promisify } = require("util");
+
+const execAsync = promisify(exec);
 
 const OBSWebSocket = require("obs-websocket-js").OBSWebSocket;
 const obs = new OBSWebSocket();
@@ -54,6 +57,9 @@ const DEFAULT_SETTINGS = {
 
 let GAME_PROCESSES = null;
 let settings = DEFAULT_SETTINGS;
+let gameDetectionInterval = null;
+let preRecordingTimestamp = null;
+let recordingGame = null;
 
 // In-memory duration cache to avoid redundant ffprobe calls within a session
 const durationCache = new Map();
@@ -78,24 +84,30 @@ function formatDate(timestamp) {
 // Parse date from filename - flexible regex like Tauri branch
 // Returns unix timestamp or null if not found
 function parseDateFromFilename(filename) {
-  const match = filename.match(/_([\d-]+_[\d-]+(?:\.?\d*)?)(?:\.\w+)?$/);
-  if (!match) return null;
+  const match = filename.match(
+    /_([\d]{2}-[\d]{2}-[\d]{4})_([\d]{2}-[\d]{2}-[\d]{2})/,
+  );
+  if (!match) {
+    const dateOnly = filename.match(/_([\d]{2}-[\d]{2}-[\d]{4})\.mp4$/);
+    if (!dateOnly) return null;
+    const parts = dateOnly[1].split("-");
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    const date = new Date(year, month - 1, day);
+    if (isNaN(date.getTime())) return null;
+    return Math.floor(date.getTime() / 1000);
+  }
 
-  const datetimeStr = match[1];
-  const parts = datetimeStr.split(/_/);
-  if (!parts || parts.length < 2) return null;
-
-  const dateParts = parts[0].split("-");
-  const timeParts = parts[1].split("-");
-
-  if (dateParts.length < 3 || timeParts.length < 2) return null;
+  const dateParts = match[1].split("-");
+  const timeParts = match[2].split("-");
 
   const day = parseInt(dateParts[0], 10);
   const month = parseInt(dateParts[1], 10);
   const year = parseInt(dateParts[2], 10);
   const hour = parseInt(timeParts[0], 10);
   const minute = parseInt(timeParts[1], 10);
-  const second = timeParts[2] ? parseInt(timeParts[2], 10) : 0;
+  const second = parseInt(timeParts[2], 10);
 
   const date = new Date(year, month - 1, day, hour, minute, second);
   if (isNaN(date.getTime())) return null;
@@ -164,15 +176,13 @@ async function saveClipMeta(filePath, meta) {
 async function deleteClipMeta(filePath) {
   try {
     await fs.unlink(clipMetaPath(filePath));
-  } catch {
-  }
+  } catch {}
 }
 
 async function renameClipMeta(oldPath, newPath) {
   try {
     await fs.rename(clipMetaPath(oldPath), clipMetaPath(newPath));
-  } catch {
-  }
+  } catch {}
 }
 
 // ─── Thumbnails ───────────────────────────────────────────────────────────────
@@ -261,7 +271,7 @@ async function setOutputPathForGame(gameName) {
 // ─── Process Detection ────────────────────────────────────────────────────────
 
 function getRunningProcesses() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (process.platform === "win32") {
       exec("tasklist", (err, stdout) => {
         if (err) {
@@ -273,11 +283,11 @@ function getRunningProcesses() {
     } else {
       try {
         const procs = [];
-        const procDir = fs.readdir("/proc");
+        const procDir = await fs.readdir("/proc");
         for (const p of procDir) {
           if (/^\d+$/.test(p)) {
             try {
-              const cmdline = fs.readFile(
+              const cmdline = await fs.readFile(
                 path.join("/proc", p, "cmdline"),
                 "utf8",
               );
@@ -313,28 +323,115 @@ async function checkGameRunning() {
   return null;
 }
 
+async function switchToScene(sceneName) {
+  try {
+    const sceneList = await obs.call("GetSceneList");
+    const sceneExists = sceneList.scenes.some(
+      (scene) => scene.sceneName === sceneName,
+    );
+    if (sceneExists) {
+      await obs.call("SetCurrentProgramScene", { sceneName });
+      console.log(`Switched to scene: ${sceneName}`);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    try {
+      const sceneList = await obs.call("GetSceneList");
+      const sceneExists = sceneList.scenes.some(
+        (scene) => scene.sceneName === sceneName,
+      );
+      if (sceneExists) {
+        await obs.call("SetCurrentScene", { sceneName });
+        console.log(`Switched to scene: ${sceneName}`);
+        return true;
+      }
+    } catch (fallbackError) {
+      console.error("Failed to switch scene:", fallbackError.message);
+    }
+    return false;
+  }
+}
+
+async function getActiveWindowTitle() {
+  try {
+    if (process.platform === "win32") {
+      const { stdout } = await execAsync(
+        `powershell -command "` +
+          `Add-Type @'\n` +
+          `using System;using System.Runtime.InteropServices;\n` +
+          `public class Win32{\n` +
+          `  [DllImport(\\"user32.dll\\")] public static extern IntPtr GetForegroundWindow();\n` +
+          `  [DllImport(\\"user32.dll\\")] public static extern int GetWindowText(IntPtr h, System.Text.StringBuilder s, int c);\n` +
+          `}\n` +
+          `'@;\n` +
+          `$h=[Win32]::GetForegroundWindow();\n` +
+          `$s=New-Object System.Text.StringBuilder 256;\n` +
+          `[Win32]::GetWindowText($h,$s,256);\n` +
+          `$s.ToString()"`,
+      );
+      return stdout.trim();
+    } else {
+      const { stdout } = await execAsync(
+        "xdotool getactivewindow getwindowname 2>/dev/null",
+      );
+      return stdout.trim();
+    }
+  } catch {
+    return null;
+  }
+}
+
+async function isGameWindowFocused(gameName) {
+  const config = GAME_PROCESSES?.[gameName];
+  const matchTitle = config?.windowTitle || gameName;
+
+  const title = await getActiveWindowTitle();
+  console.log(title)
+  if (!title) return false;
+
+  return title.toLowerCase().includes(matchTitle.toLowerCase());
+}
+
 function startGameDetection() {
+  if (gameDetectionInterval) return;
   let lastDetectedGame = null;
+  gameDetectionInterval = setInterval(async () => {
+    if (!GAME_PROCESSES) {
+      GAME_PROCESSES = settings.gamesConfig;
+    }
 
-  setInterval(async () => {
     const currentGame = await checkGameRunning();
-
     if (currentGame && currentGame !== lastDetectedGame) {
-      console.log(`${currentGame} detected! Starting OBS recording.`);
+      if (!(await isGameWindowFocused(currentGame))) return;
+
+      preRecordingTimestamp = Date.now();
+      recordingGame = currentGame;
+      console.log(`Recording started for ${currentGame} at ${preRecordingTimestamp}`);
+
       try {
         await setOutputPathForGame(currentGame);
+        await switchToScene(currentGame);
         mainWindow?.webContents.send("start-obs-recording");
       } catch (error) {
         console.error("Failed to start recording:", error);
       }
       lastDetectedGame = currentGame;
+    } else if (currentGame && currentGame === lastDetectedGame) {
+      await switchToScene(currentGame);
     } else if (!currentGame && lastDetectedGame) {
+      const stoppedGame = lastDetectedGame;
+      const scanTimestamp = preRecordingTimestamp;
+      lastDetectedGame = null;
+      preRecordingTimestamp = null;
+
+      console.log(`Game ${stoppedGame} ended. Stopping recording and scanning for new clips...`);
+
       try {
-        mainWindow?.webContents.send("stop-obs-recording");
+        mainWindow?.webContents.send("stop-obs-recording", { scanTimestamp, game: stoppedGame });
       } catch (error) {
         console.error("Failed to stop recording:", error);
       }
-      lastDetectedGame = null;
     }
   }, 10000);
 }
@@ -626,12 +723,12 @@ ipcMain.handle("rename-clip", async (event, oldPath, newName) => {
 
     // Format: Title_DATE_TIME.mp4
     const dateMatch = oldFileName.match(
-      /^(.+?)_([\d-]+_[\d-]+(?:\.?\d*)?)\.mp4$/
+      /^(.+?)_([\d-]+_[\d-]+(?:\.?\d*)?)\.mp4$/,
     );
 
     const dateTimePart = dateMatch?.[2] || "";
-    const newFileName = dateTimePart 
-      ? `${newName}_${dateTimePart}${ext}` 
+    const newFileName = dateTimePart
+      ? `${newName}_${dateTimePart}${ext}`
       : `${newName}${ext}`;
     const newPath = path.join(dir, newFileName);
 
@@ -654,6 +751,7 @@ ipcMain.handle("rename-clip", async (event, oldPath, newName) => {
 ipcMain.handle("connect-obs", async (event, port, password) => {
   try {
     await obs.connect(`ws://localhost:${port}`, password);
+    startGameDetection();
     return { connected: true, message: "Connected to OBS" };
   } catch (error) {
     console.error("OBS Connection Error:", error);
@@ -662,23 +760,33 @@ ipcMain.handle("connect-obs", async (event, port, password) => {
 });
 
 ipcMain.handle("start-obs-recording", async (event, currentGame, record) => {
+  console.log("[IPC] start-obs-recording called");
   try {
+    console.log("[IPC] Calling StartRecord...");
     await obs.call("StartRecord");
+    console.log("[IPC] StartRecord successful");
+    console.log("[IPC] Calling StartReplayBuffer...");
     await obs.call("StartReplayBuffer");
+    console.log("[IPC] StartReplayBuffer successful");
     return { success: true };
   } catch (error) {
-    console.error("OBS Recording Start Error:", error);
+    console.error("[IPC] OBS Recording Start Error:", error);
     return { success: false, message: error.message };
   }
 });
 
 ipcMain.handle("stop-obs-recording", async (event, record) => {
+  console.log("[IPC] stop-obs-recording called");
   try {
+    console.log("[IPC] Calling StopRecord...");
     await obs.call("StopRecord");
+    console.log("[IPC] StopRecord successful");
+    console.log("[IPC] Calling StopReplayBuffer...");
     await obs.call("StopReplayBuffer");
+    console.log("[IPC] StopReplayBuffer successful");
     return { success: true };
   } catch (error) {
-    console.error("OBS Recording Stop Error:", error);
+    console.error("[IPC] OBS Recording Stop Error:", error);
     return { success: false, message: error.message };
   }
 });
@@ -694,6 +802,10 @@ ipcMain.handle("check-obs-status", async () => {
   } catch (error) {
     return { connected: false, message: error.message };
   }
+});
+
+ipcMain.handle("get-game-detection-status", async () => {
+  return { running: gameDetectionInterval !== null };
 });
 
 ipcMain.handle("get-settings", async () => {
@@ -737,4 +849,77 @@ ipcMain.handle("window-maximize", async () => {
 
 ipcMain.handle("window-close", () => {
   mainWindow?.hide();
+});
+
+async function scanForNewClips(gameDir, gameName, sinceTimestamp, favourites) {
+  if (!gameDir) return [];
+  const newClips = [];
+  const sinceMs = sinceTimestamp || 0;
+
+  try {
+    const items = await fs.readdir(gameDir);
+    for (const item of items) {
+      const fullPath = path.join(gameDir, item);
+      try {
+        const stat = await fs.stat(fullPath);
+        if (stat.isFile() && (item.endsWith(".mp4") || item.endsWith(".mkv"))) {
+          const fileAgeMs = stat.mtimeMs - sinceMs;
+          if (fileAgeMs > 5000) {
+            const name = item.match(/[\sA-Za-z0-9]+/)?.[0] || item;
+            const parsedDate = parseDateFromFilename(item);
+            const effectiveDate = parsedDate || Math.floor(stat.mtime.getTime() / 1000);
+            const thumbnail = await generateThumbnail(fullPath);
+
+            let duration;
+            const meta = await loadClipMeta(fullPath);
+            if (meta?.date === effectiveDate) {
+              duration = meta.duration;
+              durationCache.set(fullPath, duration);
+            } else {
+              duration = await getVideoDuration(fullPath);
+              await saveClipMeta(fullPath, { date: effectiveDate, duration });
+            }
+
+            newClips.push({
+              game: gameName,
+              name: name,
+              filePath: fullPath,
+              mediaPath: `clips://${encodeURIComponent(fullPath)}`,
+              date: effectiveDate,
+              formattedDate: formatDate(effectiveDate),
+              isFavourite: favourites.includes(fullPath),
+              thumbnail: `clips://${encodeURIComponent(thumbnail)}`,
+              videoDuration: duration,
+              newClip: true,
+            });
+            console.log(`Found new clip: ${item}`);
+          }
+        }
+      } catch (error) {
+        console.warn(`Skipping ${fullPath}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error(`Error scanning directory ${gameDir}:`, error);
+  }
+
+  return newClips;
+}
+
+ipcMain.handle("scan-for-new-clips", async (event, scanTimestamp, gameName) => {
+  const gameDir = settings.gamesDir;
+  if (!gameDir) return [];
+
+  const fullGameDir = path.join(gameDir, gameName);
+  const favourites = await loadFavourites();
+
+  console.log(`Scanning ${fullGameDir} for clips since ${scanTimestamp}`);
+  const newClips = await scanForNewClips(fullGameDir, gameName, scanTimestamp, favourites);
+  console.log(`Found ${newClips.length} new clips`);
+
+  if (newClips.length > 0) {
+    mainWindow?.webContents.send("new-clips-detected", newClips);
+  }
+
+  return newClips;
 });

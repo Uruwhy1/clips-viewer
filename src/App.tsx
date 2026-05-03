@@ -105,10 +105,16 @@ function App() {
   }, [view, isSettingsOpen]);
 
   const handleCloseNewClipsPopup = () => {
+    setAllClips((current) =>
+      current.map((clip) => ({ ...clip, newClip: false }))
+    );
     setShowNewClipsPopup(false);
   };
 
   const handleClearNewClips = () => {
+    setAllClips((current) =>
+      current.map((clip) => ({ ...clip, newClip: false }))
+    );
     setShowNewClipsPopup(false);
   };
 

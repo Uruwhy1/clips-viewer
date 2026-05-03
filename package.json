@@ -57,6 +57,13 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "public/assets",
+        "to": "assets",
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "win": {

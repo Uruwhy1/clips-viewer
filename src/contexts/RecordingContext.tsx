@@ -7,12 +7,8 @@ import {
 } from "react";
 
 import { useSettings } from "./SettingsContext";
-import { GamesConfig, OBSSettings, RecordingMethod } from "../types/settings";
-import {
-  connectOBS,
-  startOBSRecording,
-  stopOBSRecording,
-} from "../helpers/OBS";
+import { OBSSettings, RecordingMethod } from "../types/settings";
+import { connectOBS } from "../helpers/OBS";
 
 interface ConnectionState {
   status: "disconnected" | "connected" | "error";
@@ -25,7 +21,8 @@ interface RecordingContextValue {
   connect: (port: string, password: string) => Promise<boolean>;
   obsSetting: OBSSettings;
   setObsSetting: (settings: OBSSettings) => void;
-  startGameDetection: (settings: { gamesConfig: GamesConfig }) => void;
+  startGameDetection: () => void;
+  gameDetectionRunning: boolean;
   recordingMethod: RecordingMethod;
 }
 
@@ -49,6 +46,20 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     password: null,
   });
 
+  const [gameDetectionRunning, setGameDetectionRunning] = useState(false);
+
+  const recordingSoundEnabled = settings.recordingSoundEnabled;
+
+  const playRecordingSound = () => {
+    const audio = new Audio("assets/beep.mp3");
+    audio.play().catch(() => {});
+  };
+
+  const playStopSound = () => {
+    const audio = new Audio("assets/beep.mp3");
+    audio.play().catch(() => {});
+  };
+
   useEffect(() => {
     if (settings.obs) {
       setObsSetting(settings.obs);
@@ -63,8 +74,6 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
           obsSetting.port &&
           obsSetting.password
         ) {
-          console.log(obsSetting.port)
-          console.log("xd")
           await connectFn(obsSetting.port, obsSetting.password);
         }
       } catch (error) {
@@ -85,6 +94,7 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
         version: result.version ?? null,
         error: null,
       });
+      setGameDetectionRunning(true);
       return true;
     } else {
       setConnection({
@@ -96,14 +106,86 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     }
   };
 
-  const startGameDetection = () => {};
+  const startGameDetectionFn = () => {
+    if (connection.status !== "connected") {
+      console.log("[Renderer] Cannot start game detection - not connected to OBS");
+      return;
+    }
+
+    console.log("[Renderer] Setting up IPC listeners for game detection...");
+
+    window.electron.onStartRecording(async () => {
+      console.log("[Renderer] Received start-obs-recording IPC event");
+      console.log("[Renderer] Recording sound enabled:", recordingSoundEnabled);
+      if (recordingSoundEnabled) {
+        playRecordingSound();
+      }
+      try {
+        console.log("[Renderer] Calling window.electron.startOBSRecording...");
+        const result = await window.electron.startOBSRecording("", false);
+        console.log("[Renderer] startOBSRecording result:", result);
+        if (result.success) {
+          console.log("[Renderer] OBS recording started successfully");
+        } else {
+          console.error("[Renderer] Failed to start OBS recording:", result.message);
+        }
+      } catch (error) {
+        console.error("[Renderer] Error starting OBS recording:", error);
+      }
+    });
+
+    window.electron.onStopRecording(async (data: { scanTimestamp: number; game: string }) => {
+      console.log("[Renderer] Received stop-obs-recording IPC event");
+      if (recordingSoundEnabled) {
+        playStopSound();
+      }
+      try {
+        console.log("[Renderer] Calling window.electron.stopOBSRecording...");
+        const result = await window.electron.stopOBSRecording(false);
+        console.log("[Renderer] stopOBSRecording result:", result);
+        if (result.success) {
+          console.log("[Renderer] OBS recording stopped successfully");
+          console.log("[Renderer] Scanning for new clips in 3 seconds...");
+          setTimeout(async () => {
+            console.log("[Renderer] Triggering new clips scan for game:", data.game);
+            const newClips = await window.electron.scanForNewClips(data.scanTimestamp, data.game);
+            console.log("[Renderer] Scan complete, found", newClips.length, "new clips");
+            if (newClips.length > 0) {
+              window.dispatchEvent(
+                new CustomEvent("newClipsDetected", { detail: newClips })
+              );
+            }
+          }, 3000);
+        } else {
+          console.error("[Renderer] Failed to stop OBS recording:", result.message);
+        }
+      } catch (error) {
+        console.error("[Renderer] Error stopping OBS recording:", error);
+      }
+    });
+
+    console.log("[Renderer] Game detection listeners registered");
+    setGameDetectionRunning(true);
+  };
+
+  useEffect(() => {
+    if (connection.status === "connected") {
+      startGameDetectionFn();
+    }
+
+    return () => {
+      window.electron.removeAllListeners("start-obs-recording");
+      window.electron.removeAllListeners("stop-obs-recording");
+    };
+  }, [connection.status]);
 
   const value: RecordingContextValue = {
     connection,
     connect: connectFn,
     obsSetting,
     setObsSetting,
-    startGameDetection,
+    startGameDetection: startGameDetectionFn,
+    gameDetectionRunning,
     recordingMethod: settings.recordingMethod,
   };
 

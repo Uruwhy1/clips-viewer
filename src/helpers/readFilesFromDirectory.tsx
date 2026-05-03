@@ -14,12 +14,15 @@ declare global {
       startOBSRecording: (currentGame: string, record: boolean) => Promise<{ success: boolean; message?: string }>;
       stopOBSRecording: (record: boolean) => Promise<{ success: boolean; message?: string }>;
       checkOBSStatus: () => Promise<{ connected: boolean; version?: string; websocketVersion?: string; message?: string }>;
+      scanForNewClips: (scanTimestamp: number, gameName: string) => Promise<any[]>;
+      getGameDetectionStatus: () => Promise<{ running: boolean }>;
       getSettings: () => Promise<any>;
       saveSettings: (settings: any) => Promise<boolean>;
       selectDirectory: () => Promise<string | null>;
       selectFile: (filters: any[]) => Promise<string | null>;
       onStartRecording: (callback: () => void) => void;
-      onStopRecording: (callback: () => void) => void;
+      onStopRecording: (callback: (data: { scanTimestamp: number; game: string }) => void) => void;
+      onNewClipsDetected: (callback: (clips: any[]) => void) => void;
       removeAllListeners: (channel: string) => void;
     };
   }
