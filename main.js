@@ -384,13 +384,16 @@ async function getActiveWindowTitle() {
 
 async function isGameWindowFocused(gameName) {
   const config = GAME_PROCESSES?.[gameName];
-  const matchTitle = config?.windowTitle || gameName;
+  const matchTitles = config?.windowTitles && config.windowTitles.length > 0
+    ? config.windowTitles
+    : [gameName];
 
   const title = await getActiveWindowTitle();
-  console.log(title)
   if (!title) return false;
 
-  return title.toLowerCase().includes(matchTitle.toLowerCase());
+  return matchTitles.some((matchTitle) =>
+    title.toLowerCase().includes(matchTitle.toLowerCase())
+  );
 }
 
 function startGameDetection() {

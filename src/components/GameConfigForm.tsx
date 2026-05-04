@@ -1,7 +1,8 @@
-import React, { useState, useCallback, Dispatch, SetStateAction } from "react";
+import React, { useState, useCallback, Dispatch, SetStateAction, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
+import gamesList from "../../assets/gamesList.json";
 import { Settings } from "../types/settings";
 
 type GameConfigFormProps = {
@@ -15,14 +16,66 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
   ({ removingIndex, setRemovingIndex, setSettings, settings }) => {
     const [gameName, setGameName] = useState<string>("");
     const [processNames, setProcessNames] = useState<string>("");
-    const [windowTitle, setWindowTitle] = useState<string>("");
+    const [windowTitles, setWindowTitles] = useState<string>("");
     const [recordBool, setRecordBool] = useState<boolean>(false);
     const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const [editingGame, setEditingGame] = useState<string | null>(null);
+    const [gameSearchQuery, setGameSearchQuery] = useState<string>("");
+    const [filteredGames, setFilteredGames] = useState<typeof gamesList>([]);
+    const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+    const suggestionsRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (
+          suggestionsRef.current &&
+          !suggestionsRef.current.contains(e.target as Node) &&
+          inputRef.current &&
+          !inputRef.current.contains(e.target as Node)
+        ) {
+          setShowSuggestions(false);
+        }
+      };
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleGameSearch = useCallback((query: string) => {
+      setGameSearchQuery(query);
+      setGameName(query);
+      if (query.length === 0) {
+        setFilteredGames([]);
+        setShowSuggestions(false);
+        return;
+      }
+      const queryLower = query.toLowerCase();
+      const filtered = gamesList
+        .filter(
+          (game) =>
+            game.Name.toLowerCase().includes(queryLower) ||
+            (game.processName && game.processName.toLowerCase().includes(queryLower))
+        )
+        .slice(0, 10);
+      setFilteredGames(filtered);
+      setShowSuggestions(filtered.length > 0);
+    }, []);
+
+    const selectGame = useCallback((game: (typeof gamesList)[0]) => {
+      setGameName(game.Name);
+      setGameSearchQuery(game.Name);
+      setProcessNames(game.processName || "");
+      setWindowTitles(game.Name);
+      setShowSuggestions(false);
+    }, []);
 
     const handleSave = useCallback(() => {
       if (gameName && processNames) {
         const processArray = processNames.split(",").map((name) => name.trim());
+        const windowTitlesArray = windowTitles
+          .split(",")
+          .map((title) => title.trim())
+          .filter((title) => title.length > 0);
 
         setSettings((prevSettings: Settings) => {
           const updatedGamesConfig = { ...prevSettings.gamesConfig };
@@ -30,7 +83,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
           updatedGamesConfig[gameName] = {
             processes: processArray,
             record: recordBool,
-            windowTitle: windowTitle.trim() || gameName,
+            windowTitles: windowTitlesArray.length > 0 ? windowTitlesArray : undefined,
           };
 
           return {
@@ -41,14 +94,14 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
 
         setGameName("");
         setProcessNames("");
-        setWindowTitle("");
+        setWindowTitles("");
         setRecordBool(false);
         setIsFormVisible(false);
         setEditingGame(null);
       } else {
         alert("Both game name and process names are required!");
       }
-    }, [gameName, processNames, windowTitle, recordBool, setSettings]);
+    }, [gameName, processNames, windowTitles, recordBool, setSettings]);
 
     const startEditGame = useCallback(
       (gameName: string) => {
@@ -56,8 +109,9 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
 
         setEditingGame(gameName);
         setGameName(gameName);
+        setGameSearchQuery(gameName);
         setProcessNames(gameConfig.processes.join(", "));
-        setWindowTitle(gameConfig.windowTitle || gameName);
+        setWindowTitles(gameConfig.windowTitles?.join(", ") || gameName);
         setRecordBool(gameConfig.record);
         setIsFormVisible(true);
       },
@@ -90,11 +144,12 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
     const toggleForm = useCallback(() => {
       setIsFormVisible((prev) => !prev);
       setEditingGame(null);
+      setGameSearchQuery("");
       if (isFormVisible) {
         setTimeout(() => {
           setGameName("");
           setProcessNames("");
-          setWindowTitle("");
+          setWindowTitles("");
           setRecordBool(false);
         }, 500);
       }
@@ -121,14 +176,32 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
             >
               <div className={styles.inputGroup}>
                 <label htmlFor="gameName">Game Name</label>
-                <input
-                  autoComplete="off"
-                  id="gameName"
-                  type="text"
-                  value={gameName}
-                  onChange={(e) => setGameName(e.target.value)}
-                  placeholder="Enter game name"
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    autoComplete="off"
+                    id="gameName"
+                    type="text"
+                    value={gameSearchQuery}
+                    onChange={(e) => handleGameSearch(e.target.value)}
+                    onFocus={() => filteredGames.length > 0 && setShowSuggestions(true)}
+                    ref={inputRef}
+                    placeholder="Search or enter game name"
+                  />
+                  {showSuggestions && (
+                    <div className={styles.suggestionsDropdown} ref={suggestionsRef}>
+                      {filteredGames.map((game, idx) => (
+                        <div
+                          key={idx}
+                          className={styles.suggestionItem}
+                          onClick={() => selectGame(game)}
+                        >
+                          <strong>{game.Name}</strong>
+                          <span>{game.processName}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className={styles.inputGroup}>
                 <label htmlFor="processNames">Game Processes</label>
@@ -142,14 +215,14 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
                 />
               </div>
               <div className={styles.inputGroup}>
-                <label htmlFor="windowTitle">Window Title</label>
+                <label htmlFor="windowTitles">Window Titles</label>
                 <input
                   autoComplete="off"
-                  id="windowTitle"
+                  id="windowTitles"
                   type="text"
-                  value={windowTitle}
-                  onChange={(e) => setWindowTitle(e.target.value)}
-                  placeholder="Enter window title (optional, defaults to game name)"
+                  value={windowTitles}
+                  onChange={(e) => setWindowTitles(e.target.value)}
+                  placeholder="Enter window titles, separated by commas (optional)"
                 />
               </div>
               <div className={styles.inputGroup}>
@@ -217,7 +290,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
           )}
         </div>
 
-        {settings.recordingMethod === "wgc" && (
+        {settings.recordingMethod !== "obs" && (
           <div className={styles.themeDescription}>
             <p>WGC is selected. All sessions will be fully recorded.</p>
           </div>

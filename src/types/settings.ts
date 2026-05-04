@@ -1,7 +1,7 @@
 type GameConfig = {
   processes: string[];
   record: boolean;
-  windowTitle?: string;
+  windowTitles?: string[];
 };
 
 export type GamesConfig = {

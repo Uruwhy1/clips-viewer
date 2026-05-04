@@ -230,6 +230,40 @@
   }
 }
 
+.suggestionsDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--page-bg);
+  border: 1px solid var(--borders);
+  border-radius: var(--radius-small);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.suggestionItem {
+  padding: var(--padding-small) var(--padding-medium);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &:hover {
+    background-color: var(--accent-white);
+  }
+
+  > strong {
+    font-weight: 500;
+  }
+
+  > span {
+    font-size: 0.85rem;
+    color: var(--gray-color);
+  }
+}
+
 .inputGroup {
   display: flex;
   flex-direction: column;
