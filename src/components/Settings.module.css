@@ -225,19 +225,26 @@
   flex-direction: column;
   gap: var(--gap-small);
 
-  > button {
+  >button {
     width: calc(100% - 2px);
   }
 }
 
+.nameInput {
+  anchor-name: --nameInput;
+}
+
 .suggestionsDropdown {
   position: absolute;
-  top: 100%;
+  position-anchor: --nameInput;
+  top: anchor(bottom);
   left: 0;
   right: 0;
+
   background-color: var(--page-bg);
   border: 1px solid var(--borders);
   border-radius: var(--radius-small);
+
   max-height: 200px;
   overflow-y: auto;
   z-index: 10;
@@ -245,7 +252,9 @@
 
 .suggestionItem {
   padding: var(--padding-small) var(--padding-medium);
+
   cursor: pointer;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -254,11 +263,11 @@
     background-color: var(--accent-white);
   }
 
-  > strong {
+  >strong {
     font-weight: 500;
   }
 
-  > span {
+  >span {
     font-size: 0.85rem;
     color: var(--gray-color);
   }
@@ -270,6 +279,8 @@
 
   width: 100%;
   height: var(--inputGroupHeight);
+
+  position: relative;
 }
 
 .inputGroup label {
@@ -279,7 +290,7 @@
 .inputGroup input {
   height: 2.625rem;
 
-  width: 99%;
+  width: calc(100% - 4px);
   margin: auto;
 
   color: #000;
@@ -289,7 +300,8 @@
   border-radius: var(--radius-small);
 
   &:focus-visible {
-    outline-color: var(--accent-washed);
+    outline: 2px solid var(--accent-washed);
+    border-color: var(--accent-washed);
   }
 }
 

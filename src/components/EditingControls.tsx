@@ -22,7 +22,7 @@ type EditingControlsProps = {
 
 const EditingControls = React.memo<EditingControlsProps>(
   ({ videoRef, onMarkersUpdate }) => {
-    const { currentClip, addClip } = useClips();
+    const { currentClip, addClip, setCurrentClip, deleteClip } = useClips();
     const {
       showPopup,
       showPersistentNotification,
@@ -60,11 +60,13 @@ const EditingControls = React.memo<EditingControlsProps>(
 
     const handleCreateNew = async (name: string) => {
       const result = await createClipHandler(
-        startTime,
-        endTime,
+        startTime!,
+        endTime!,
         currentClip,
         name,
         addClip,
+        setCurrentClip,
+        deleteClip,
         showPersistentNotification,
         removePersistentNotification,
       );
@@ -73,6 +75,7 @@ const EditingControls = React.memo<EditingControlsProps>(
         setStartTime(null);
         setEndTime(null);
         onMarkersUpdate(null, null);
+        setShowCreateClipPopup(false);
       } else {
         showPopup(result.error, false);
       }

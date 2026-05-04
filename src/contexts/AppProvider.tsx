@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { SettingsProvider } from "./SettingsContext";
 import { ClipsProvider } from "./ClipsContext";
-import { MediaProvider } from "./MediaContext";
 import { PopupProvider } from "./PopupContext";
 import { RecordingProvider } from "./RecordingContext";
 
@@ -15,7 +14,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       <SettingsProvider>
         <ClipsProvider>
           <RecordingProvider>
-            <MediaProvider>{children}</MediaProvider>
+            {children}
           </RecordingProvider>
         </ClipsProvider>
       </SettingsProvider>

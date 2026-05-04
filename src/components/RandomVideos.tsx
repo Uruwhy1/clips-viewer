@@ -29,7 +29,7 @@ const RandomVideos = () => {
             onClick={() => handleClipClick(clip)}
           >
             <div className={styles.thumbnailContainer}>
-              <img src={clip.thumbnail ? `file://${clip.thumbnail}` : ""} alt=""></img>
+              <img src={clip.thumbnail || ""} alt=""></img>
               <div className={styles.playIcon}>
                 <Play size={24} />
               </div>

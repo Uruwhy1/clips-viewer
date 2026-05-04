@@ -14,7 +14,6 @@ import styles from "./CurrentVideo.module.css";
 import StarButton from "./icons/StarButton";
 import { usePopup } from "../contexts/PopupContext";
 import { useClips } from "../contexts/ClipsContext";
-import { useMedia } from "../contexts/MediaContext";
 import { Clip } from "../types/clip";
 
 const MemoizedCalendar = React.memo(() => <Calendar size={15} />);
@@ -32,7 +31,6 @@ const MemoizedTrash2 = React.memo((props: LucideProps) => (
 const CurrentVideo: React.FC = React.memo(() => {
   const { currentClip, deleteClip, editClip, isFavorite, toggleFavourite } =
     useClips();
-  const { coverCache } = useMedia();
   const { showPopup } = usePopup();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -97,11 +95,17 @@ const CurrentVideo: React.FC = React.memo(() => {
     [editClip],
   );
 
+  const sanitizeGameName = (name: string) => {
+    return name.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
+  };
+
   const handleImageError = (e: any) => {
     const target = e.currentTarget as HTMLImageElement;
-    target.onerror = null; // prevent infinite loop
-    target.src = coverCache.get("default") || "";
+    target.onerror = null;
+    target.style.display = "none";
   };
+
+  const gameCoverPath = `assets/covers/${sanitizeGameName(currentClip.game)}.jpg`;
 
   return (
     <main className={styles.container}>
@@ -161,7 +165,7 @@ const CurrentVideo: React.FC = React.memo(() => {
         </div>
         <div className={styles.imageDiv}>
           <img
-            src={coverCache.get(currentClip.game)}
+            src={gameCoverPath}
             alt={`${currentClip.game} Cover`}
             onError={(e) => handleImageError(e)}
           />

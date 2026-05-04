@@ -176,32 +176,32 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
             >
               <div className={styles.inputGroup}>
                 <label htmlFor="gameName">Game Name</label>
-                <div style={{ position: "relative" }}>
-                  <input
-                    autoComplete="off"
-                    id="gameName"
-                    type="text"
-                    value={gameSearchQuery}
-                    onChange={(e) => handleGameSearch(e.target.value)}
-                    onFocus={() => filteredGames.length > 0 && setShowSuggestions(true)}
-                    ref={inputRef}
-                    placeholder="Search or enter game name"
-                  />
-                  {showSuggestions && (
-                    <div className={styles.suggestionsDropdown} ref={suggestionsRef}>
-                      {filteredGames.map((game, idx) => (
-                        <div
-                          key={idx}
-                          className={styles.suggestionItem}
-                          onClick={() => selectGame(game)}
-                        >
-                          <strong>{game.Name}</strong>
-                          <span>{game.processName}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <input
+                  autoComplete="off"
+                  id="gameName"
+                  type="text"
+                  value={gameSearchQuery}
+                  onChange={(e) => handleGameSearch(e.target.value)}
+                  onFocus={() => filteredGames.length > 0 && setShowSuggestions(true)}
+                  ref={inputRef}
+                  placeholder="Search or enter game name"
+
+                  className={styles.nameInput}
+                />
+                {showSuggestions && (
+                  <div className={styles.suggestionsDropdown} ref={suggestionsRef}>
+                    {filteredGames.map((game, idx) => (
+                      <div
+                        key={idx}
+                        className={styles.suggestionItem}
+                        onClick={() => selectGame(game)}
+                      >
+                        <strong>{game.Name}</strong>
+                        <span>{game.processName}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className={styles.inputGroup}>
                 <label htmlFor="processNames">Game Processes</label>
@@ -251,11 +251,9 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
             Object.entries(settings.gamesConfig).map(
               ([gameName, config], index) => (
                 <div
-                  className={`${styles.gameItem} ${styles.currentSetting} ${
-                    index === removingIndex ? styles.remove : ""
-                  } ${gameName === editingGame ? styles.editing : ""} ${
-                    config.record ? styles.recording : ""
-                  }`}
+                  className={`${styles.gameItem} ${styles.currentSetting} ${index === removingIndex ? styles.remove : ""
+                    } ${gameName === editingGame ? styles.editing : ""} ${config.record ? styles.recording : ""
+                    }`}
                   key={index}
                   onClick={(e) => {
                     e.stopPropagation();

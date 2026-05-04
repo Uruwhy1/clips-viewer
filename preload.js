@@ -9,9 +9,17 @@ contextBridge.exposeInMainWorld("electron", {
   openFileExplorer: (filePath) => shell.showItemInFolder(filePath),
   toggleFavourite: (filePath) =>
     ipcRenderer.invoke("toggle-favourite", filePath),
+  saveAllFavourites: (favourites) =>
+    ipcRenderer.invoke("save-all-favourites", favourites),
   deleteClip: (filePath) => ipcRenderer.invoke("delete-clip", filePath),
+  createClip: (options) => ipcRenderer.invoke("create-clip", options),
   renameClip: (oldPath, newName) =>
     ipcRenderer.invoke("rename-clip", oldPath, newName),
+
+  onClipProgress: (callback) =>
+    ipcRenderer.on("clip-progress", (event, progress) => callback(progress)),
+  removeClipProgressListener: () =>
+    ipcRenderer.removeAllListeners("clip-progress"),
 
 connectOBS: (port, password) => ipcRenderer.invoke("connect-obs", port, password),
 

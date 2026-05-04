@@ -705,6 +705,16 @@ ipcMain.handle("toggle-favourite", async (event, filePath) => {
   }
 });
 
+ipcMain.handle("save-all-favourites", async (event, favouritesArray) => {
+  try {
+    await saveFavourites(favouritesArray);
+    return true;
+  } catch (error) {
+    console.error("Error saving all favourites:", error);
+    return false;
+  }
+});
+
 ipcMain.handle("delete-clip", async (event, filePath) => {
   try {
     await fs.unlink(filePath);
@@ -717,6 +727,68 @@ ipcMain.handle("delete-clip", async (event, filePath) => {
     return false;
   }
 });
+
+ipcMain.handle("create-clip", async (event, { inputFile, startTime, endTime, outputFile }) => {
+  try {
+    // Parse times to calculate duration
+    const startSeconds = parseTimeToSeconds(startTime);
+    const endSeconds = parseTimeToSeconds(endTime);
+    const totalDuration = endSeconds - startSeconds;
+
+    const command = `ffmpeg -ss ${startTime} -to ${endTime} -i "${inputFile}" -c copy -movflags +faststart "${outputFile}" -y`;
+
+    await new Promise((resolve, reject) => {
+      const child = exec(command, { windowsHide: true }, (error) => {
+        if (error) reject(error);
+        else resolve();
+      });
+
+      // Progress tracking via stderr
+      const progressInterval = setInterval(() => {
+        try {
+          const progressData = { totalDuration, startSeconds };
+          event.sender.send("clip-progress", progressData);
+        } catch (e) {
+          // Ignore progress errors
+        }
+      }, 500);
+
+      child.on("close", () => {
+        clearInterval(progressInterval);
+      });
+    });
+
+    // Generate thumbnail for the new clip
+    await generateThumbnail(outputFile);
+
+    // Get video duration
+    const duration = await getVideoDuration(outputFile);
+
+    // Get file stats for date
+    const stats = await fs.stat(outputFile);
+    const formattedDate = formatDate(stats.mtimeMs);
+
+    return {
+      success: true,
+      path: outputFile,
+      duration,
+      formattedDate,
+    };
+  } catch (error) {
+    console.error("Error creating clip:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+function parseTimeToSeconds(timeStr) {
+  const parts = timeStr.split(":");
+  if (parts.length === 3) {
+    return parseFloat(parts[0]) * 3600 + parseFloat(parts[1]) * 60 + parseFloat(parts[2]);
+  } else if (parts.length === 2) {
+    return parseFloat(parts[0]) * 60 + parseFloat(parts[1]);
+  }
+  return 0;
+}
 
 ipcMain.handle("rename-clip", async (event, oldPath, newName) => {
   try {

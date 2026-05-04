@@ -1,7 +1,6 @@
 export async function saveFavourites(favourites: Set<string>) {
   try {
-    await window.electron.toggleFavourite("");
-    const arr = [...favourites];
+    await window.electron.saveAllFavourites([...favourites]);
   } catch (error) {
     console.error("Error saving favourites:", error);
   }

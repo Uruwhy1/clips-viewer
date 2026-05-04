@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useContext } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AnimatePresence } from "motion/react"
 
 import "./reset.css";
@@ -11,14 +11,9 @@ import Sidebar from "./components/Sidebar";
 import Settings from "./components/Settings";
 import NewClipsPopup from "./components/NewClips";
 
-import { useSettings } from "./contexts/SettingsContext";
-import { useClips } from "./contexts/ClipsContext";
-import { useMedia } from "./contexts/MediaContext";
-
-import { usePopup } from "./contexts/PopupContext.js";
 import SplashScreen from "./SplashScreen";
 import { Clip } from "./types/clip";
-import PageCover from "./components/PageCover";
+import { useClips } from "./contexts/ClipsContext";
 import OverlayModal from "./components/OverlayModal";
 
 function App() {
@@ -29,12 +24,7 @@ function App() {
 
   const settingsRef = useRef<HTMLDivElement | null>(null);
 
-  const { coverCache } = useMedia();
-  const { settings } = useSettings();
   const { allClips, setAllClips } = useClips();
-
-  const firstLoadRef = useRef(true);
-  const { showPopup } = usePopup();
 
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
@@ -132,33 +122,6 @@ function App() {
   return (
     <>
       <SplashScreen />
-      {coverCache && (
-        <div
-          style={{
-            position: "absolute",
-            width: "0px",
-            height: "0px",
-            overflow: "hidden",
-            pointerEvents: "none",
-            top: 0,
-            left: 0,
-          }}
-        >
-          {Array.from(coverCache).map(([name, coverPath], index) => (
-            <img
-              key={index}
-              src={coverPath}
-              style={{
-                width: 0,
-                height: 0,
-              }}
-              alt=""
-              loading="eager"
-            />
-          ))}
-        </div>
-      )}
-
       <TitleBar />
       <Sidebar
         view={view}
