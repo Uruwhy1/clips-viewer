@@ -1,12 +1,29 @@
+import { Clip } from "./clip";
+
 export interface ElectronAPI {
-  getAllClips: () => Promise<any[]>;
-  onClipLoadingProgress: (callback: (progress: { current: number; total: number; game: string; itemsTotal?: number; itemsProcessed?: number }) => void) => void;
+      getAllClips: () => Promise<Clip[]>;
+  onClipLoadingProgress: (
+    callback: (progress: {
+      current: number;
+      total: number;
+      game: string;
+      itemsTotal?: number;
+      itemsProcessed?: number;
+    }) => void,
+  ) => void;
   removeClipLoadingProgressListener: () => void;
   openFileExplorer: (filePath: string) => void;
   toggleFavourite: (filePath: string) => Promise<string[]>;
   deleteClip: (filePath: string) => Promise<boolean>;
-  renameClip: (oldPath: string, newName: string) => Promise<{ newPath: string; newName: string } | null>;
-connectOBS: (port: string, password: string) => Promise<{ connected: boolean; message: string }>;
+  getClipsSizes: (filePaths: string[]) => Promise<Record<string, number>>;
+  renameClip: (
+    oldPath: string,
+    newName: string,
+  ) => Promise<{ newPath: string; newName: string } | null>;
+  connectOBS: (
+    port: string,
+    password: string,
+  ) => Promise<{ connected: boolean; message: string }>;
 
   startOBSRecording: (
     currentGame: string,
@@ -16,7 +33,12 @@ connectOBS: (port: string, password: string) => Promise<{ connected: boolean; me
   stopOBSRecording: (
     record: boolean,
   ) => Promise<{ success: boolean; message?: string }>;
-  checkOBSStatus: () => Promise<{ connected: boolean; version?: string; websocketVersion?: string; message?: string }>;
+  checkOBSStatus: () => Promise<{
+    connected: boolean;
+    version?: string;
+    websocketVersion?: string;
+    message?: string;
+  }>;
   scanForNewClips: (scanTimestamp: number, gameName: string) => Promise<any[]>;
   getGameDetectionStatus: () => Promise<{ running: boolean }>;
   getSettings: () => Promise<any>;
@@ -24,9 +46,12 @@ connectOBS: (port: string, password: string) => Promise<{ connected: boolean; me
   selectDirectory: () => Promise<string | null>;
   selectFile: (filters: any[]) => Promise<string | null>;
   onStartRecording: (callback: () => void) => void;
-  onStopRecording: (callback: (data: { scanTimestamp: number; game: string }) => void) => void;
+  onStopRecording: (
+    callback: (data: { scanTimestamp: number; game: string }) => void,
+  ) => void;
   onNewClipsDetected: (callback: (clips: any[]) => void) => void;
   removeAllListeners: (channel: string) => void;
+  test: boolean;
 }
 
 declare global {

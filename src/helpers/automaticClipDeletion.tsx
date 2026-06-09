@@ -1,9 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import { Clip } from "../types/clip";
 import { Settings } from "../types/settings";
-import type { default as ElectronAPI } from "../types/electron";
 
-declare const window: Window & { electron: typeof ElectronAPI };
+const GB = 1024 * 1024 * 1024;
 
 export const checkAndDeleteOldClips = async (
   settings: Settings,
@@ -18,8 +17,12 @@ export const checkAndDeleteOldClips = async (
     return;
   }
 
-  const clipCount = allClips.length;
-  if (clipCount <= settings.clipsDeleteThreshold) {
+  const sizes = await window.electron.getClipsSizes(allClips.map((c) => c.filePath));
+  const totalBytes = Object.values(sizes).reduce((sum, b) => sum + b, 0);
+  const totalGB = totalBytes / GB;
+
+  if (totalGB <= settings.clipsDeleteThreshold) {
+    console.log(totalGB, settings.clipsDeleteThreshold)
     return;
   }
 
@@ -31,8 +34,14 @@ export const checkAndDeleteOldClips = async (
     return [true, "No non-favorite clips to delete."];
   }
 
-  const clipsToDelete = clipCount - settings.clipsDeleteThreshold;
-  const clipsToRemove = nonFavoriteClips.slice(0, clipsToDelete);
+  let bytesToFree = totalBytes - settings.clipsDeleteThreshold * GB;
+  const clipsToRemove: Clip[] = [];
+
+  for (const clip of nonFavoriteClips) {
+    if (bytesToFree <= 0) break;
+    clipsToRemove.push(clip);
+    bytesToFree -= sizes[clip.filePath] || 0;
+  }
 
   for (const clip of clipsToRemove) {
     const success = await window.electron.deleteClip(clip.filePath);
@@ -45,5 +54,5 @@ export const checkAndDeleteOldClips = async (
     prevClips.filter((clip) => !clipsToRemove.some((c) => c.filePath === clip.filePath)),
   );
 
-  return [true, `Deleted ${clipsToRemove.length} old clip(s).`];
+  return [true, `Deleted ${clipsToRemove.length} old clip(s) to stay under ${settings.clipsDeleteThreshold} GB.`];
 };

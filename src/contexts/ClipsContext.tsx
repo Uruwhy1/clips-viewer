@@ -17,7 +17,7 @@ import {
 import { useSettings } from "./SettingsContext";
 import { Clip } from "../types/clip";
 import { checkAndDeleteOldClips } from "../helpers/automaticClipDeletion";
-import { usePopup, showPersistentNotification, removePersistentNotification } from "./PopupContext";
+import { usePopup } from "./PopupContext";
 
 type AddClipResult = {
   setAsCurrent: () => void;

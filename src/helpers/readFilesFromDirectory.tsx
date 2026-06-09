@@ -1,33 +1,5 @@
 import { Clip } from "../types/clip";
 
-declare global {
-  interface Window {
-    electron: {
-      getAllClips: () => Promise<Clip[]>;
-      onClipLoadingProgress: (callback: (progress: { current: number; total: number; game: string }) => void) => void;
-      removeClipLoadingProgressListener: () => void;
-      openFileExplorer: (filePath: string) => void;
-      toggleFavourite: (filePath: string) => Promise<string[]>;
-      deleteClip: (filePath: string) => Promise<boolean>;
-      renameClip: (oldPath: string, newName: string) => Promise<{ newPath: string; newName: string } | null>;
-      connectOBS: (port: string, password: string) => Promise<{ connected: boolean; message: string }>;
-      startOBSRecording: (currentGame: string, record: boolean) => Promise<{ success: boolean; message?: string }>;
-      stopOBSRecording: (record: boolean) => Promise<{ success: boolean; message?: string }>;
-      checkOBSStatus: () => Promise<{ connected: boolean; version?: string; websocketVersion?: string; message?: string }>;
-      scanForNewClips: (scanTimestamp: number, gameName: string) => Promise<any[]>;
-      getGameDetectionStatus: () => Promise<{ running: boolean }>;
-      getSettings: () => Promise<any>;
-      saveSettings: (settings: any) => Promise<boolean>;
-      selectDirectory: () => Promise<string | null>;
-      selectFile: (filters: any[]) => Promise<string | null>;
-      onStartRecording: (callback: () => void) => void;
-      onStopRecording: (callback: (data: { scanTimestamp: number; game: string }) => void) => void;
-      onNewClipsDetected: (callback: (clips: any[]) => void) => void;
-      removeAllListeners: (channel: string) => void;
-    };
-  }
-}
-
 export async function getAllClips(
   gamesDir: string,
 ): Promise<[Set<string>, Clip[]]> {
