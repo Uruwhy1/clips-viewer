@@ -1,5 +1,5 @@
 {
-  "name": "gaming-clips-viewer",
+  "name": "clips-viewer",
   "version": "1.2.5",
   "description": "A desktop app for managing gaming clips",
   "main": "main.js",
@@ -41,13 +41,15 @@
   },
   "build": {
     "appId": "com.facundo.clipsviewer",
-    "productName": "Clips Viewer",
+    "productName": "clips-viewer",
     "directories": {
       "output": "dist"
     },
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
+      "electron/**/*",
+      "preload.js",
       "main.js",
       "package.json"
     ],

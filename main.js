@@ -1,7 +1,14 @@
 const { app, protocol } = require("electron");
 const path = require("path");
 
+app.setPath("userData", path.join(app.getPath("appData"), "clips-viewer"));
+
 const { isDev } = require("./electron/config");
+
+if (!isDev) {
+  const { Menu } = require("electron");
+  Menu.setApplicationMenu(null);
+}
 const { loadSettings } = require("./electron/settings");
 const { createWindow } = require("./electron/window");
 const { createTray, handleQuit } = require("./electron/tray");
