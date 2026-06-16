@@ -1,18 +1,18 @@
 import styles from "./TitleBar.module.css";
-import { X, Minus, Square, Copy, MinusSquare } from "lucide-react";
+import { X, Minus, Square } from "lucide-react";
 import React from "react";
 
 const TitleBar = React.memo(() => {
   const handleMinimize = () => {
-    window.electronAPI?.minimize?.();
+    window.electron.minimize();
   };
 
   const handleMaximize = () => {
-    window.electronAPI?.maximize?.();
+    window.electron.maximize();
   };
 
   const handleClose = () => {
-    window.electronAPI?.close?.();
+    window.electron.close();
   };
 
   return (

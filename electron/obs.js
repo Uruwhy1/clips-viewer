@@ -8,13 +8,17 @@ async function connect(port, password) {
   await obs.connect(`ws://localhost:${port}`, password);
 }
 
-async function startRecording() {
-  await obs.call("StartRecord");
+async function startRecording(fullRecording) {
+  if (fullRecording) {
+    await obs.call("StartRecord");
+  }
   await obs.call("StartReplayBuffer");
 }
 
-async function stopRecording() {
-  await obs.call("StopRecord");
+async function stopRecording(fullRecording) {
+  if (fullRecording) {
+    await obs.call("StopRecord");
+  }
   await obs.call("StopReplayBuffer");
 }
 

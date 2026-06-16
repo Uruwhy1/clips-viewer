@@ -15,6 +15,7 @@ function createWindow() {
       devTools: true,
       preload: path.join(__dirname, "..", "preload.js"),
     },
+    titleBarStyle: 'hidden'
   });
 
   if (isDev) {

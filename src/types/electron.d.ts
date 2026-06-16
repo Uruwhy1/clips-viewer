@@ -25,14 +25,6 @@ export interface ElectronAPI {
     password: string,
   ) => Promise<{ connected: boolean; message: string }>;
 
-  startOBSRecording: (
-    currentGame: string,
-    record: boolean,
-  ) => Promise<{ success: boolean; message?: string }>;
-
-  stopOBSRecording: (
-    record: boolean,
-  ) => Promise<{ success: boolean; message?: string }>;
   checkOBSStatus: () => Promise<{
     connected: boolean;
     version?: string;
@@ -45,8 +37,8 @@ export interface ElectronAPI {
   saveSettings: (settings: any) => Promise<boolean>;
   selectDirectory: () => Promise<string | null>;
   selectFile: (filters: any[]) => Promise<string | null>;
-  onStartRecording: (callback: () => void) => void;
-  onStopRecording: (
+  onRecordingStarted: (callback: (data: { game: string }) => void) => void;
+  onRecordingStopped: (
     callback: (data: { scanTimestamp: number; game: string }) => void,
   ) => void;
   onNewClipsDetected: (callback: (clips: any[]) => void) => void;

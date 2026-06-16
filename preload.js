@@ -28,16 +28,10 @@ contextBridge.exposeInMainWorld("electron", {
   connectOBS: (port, password) =>
     ipcRenderer.invoke("connect-obs", port, password),
 
-  startOBSRecording: (currentGame, record) =>
-    ipcRenderer.invoke("start-obs-recording", currentGame, record),
-
-  stopOBSRecording: (record) =>
-    ipcRenderer.invoke("stop-obs-recording", record),
   checkOBSStatus: () => ipcRenderer.invoke("check-obs-status"),
   scanForNewClips: (scanTimestamp, gameName) =>
     ipcRenderer.invoke("scan-for-new-clips", scanTimestamp, gameName),
   getGameDetectionStatus: () => ipcRenderer.invoke("get-game-detection-status"),
-
   getSettings: () => ipcRenderer.invoke("get-settings"),
   saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
   selectDirectory: () => ipcRenderer.invoke("select-directory"),
@@ -47,10 +41,10 @@ contextBridge.exposeInMainWorld("electron", {
   maximize: () => ipcRenderer.invoke("window-maximize"),
   close: () => ipcRenderer.invoke("window-close"),
 
-  onStartRecording: (callback) =>
-    ipcRenderer.on("start-obs-recording", callback),
-  onStopRecording: (callback) =>
-    ipcRenderer.on("stop-obs-recording", (event, data) => callback(data)),
+  onRecordingStarted: (callback) =>
+    ipcRenderer.on("recording-started", (event, data) => callback(data)),
+  onRecordingStopped: (callback) =>
+    ipcRenderer.on("recording-stopped", (event, data) => callback(data)),
   onNewClipsDetected: (callback) =>
     ipcRenderer.on("new-clips-detected", (event, clips) => callback(clips)),
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),

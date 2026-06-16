@@ -114,54 +114,29 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
 
     console.log("[Renderer] Setting up IPC listeners for game detection...");
 
-    window.electron.onStartRecording(async () => {
-      console.log("[Renderer] Received start-obs-recording IPC event");
-      console.log("[Renderer] Recording sound enabled:", recordingSoundEnabled);
+    window.electron.onRecordingStarted(() => {
+      console.log("[Renderer] Recording started");
       if (recordingSoundEnabled) {
         playRecordingSound();
       }
-      try {
-        console.log("[Renderer] Calling window.electron.startOBSRecording...");
-        const result = await window.electron.startOBSRecording("", false);
-        console.log("[Renderer] startOBSRecording result:", result);
-        if (result.success) {
-          console.log("[Renderer] OBS recording started successfully");
-        } else {
-          console.error("[Renderer] Failed to start OBS recording:", result.message);
-        }
-      } catch (error) {
-        console.error("[Renderer] Error starting OBS recording:", error);
-      }
     });
 
-    window.electron.onStopRecording(async (data: { scanTimestamp: number; game: string }) => {
-      console.log("[Renderer] Received stop-obs-recording IPC event");
+    window.electron.onRecordingStopped(async (data: { scanTimestamp: number; game: string }) => {
+      console.log("[Renderer] Recording stopped");
       if (recordingSoundEnabled) {
         playStopSound();
       }
-      try {
-        console.log("[Renderer] Calling window.electron.stopOBSRecording...");
-        const result = await window.electron.stopOBSRecording(false);
-        console.log("[Renderer] stopOBSRecording result:", result);
-        if (result.success) {
-          console.log("[Renderer] OBS recording stopped successfully");
-          console.log("[Renderer] Scanning for new clips in 3 seconds...");
-          setTimeout(async () => {
-            console.log("[Renderer] Triggering new clips scan for game:", data.game);
-            const newClips = await window.electron.scanForNewClips(data.scanTimestamp, data.game);
-            console.log("[Renderer] Scan complete, found", newClips.length, "new clips");
-            if (newClips.length > 0) {
-              window.dispatchEvent(
-                new CustomEvent("newClipsDetected", { detail: newClips })
-              );
-            }
-          }, 3000);
-        } else {
-          console.error("[Renderer] Failed to stop OBS recording:", result.message);
+      console.log("[Renderer] Scanning for new clips in 3 seconds...");
+      setTimeout(async () => {
+        console.log("[Renderer] Triggering new clips scan for game:", data.game);
+        const newClips = await window.electron.scanForNewClips(data.scanTimestamp, data.game);
+        console.log("[Renderer] Scan complete, found", newClips.length, "new clips");
+        if (newClips.length > 0) {
+          window.dispatchEvent(
+            new CustomEvent("newClipsDetected", { detail: newClips })
+          );
         }
-      } catch (error) {
-        console.error("[Renderer] Error stopping OBS recording:", error);
-      }
+      }, 3000);
     });
 
     console.log("[Renderer] Game detection listeners registered");
@@ -174,8 +149,8 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     }
 
     return () => {
-      window.electron.removeAllListeners("start-obs-recording");
-      window.electron.removeAllListeners("stop-obs-recording");
+      window.electron.removeAllListeners("recording-started");
+      window.electron.removeAllListeners("recording-stopped");
     };
   }, [connection.status]);
 

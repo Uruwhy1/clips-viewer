@@ -16,26 +16,6 @@ function register() {
     }
   });
 
-  ipcMain.handle("start-obs-recording", async () => {
-    try {
-      await obs.startRecording();
-      return { success: true };
-    } catch (error) {
-      console.error("OBS Recording Start Error:", error);
-      return { success: false, message: error.message };
-    }
-  });
-
-  ipcMain.handle("stop-obs-recording", async () => {
-    try {
-      await obs.stopRecording();
-      return { success: true };
-    } catch (error) {
-      console.error("OBS Recording Stop Error:", error);
-      return { success: false, message: error.message };
-    }
-  });
-
   ipcMain.handle("check-obs-status", async () => {
     return await obs.checkStatus();
   });
@@ -43,6 +23,7 @@ function register() {
   ipcMain.handle("get-game-detection-status", async () => {
     return gameDetection.getStatus();
   });
+
 }
 
 module.exports = { register };

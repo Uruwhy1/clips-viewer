@@ -77,7 +77,7 @@ async function isGameWindowFocused(gameName) {
     : [gameName];
 
   const title = await getActiveWindowTitle();
-  if (!title) return false;
+  if (!title) return true;
 
   return matchTitles.some((mt) => title.toLowerCase().includes(mt.toLowerCase()));
 }
@@ -99,7 +99,10 @@ function start(gamesDir, gamesConfig) {
       try {
         await obs.setOutputPathForGame(gamesDir, currentGame);
         await obs.switchToScene(currentGame);
-        getMainWindow()?.webContents.send("start-obs-recording");
+        await obs.startRecording(gameConfig[currentGame]?.record ?? false);
+        getMainWindow()?.webContents.send("recording-started", {
+          game: currentGame,
+        });
       } catch (error) {
         console.error("Failed to start recording:", error);
       }
@@ -116,7 +119,8 @@ function start(gamesDir, gamesConfig) {
       console.log(`Game ${stoppedGame} ended. Stopping recording and scanning...`);
 
       try {
-        getMainWindow()?.webContents.send("stop-obs-recording", {
+        await obs.stopRecording(gameConfig[stoppedGame]?.record ?? false);
+        getMainWindow()?.webContents.send("recording-stopped", {
           scanTimestamp: scanTs,
           game: stoppedGame,
         });
