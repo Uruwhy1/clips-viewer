@@ -1,6 +1,7 @@
 const fs = require("fs").promises;
 const path = require("path");
 const { exec } = require("child_process");
+const ffmpeg = require("ffmpeg-static");
 const { getMainWindow } = require("./window");
 const meta = require("./clipMetadata");
 const thumbs = require("./thumbnails");
@@ -173,10 +174,9 @@ async function createClip(inputFile, startTime, endTime, outputFile) {
     const startSeconds = parseTimeToSeconds(startTime);
     const endSeconds = parseTimeToSeconds(endTime);
 
-    const command = `ffmpeg -ss ${startTime} -to ${endTime} -i "${inputFile}" -c copy -movflags +faststart "${outputFile}" -y`;
+    const command = `"${ffmpeg}" -ss ${startTime} -to ${endTime} -i "${inputFile}" -c copy -movflags +faststart "${outputFile}" -y`;
 
     await new Promise((resolve, reject) => {
-	    console.log(process.env.PATH);
       const child = exec(command, { windowsHide: true }, (error) => {
         if (error) reject(error);
         else resolve();

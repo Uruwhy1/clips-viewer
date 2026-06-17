@@ -1,6 +1,7 @@
 const fs = require("fs").promises;
 const path = require("path");
 const { exec } = require("child_process");
+const ffmpeg = require("ffmpeg-static");
 const { THUMBNAIL_CACHE_DIR } = require("./config");
 const { fileKey } = require("./utils");
 
@@ -22,8 +23,8 @@ async function generate(filePath) {
   } catch {
     return new Promise((resolve) => {
       exec(
-        `ffmpeg -ss 5 -i "${filePath}" -vframes 1 -q:v 3 "${tPath}" -y 2>/dev/null || ` +
-          `ffmpeg -i "${filePath}" -vframes 1 -q:v 3 "${tPath}" -y`,
+        `"${ffmpeg}" -ss 5 -i "${filePath}" -vframes 1 -q:v 3 "${tPath}" -y 2>nul || ` +
+          `"${ffmpeg}" -i "${filePath}" -vframes 1 -q:v 3 "${tPath}" -y`,
         (err) => resolve(err ? "" : tPath),
       );
     });
