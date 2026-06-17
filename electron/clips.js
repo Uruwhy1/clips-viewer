@@ -128,9 +128,23 @@ async function fromDirectory(dirPath, game, favSet, processedCount, totalItems) 
   return clipFiles;
 }
 
+async function retryOnBusy(fn, maxRetries = 10) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (error.code === "EBUSY" && i < maxRetries - 1) {
+        await new Promise((r) => setTimeout(r, 200 * (i + 1)));
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 async function deleteClipFile(filePath) {
   try {
-    await fs.unlink(filePath);
+    await retryOnBusy(() => fs.unlink(filePath));
     await meta.remove(filePath);
     await thumbs.remove(filePath);
     dur.invalidate(filePath);
@@ -162,6 +176,7 @@ async function createClip(inputFile, startTime, endTime, outputFile) {
     const command = `ffmpeg -ss ${startTime} -to ${endTime} -i "${inputFile}" -c copy -movflags +faststart "${outputFile}" -y`;
 
     await new Promise((resolve, reject) => {
+	    console.log(process.env.PATH);
       const child = exec(command, { windowsHide: true }, (error) => {
         if (error) reject(error);
         else resolve();
@@ -202,12 +217,13 @@ async function renameClipFile(oldPath, newName) {
       : `${newName}${ext}`;
     const newPath = path.join(dir, newFileName);
 
-    await fs.rename(oldPath, newPath);
+    await retryOnBusy(() => fs.rename(oldPath, newPath));
     await meta.rename(oldPath, newPath);
     dur.invalidate(oldPath);
     await thumbs.remove(oldPath);
+    const newThumbPath = await thumbs.generate(newPath);
 
-    return { newPath, newName };
+    return { newPath, newName, newThumbPath };
   } catch (error) {
     console.error("Error renaming clip:", error);
     return null;

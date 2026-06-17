@@ -19,7 +19,7 @@ export interface ElectronAPI {
   renameClip: (
     oldPath: string,
     newName: string,
-  ) => Promise<{ newPath: string; newName: string } | null>;
+  ) => Promise<{ newPath: string; newName: string; newThumbPath: string } | null>;
   connectOBS: (
     port: string,
     password: string,

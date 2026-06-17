@@ -49,12 +49,22 @@ const CurrentVideo: React.FC = React.memo(() => {
     setRenaming((prev) => !prev);
   }, []);
 
+  const releaseVideo = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.removeAttribute("src");
+      videoRef.current.load();
+    }
+  }, []);
+
   const handleDeleteClick = useCallback(async () => {
     const confirmDelete = await window.confirm(
       "Are you sure you want to delete this clip?",
     );
 
     if (confirmDelete) {
+      releaseVideo();
+      await new Promise((r) => setTimeout(r, 100));
       let response = await deleteClip(
         currentClip.filePath,
         currentClip.isFavourite,
@@ -65,7 +75,7 @@ const CurrentVideo: React.FC = React.memo(() => {
         showPopup("Failed to delete clip.", false);
       }
     }
-  }, [currentClip, deleteClip]);
+  }, [currentClip, deleteClip, releaseVideo]);
 
   const renameClipFile = useCallback(
     async (clip: Clip, title: string) => {
@@ -82,6 +92,9 @@ const CurrentVideo: React.FC = React.memo(() => {
           }
         }
 
+        releaseVideo();
+        await new Promise((r) => setTimeout(r, 100));
+
         let response = await editClip(clip, title);
 
         if (response) showPopup("Clip renamed!", true);
@@ -92,7 +105,7 @@ const CurrentVideo: React.FC = React.memo(() => {
       }
       setRenaming(false);
     },
-    [editClip],
+    [editClip, releaseVideo],
   );
 
   const sanitizeGameName = (name: string) => {

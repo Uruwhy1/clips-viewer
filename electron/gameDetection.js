@@ -57,29 +57,29 @@ async function checkGameRunning() {
 async function getActiveWindowTitle() {
   try {
     if (process.platform === "win32") {
+      const scriptPath = path.join(__dirname, "get-window-title.ps1");
       const { stdout } = await execAsync(
-        `powershell -command "Add-Type @'\\nusing System;using System.Runtime.InteropServices;\\npublic class Win32{\\n  [DllImport(\\"user32.dll\\")] public static extern IntPtr GetForegroundWindow();\\n  [DllImport(\\"user32.dll\\")] public static extern int GetWindowText(IntPtr h, System.Text.StringBuilder s, int c);\\n}'@;$h=[Win32]::GetForegroundWindow();$s=New-Object System.Text.StringBuilder 256;[Win32]::GetWindowText($h,$s,256);$s.ToString()"`,
+        `powershell -NoProfile -File "${scriptPath}"`,
       );
       return stdout.trim();
     } else {
       const { stdout } = await execAsync("xdotool getactivewindow getwindowname 2>/dev/null");
       return stdout.trim();
     }
-  } catch {
+  } catch (e) {
+    console.error("getActiveWindowTitle error:", e);
     return null;
   }
 }
 
 async function isGameWindowFocused(gameName) {
   const conf = gameConfig?.[gameName];
-  const matchTitles = conf?.windowTitles?.length
-    ? conf.windowTitles
-    : [gameName];
+  if (!conf?.windowTitles?.length) return true;
 
   const title = await getActiveWindowTitle();
   if (!title) return true;
 
-  return matchTitles.some((mt) => title.toLowerCase().includes(mt.toLowerCase()));
+  return conf.windowTitles.some((mt) => title.toLowerCase().includes(mt.toLowerCase()));
 }
 
 function start(gamesDir, gamesConfig) {
@@ -88,6 +88,9 @@ function start(gamesDir, gamesConfig) {
 
   let lastDetectedGame = null;
   detectionInterval = setInterval(async () => {
+    const activeTitle = await getActiveWindowTitle();
+    console.log(`Active window: ${activeTitle}`);
+
     const currentGame = await checkGameRunning();
     if (currentGame && currentGame !== lastDetectedGame) {
       if (!(await isGameWindowFocused(currentGame))) return;

@@ -275,7 +275,7 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     }
 
     try {
-      const { newPath, newName } = await renameClipFile(oldPath, newTitle);
+      const { newPath, newName, newThumbPath } = await renameClipFile(oldPath, newTitle);
 
       if (isFavourite) {
         await updateFavoritePath(oldPath, newPath);
@@ -288,6 +288,8 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
               ...c,
               filePath: newPath,
               name: newName,
+              mediaPath: `clips://${encodeURIComponent(newPath)}`,
+              thumbnail: `clips://${encodeURIComponent(newThumbPath)}`,
               isFavourite: isFavourite,
             }
             : c,
@@ -299,6 +301,8 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
           ...currentClip,
           filePath: newPath,
           name: newName,
+          mediaPath: `clips://${encodeURIComponent(newPath)}`,
+          thumbnail: `clips://${encodeURIComponent(newThumbPath)}`,
           isFavourite: isFavourite,
         });
       }

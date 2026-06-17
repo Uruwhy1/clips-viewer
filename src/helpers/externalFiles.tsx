@@ -9,6 +9,7 @@ export async function saveFavourites(favourites: Set<string>) {
 type RenameResult = {
   newPath: string;
   newName: string;
+  newThumbPath: string;
 };
 
 export const renameClipFile = async (
@@ -29,7 +30,7 @@ export const renameClipFile = async (
     const newPath = oldPath.replace(oldFileName, `${newTitle}${ext}`);
     const result = await window.electron.renameClip(oldPath, newTitle);
     if (result) {
-      return { newPath: result.newPath, newName: result.newName };
+      return { newPath: result.newPath, newName: result.newName, newThumbPath: result.newThumbPath };
     }
     throw new Error("Rename canceled or invalid name.");
   }
@@ -47,7 +48,7 @@ export const renameClipFile = async (
   try {
     const result = await window.electron.renameClip(oldPath, trimmedTitle);
     if (result) {
-      return { newPath: result.newPath, newName: result.newName };
+      return { newPath: result.newPath, newName: result.newName, newThumbPath: result.newThumbPath };
     }
     throw new Error("Failed to rename");
   } catch (error) {
