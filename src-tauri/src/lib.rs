@@ -10,7 +10,7 @@ use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
 
 use serde::Serialize;
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Write};
 use std::process::{Command, Stdio};
 
 use tauri::Emitter;
@@ -52,6 +52,42 @@ async fn get_running_processes() -> Result<ProcessInfo, String> {
         Ok(ProcessInfo {
             running_processes: process_set,
         })
+    })
+    .await
+    .map_err(|e| format!("Join error: {}", e))?
+}
+
+#[tauri::command]
+async fn get_foreground_window_title() -> Result<String, String> {
+    let script = include_str!("../scripts/get-window-title.ps1");
+
+    tokio::task::spawn_blocking(move || {
+        let mut child = Command::new("powershell")
+            .creation_flags(CREATE_NO_WINDOW)
+            .arg("-NoProfile")
+            .arg("-Command")
+            .arg("-")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .map_err(|e| format!("Failed to spawn PowerShell: {}", e))?;
+
+        if let Some(mut stdin) = child.stdin.take() {
+            stdin
+                .write_all(script.as_bytes())
+                .map_err(|e| format!("Failed to write to stdin: {}", e))?;
+        }
+
+        let output = child
+            .wait_with_output()
+            .map_err(|e| format!("Failed to read output: {}", e))?;
+
+        if !output.status.success() {
+            return Err("Failed to get window title".into());
+        }
+
+        let title = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        Ok(title)
     })
     .await
     .map_err(|e| format!("Join error: {}", e))?
@@ -255,6 +291,7 @@ pub fn run() {
             get_all_clips,
             create_clip,
             get_running_processes,
+            get_foreground_window_title,
             open_file_explorer,
             delete::calculate_total_size,
             delete::delete_older_clips,

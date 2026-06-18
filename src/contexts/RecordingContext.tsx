@@ -214,6 +214,30 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     return { success: false, message: "Unknown recording method" };
   };
 
+  async function getForegroundWindowTitle(): Promise<string | null> {
+    try {
+      return await invoke<string>("get_foreground_window_title");
+    } catch (error) {
+      console.error("Error getting foreground window title:", error);
+      return null;
+    }
+  }
+
+  async function isGameWindowFocused(
+    gameName: string,
+    gamesConfig: GamesConfig,
+  ): Promise<boolean> {
+    const config = gamesConfig[gameName];
+    if (!config.windowTitles?.length) return true;
+
+    const title = await getForegroundWindowTitle();
+    if (!title) return true;
+
+    return config.windowTitles.some((wt) =>
+      title.toLowerCase().includes(wt.toLowerCase()),
+    );
+  }
+
   async function checkGameRunning(
     gamesConfig: GamesConfig,
   ): Promise<[string | null, boolean | null]> {
@@ -261,8 +285,19 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
 
       if (currentGame !== lastDetectedGame) {
         if (currentGame) {
+          const focused = await isGameWindowFocused(
+            currentGame,
+            gameSettings.gamesConfig,
+          );
+          if (!focused) {
+            console.log(
+              `${currentGame} process running but window not in focus. Waiting...`,
+            );
+            return;
+          }
+
           console.log(
-            `${currentGame} detected! Starting recording with ${settings.recordingMethod}.`,
+            `${currentGame} detected and window in focus! Starting recording with ${settings.recordingMethod}.`,
           );
 
           isRecordingInProgress.current = true;

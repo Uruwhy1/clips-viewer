@@ -15,7 +15,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
   ({ removingIndex, setRemovingIndex, setSettings, settings }) => {
     const [gameName, setGameName] = useState<string>("");
     const [processNames, setProcessNames] = useState<string>("");
-    const [windowTitle, setWindowTitle] = useState<string>("");
+    const [windowTitles, setWindowTitles] = useState<string>("");
     const [recordBool, setRecordBool] = useState<boolean>(false);
     const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const [editingGame, setEditingGame] = useState<string | null>(null);
@@ -23,6 +23,10 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
     const handleSave = useCallback(() => {
       if (gameName && processNames) {
         const processArray = processNames.split(",").map((name) => name.trim());
+        const windowTitlesArray = windowTitles
+          .split(",")
+          .map((title) => title.trim())
+          .filter((title) => title.length > 0);
 
         setSettings((prevSettings: Settings) => {
           const updatedGamesConfig = { ...prevSettings.gamesConfig };
@@ -30,7 +34,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
           updatedGamesConfig[gameName] = {
             processes: processArray,
             record: recordBool,
-            windowTitle: windowTitle.trim() || gameName,
+            windowTitles: windowTitlesArray.length > 0 ? windowTitlesArray : [gameName],
           };
 
           return {
@@ -41,14 +45,14 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
 
         setGameName("");
         setProcessNames("");
-        setWindowTitle("");
+        setWindowTitles("");
         setRecordBool(false);
         setIsFormVisible(false);
         setEditingGame(null);
       } else {
         alert("Both game name and process names are required!");
       }
-    }, [gameName, processNames, windowTitle, recordBool, setSettings]);
+    }, [gameName, processNames, windowTitles, recordBool, setSettings]);
 
     const startEditGame = useCallback(
       (gameName: string) => {
@@ -57,7 +61,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
         setEditingGame(gameName);
         setGameName(gameName);
         setProcessNames(gameConfig.processes.join(", "));
-        setWindowTitle(gameConfig.windowTitle || gameName);
+        setWindowTitles(gameConfig.windowTitles?.join(", ") || gameName);
         setRecordBool(gameConfig.record);
         setIsFormVisible(true);
       },
@@ -94,7 +98,7 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
         setTimeout(() => {
           setGameName("");
           setProcessNames("");
-          setWindowTitle("");
+          setWindowTitles("");
           setRecordBool(false);
         }, 500);
       }
@@ -142,14 +146,14 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
                 />
               </div>
               <div className={styles.inputGroup}>
-                <label htmlFor="windowTitle">Window Title</label>
+                <label htmlFor="windowTitles">Window Titles</label>
                 <input
                   autoComplete="off"
-                  id="windowTitle"
+                  id="windowTitles"
                   type="text"
-                  value={windowTitle}
-                  onChange={(e) => setWindowTitle(e.target.value)}
-                  placeholder="Enter window title (optional, defaults to game name)"
+                  value={windowTitles}
+                  onChange={(e) => setWindowTitles(e.target.value)}
+                  placeholder="Enter window titles, separated by commas (optional)"
                 />
               </div>
               <div className={styles.inputGroup}>
