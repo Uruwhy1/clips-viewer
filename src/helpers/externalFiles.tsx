@@ -33,7 +33,7 @@ export const renameClipFile = async (
   oldPath: string,
   newTitle: string,
 ): Promise<RenameResult> => {
-  const oldFileName = oldPath.split("\\").pop();
+  const oldFileName = oldPath.replace(/^.*[/\\]/, "");
   if (!oldFileName) {
     throw new Error("Invalid file path");
   }

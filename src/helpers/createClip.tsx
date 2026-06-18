@@ -27,12 +27,16 @@ export default async function createClipHandler(
   let outputFilePath: string;
   let clipName: string;
 
-  const parts: string[] = currentClip.filePath.split("\\");
-  const originalFileName: string[] = parts.pop()!.split("_");
+  const lastSeparator = Math.max(
+    currentClip.filePath.lastIndexOf("/"),
+    currentClip.filePath.lastIndexOf("\\"),
+  );
+  const dir = lastSeparator >= 0 ? currentClip.filePath.substring(0, lastSeparator + 1) : "";
+  const fileName = currentClip.filePath.substring(lastSeparator + 1);
 
-  originalFileName[0] = newName;
-  parts.push(originalFileName.join("_"));
-  outputFilePath = parts.join("\\");
+  const fileNameParts = fileName.split("_");
+  fileNameParts[0] = newName;
+  outputFilePath = dir + fileNameParts.join("_");
   clipName = newName;
 
   try {
