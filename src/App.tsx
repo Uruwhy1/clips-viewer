@@ -31,7 +31,7 @@ function App() {
 
   const { coverCache } = useMedia();
   const { settings } = useSettings();
-  const { allClips, setAllClips } = useClips();
+  const { allClips, setAllClips, currentClip } = useClips();
 
   const firstLoadRef = useRef(true);
   const { showPopup } = usePopup();
@@ -117,7 +117,7 @@ function App() {
       case "clips":
         return <Clips setView={setView} />;
       case "video":
-        return <CurrentVideo />;
+        return currentClip ? <CurrentVideo /> : <Clips setView={setView} />;
       default:
         return null;
     }

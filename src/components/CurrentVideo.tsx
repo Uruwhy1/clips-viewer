@@ -31,17 +31,14 @@ const MemoizedTrash2 = React.memo((props: LucideProps) => (
 ));
 
 const CurrentVideo: React.FC = React.memo(() => {
-  const { currentClip, deleteClip, editClip, isFavorite, toggleFavourite, goToNextClip, goToPrevClip } =
+  const { currentClip: currentClipMaybe, deleteClip, editClip, isFavorite, toggleFavourite, goToNextClip, goToPrevClip } =
     useClips();
+  const currentClip = currentClipMaybe!;
   const { coverCache } = useMedia();
   const { showPopup } = usePopup();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [renaming, setRenaming] = useState<boolean>(false);
-
-  if (currentClip == null) {
-    return <div>There's no clip. This should not be possible.</div>;
-  }
 
   const handleFavouriteClick = (path: string) => toggleFavourite(path);
 
