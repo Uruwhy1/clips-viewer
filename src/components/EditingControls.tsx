@@ -5,7 +5,7 @@ import createClipHandler from "../helpers/createClip";
 import { usePopup } from "../contexts/PopupContext";
 import { useClips } from "../contexts/ClipsContext";
 import { Plus, FlagTriangleRight, FlagTriangleLeft } from "lucide-react";
-import CreateClipPopup from "./CreateClipPopup";
+import CreateClipPopup from "./CreateClipPopup.tsx";
 
 const MemoizedPlus = React.memo(() => <Plus size={20} />);
 const MemoizedFlagTriangleRight = React.memo(() => (

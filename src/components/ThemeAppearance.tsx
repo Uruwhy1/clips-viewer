@@ -19,8 +19,20 @@ export const AppearanceModeControl: React.FC<{
   };
 
   const selectedMode = getCurrentMode();
+  const isLinux = navigator.userAgent.includes("Linux");
 
   const handleModeChange = (mode: ThemeModeType) => {
+    if (isLinux) {
+      if (mode === "System") {
+        switchTheme("System (Catppuccin)");
+      } else if (mode === "Light") {
+        switchTheme("Latte");
+      } else if (mode === "Dark") {
+        switchTheme("Mocha");
+      }
+
+      return;
+    }
     document.startViewTransition(() => {
       if (mode === "System") {
         switchTheme("System (Catppuccin)");

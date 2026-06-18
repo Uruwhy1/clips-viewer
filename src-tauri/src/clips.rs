@@ -3,11 +3,24 @@ use dirs;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
-use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::{Emitter, Window};
+
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+fn cmd_no_window(program: &str) -> Command {
+    #[cfg(windows)]
+    {
+        let mut cmd = Command::new(program);
+        cmd.creation_flags(0x08000000);
+        cmd
+    }
+    #[cfg(not(windows))]
+    Command::new(program)
+}
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -146,8 +159,7 @@ fn generate_thumbnail_if_missing(app_name: &str, video_path: &str) -> Result<Str
 
     let seek_time_str = format!("{:.3}", seek_time);
 
-    let status = Command::new("ffmpeg")
-        .creation_flags(0x08000000) // CREATE_NO_WINDOW (Windows-specific flag)
+    let status = cmd_no_window("ffmpeg")
         .args([
             "-loglevel",
             "error",
@@ -235,8 +247,7 @@ fn get_cached_video_duration(app_name: &str, video_path: &str) -> Result<f64, St
 }
 
 fn get_video_duration(path: &str) -> Result<f64, String> {
-    let output = Command::new("ffprobe")
-        .creation_flags(0x08000000) // CREATE_NO_WINDOW
+    let output = cmd_no_window("ffprobe")
         .args([
             "-v",
             "error",

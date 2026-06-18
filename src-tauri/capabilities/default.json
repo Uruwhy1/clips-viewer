@@ -35,10 +35,7 @@
       "identifier": "fs:scope",
       "allow": [
         {
-          "path": "E:/Clips/**"
-        },
-        {
-          "path": "*/**"
+          "path": "**"
         }
       ]
     },
