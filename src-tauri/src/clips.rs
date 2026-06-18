@@ -6,6 +6,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
+use crate::R;
 use tauri::{Emitter, Window};
 
 #[cfg(windows)]
@@ -344,7 +345,7 @@ fn process_directory(
     game: Option<String>,
     favourites_set: &HashSet<String>,
     all_clips: &mut Vec<ClipInfo>,
-    window: Option<&Window>,
+    window: Option<&Window<R>>,
     total_files: usize,
     processed_files: &mut usize,
 ) -> Result<(), String> {
@@ -495,9 +496,9 @@ fn process_directory_newer(
 
 #[tauri::command]
 pub fn get_all_clips(
-    app_handle: tauri::AppHandle,
+    app_handle: tauri::AppHandle<R>,
     dir_path: String,
-    window: Window,
+    window: Window<R>,
 ) -> Result<ClipsResult, String> {
     let app_name = app_handle
         .config()
@@ -549,7 +550,7 @@ pub fn get_all_clips(
 
 #[tauri::command]
 pub fn get_new_clips_since(
-    app_handle: tauri::AppHandle,
+    app_handle: tauri::AppHandle<R>,
     dir: String,
     since_timestamp: i64,
 ) -> Result<Vec<ClipInfo>, String> {

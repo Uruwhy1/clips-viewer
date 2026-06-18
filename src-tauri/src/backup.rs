@@ -4,6 +4,7 @@ use std::collections::HashSet;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
+use crate::R;
 use tauri::Emitter;
 use tauri::Window;
 
@@ -21,7 +22,7 @@ struct BackupProgress {
 }
 
 #[tauri::command]
-pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Result<String, String> {
+pub async fn backup_favourite_clips(window: Window<R>, backup_dir: String) -> Result<String, String> {
     // Step 1: Load the favourites list
     let favourites_set = match load_favourites() {
         Ok(set) => set,

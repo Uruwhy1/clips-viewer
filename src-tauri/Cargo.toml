@@ -15,19 +15,34 @@ name = "tauri_app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef", features = [
+] }
 
 [dependencies]
-tauri = { version = "2", features = ["protocol-asset", "tray-icon"] }
-tauri-plugin-shell = "2"
+tauri-plugin-opener = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
+tauri = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef", features = [
+    "common-controls-v6",
+    "compression",
+    "protocol-asset",
+    "tray-icon"
+], default-features = false }
+tauri-plugin-shell = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tauri-plugin-fs = "2"
+tauri-plugin-fs = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
 filetime = "0.2"
-tauri-plugin-dialog = "2"
+tauri-plugin-dialog = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "feat/cef" }
 chrono = "0.4"
 dirs = "6.0"
 regex = "1.9.0"
 walkdir = "2.3"
 tokio = { version = "1.37", features = ["rt", "macros"] }
+gtk = "0.18"
 
+[patch.crates-io]
+tauri = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+tauri-plugin = { git = "https://github.com/tauri-apps/tauri", branch = "feat/cef" }
+
+[features]
+default = ["cef"]
+cef = ["tauri/cef"]

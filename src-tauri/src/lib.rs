@@ -21,6 +21,12 @@ pub use backup::backup_favourite_clips;
 pub use clips::get_all_clips;
 pub use clips::get_new_clips_since;
 
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[cfg(feature = "cef")]
+type R = tauri::Cef;
+#[cfg(not(feature = "cef"))]
+type R = tauri::Wry;
+
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
 
@@ -177,7 +183,7 @@ async fn create_clip(
     start_time: String,
     end_time: String,
     output_file: String,
-    window: Window,
+    window: Window<R>,
 ) -> Result<String, String> {
     println!("Starting create_clip function"); // Log function start
 
@@ -307,6 +313,9 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
+            #[cfg(all(unix, not(target_os = "macos"), feature = "cef"))]
+            gtk::init().expect("Failed to initialize GTK");
+
             /* system tray setup */
 
             let quit = MenuItemBuilder::new("Quit").id("quit").build(app).unwrap();
