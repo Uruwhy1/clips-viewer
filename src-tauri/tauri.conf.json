@@ -19,7 +19,7 @@
       }
     ],
     "security": {
-      "csp": "default",
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' asset: https://asset.localhost data:; media-src 'self' asset: https://asset.localhost http://127.0.0.1 http://127.0.0.1:* http://localhost:*;",
       "assetProtocol": {
         "enable": true,
         "scope": ["*/**"]

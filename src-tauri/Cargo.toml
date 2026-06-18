@@ -31,3 +31,6 @@ regex = "1.9.0"
 walkdir = "2.3"
 tokio = { version = "1.37", features = ["rt", "macros"] }
 
+[target.'cfg(target_os = "linux")'.dependencies]
+tiny_http = "0.12"
+

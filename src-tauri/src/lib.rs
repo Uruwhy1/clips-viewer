@@ -1,8 +1,11 @@
 mod backup;
 mod clips;
 mod delete;
+#[cfg(target_os = "linux")]
+mod video_server;
 
 use std::collections::HashSet;
+use std::sync::atomic::{AtomicU16, Ordering};
 use tauri::menu::MenuBuilder;
 use tauri::menu::MenuItemBuilder;
 use tauri::tray::TrayIconBuilder;
@@ -302,11 +305,28 @@ fn format_time_from_seconds(total_seconds: f64) -> String {
     format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
 }
 
+static VIDEO_SERVER_PORT: AtomicU16 = AtomicU16::new(0);
+
+fn start_video_server() {
+    #[cfg(target_os = "linux")]
+    {
+        let port = video_server::start();
+        VIDEO_SERVER_PORT.store(port, Ordering::SeqCst);
+    }
+}
+
+#[tauri::command]
+fn get_video_server_port() -> u16 {
+    VIDEO_SERVER_PORT.load(Ordering::SeqCst)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
+            start_video_server();
+
             /* system tray setup */
 
             let quit = MenuItemBuilder::new("Quit").id("quit").build(app).unwrap();
@@ -363,6 +383,7 @@ pub fn run() {
             delete::delete_older_clips,
             backup_favourite_clips,
             get_new_clips_since,
+            get_video_server_port,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

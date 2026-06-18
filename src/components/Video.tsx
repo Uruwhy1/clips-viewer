@@ -8,6 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { getVideoUrl } from "../helpers/videoServer";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   Play,
@@ -52,6 +53,7 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
     const [playback, setPlayback] = useState<number | null>(null);
+    const [videoUrl, setVideoUrl] = useState("");
     const divRef = useRef<HTMLDivElement>(null);
     const animationFrameRef = useRef<number | null>(null);
 
@@ -67,6 +69,20 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
     useEffect(() => {
       setIsPlaying(true);
     }, [currentClip]);
+
+    useEffect(() => {
+      getVideoUrl(currentClip.filePath).then((url) => {
+        console.log("[Video] setting video URL:", url);
+        setVideoUrl(url);
+      });
+    }, [currentClip.filePath]);
+
+    useEffect(() => {
+      if (!videoUrl) return;
+      const video = ref && "current" in ref ? ref.current : null;
+      if (!video) return;
+      video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    }, [videoUrl]);
 
     useEffect(() => {
       const handleKeystroke = (e: KeyboardEvent) => {
@@ -294,17 +310,34 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
           ref={ref}
           id="video"
           muted={isMuted}
-          src={convertFileSrc(currentClip.filePath)}
+          autoPlay
           style={{
             opacity: isVideoLoaded ? 1 : 0,
             transition: "opacity 200ms ease-in-out 200ms",
           }}
-          onLoadedData={() => setIsVideoLoaded(true)}
+          onLoadedData={() => {
+            console.log("[Video] loaded data, url:", videoUrl);
+            setIsVideoLoaded(true);
+          }}
+          onError={(e) => {
+            const video = e.currentTarget;
+            const error = video.error;
+            console.error("[Video] playback error:", {
+              code: error?.code,
+              message: error?.message,
+              src: video.currentSrc,
+              url: videoUrl,
+              networkState: video.networkState,
+              readyState: video.readyState,
+            });
+          }}
           onTimeUpdate={handleTimeUpdate}
           className={styles.video}
           onClick={togglePlayPause}
           onDoubleClick={toggleFullscreen}
-        ></video>
+        >
+          {videoUrl && <source src={videoUrl} />}
+        </video>
         <div className={styles.controls}>
           <div className={styles.progressBarContainer} onClick={handleSeek}>
             <div
