@@ -3,14 +3,15 @@ mod clips;
 mod delete;
 
 use std::collections::HashSet;
-use std::os::windows::process::CommandExt;
 use tauri::menu::MenuBuilder;
 use tauri::menu::MenuItemBuilder;
 use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
 
 use serde::Serialize;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader};
+#[cfg(windows)]
+use std::io::Write;
 use std::process::{Command, Stdio};
 
 use tauri::Emitter;
@@ -20,7 +21,19 @@ pub use backup::backup_favourite_clips;
 pub use clips::get_all_clips;
 pub use clips::get_new_clips_since;
 
-const CREATE_NO_WINDOW: u32 = 0x08000000;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+fn cmd_no_window(program: &str) -> Command {
+    #[cfg(windows)]
+    {
+        let mut cmd = Command::new(program);
+        cmd.creation_flags(0x08000000);
+        cmd
+    }
+    #[cfg(not(windows))]
+    Command::new(program)
+}
 
 #[derive(serde::Serialize)]
 struct ProcessInfo {
@@ -30,22 +43,39 @@ struct ProcessInfo {
 #[tauri::command]
 async fn get_running_processes() -> Result<ProcessInfo, String> {
     tokio::task::spawn_blocking(|| {
-        let output = Command::new("tasklist")
-            .creation_flags(CREATE_NO_WINDOW)
+        #[cfg(windows)]
+        let output = cmd_no_window("tasklist")
             .output()
             .map_err(|e| format!("Error executing tasklist: {}", e))?;
+
+        #[cfg(not(windows))]
+        let output = Command::new("ps")
+            .args(["-e", "-o", "comm="])
+            .output()
+            .map_err(|e| format!("Error executing ps: {}", e))?;
 
         if !output.status.success() {
             return Err("Failed to get processes".into());
         }
 
         let processes = String::from_utf8_lossy(&output.stdout);
+
+        #[cfg(windows)]
         let process_set: HashSet<String> = processes
             .lines()
             .skip(3)
             .filter_map(|line| {
                 let name = line.get(0..=24)?.trim().to_lowercase();
                 Some(name)
+            })
+            .collect();
+
+        #[cfg(not(windows))]
+        let process_set: HashSet<String> = processes
+            .lines()
+            .filter_map(|line| {
+                let name = line.trim().to_lowercase();
+                if name.is_empty() { None } else { Some(name) }
             })
             .collect();
 
@@ -59,47 +89,84 @@ async fn get_running_processes() -> Result<ProcessInfo, String> {
 
 #[tauri::command]
 async fn get_foreground_window_title() -> Result<String, String> {
-    let script = include_str!("../scripts/get-window-title.ps1");
+    #[cfg(windows)]
+    let result = {
+        let script = include_str!("../scripts/get-window-title.ps1");
 
-    tokio::task::spawn_blocking(move || {
-        let mut child = Command::new("powershell")
-            .creation_flags(CREATE_NO_WINDOW)
-            .arg("-NoProfile")
-            .arg("-Command")
-            .arg("-")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .spawn()
-            .map_err(|e| format!("Failed to spawn PowerShell: {}", e))?;
+        tokio::task::spawn_blocking(move || {
+            let mut child = cmd_no_window("powershell")
+                .arg("-NoProfile")
+                .arg("-Command")
+                .arg("-")
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .spawn()
+                .map_err(|e| format!("Failed to spawn PowerShell: {}", e))?;
 
-        if let Some(mut stdin) = child.stdin.take() {
-            stdin
-                .write_all(script.as_bytes())
-                .map_err(|e| format!("Failed to write to stdin: {}", e))?;
-        }
+            if let Some(mut stdin) = child.stdin.take() {
+                stdin
+                    .write_all(script.as_bytes())
+                    .map_err(|e| format!("Failed to write to stdin: {}", e))?;
+            }
 
-        let output = child
-            .wait_with_output()
-            .map_err(|e| format!("Failed to read output: {}", e))?;
+            let output = child
+                .wait_with_output()
+                .map_err(|e| format!("Failed to read output: {}", e))?;
 
-        if !output.status.success() {
-            return Err("Failed to get window title".into());
-        }
+            if !output.status.success() {
+                return Err("Failed to get window title".into());
+            }
 
-        let title = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        Ok(title)
-    })
-    .await
-    .map_err(|e| format!("Join error: {}", e))?
+            let title = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            Ok(title)
+        })
+        .await
+        .map_err(|e| format!("Join error: {}", e))?
+    };
+
+    #[cfg(not(windows))]
+    let result = {
+        tokio::task::spawn_blocking(|| {
+            let output = Command::new("xdotool")
+                .args(["getactivewindow", "getwindowname"])
+                .output()
+                .map_err(|e| format!("Failed to run xdotool: {}", e))?;
+
+            if !output.status.success() {
+                return Err("xdotool failed to get window title".into());
+            }
+
+            let title = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            Ok(title)
+        })
+        .await
+        .map_err(|e| format!("Join error: {}", e))?
+    };
+
+    result
 }
 
 #[tauri::command]
 fn open_file_explorer(path: String) -> Result<(), String> {
-    Command::new("explorer")
-        .arg("/select,")
-        .arg(path)
-        .spawn()
-        .map_err(|e| format!("Failed to open file explorer: {}", e))?;
+    #[cfg(windows)]
+    {
+        Command::new("explorer")
+            .arg("/select,")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("Failed to open file explorer: {}", e))?;
+    }
+
+    #[cfg(not(windows))]
+    {
+        let parent = std::path::Path::new(&path)
+            .parent()
+            .ok_or("No parent directory")?;
+        Command::new("xdg-open")
+            .arg(parent.to_str().unwrap())
+            .spawn()
+            .map_err(|e| format!("Failed to open file manager: {}", e))?;
+    }
 
     Ok(())
 }
@@ -128,8 +195,7 @@ async fn create_clip(
     let total_duration = end_seconds - start_seconds;
 
     println!("Starting FFmpeg process"); // Log process creation
-    let mut child = Command::new("ffmpeg")
-        .creation_flags(CREATE_NO_WINDOW)
+    let mut child = cmd_no_window("ffmpeg")
         .arg("-ss")
         .arg(&start_time)
         .arg("-to")

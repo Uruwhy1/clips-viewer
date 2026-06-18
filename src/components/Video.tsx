@@ -304,7 +304,6 @@ const Video = forwardRef<HTMLVideoElement, VideoProps>(
           className={styles.video}
           onClick={togglePlayPause}
           onDoubleClick={toggleFullscreen}
-          autoPlay
         ></video>
         <div className={styles.controls}>
           <div className={styles.progressBarContainer} onClick={handleSeek}>
