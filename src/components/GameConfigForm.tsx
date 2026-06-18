@@ -1,8 +1,10 @@
-import React, { useState, useCallback, Dispatch, SetStateAction } from "react";
+import React, { useState, useCallback, Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
 import { Settings } from "../types/settings";
+import { invoke } from "@tauri-apps/api/core";
+import Dropdown from "./Dropdown";
 
 type GameConfigFormProps = {
   removingIndex: number | null;
@@ -19,6 +21,25 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
     const [recordBool, setRecordBool] = useState<boolean>(false);
     const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const [editingGame, setEditingGame] = useState<string | null>(null);
+
+    const [currentProcesses, setCurrentProcesses] = useState<string[]>([]);
+    const [showProcesses, setShowProcesses] = useState(false);
+
+    useEffect(() => {
+      const loadProcesses = async () => {
+        try {
+          const { running_processes } = await invoke<{
+            running_processes: string[];
+          }>("get_running_processes");
+
+          setCurrentProcesses(running_processes);
+        } catch (err) {
+          console.error("Failed to load processes:", err);
+        }
+      };
+
+      loadProcesses();
+    }, []);
 
     const handleSave = useCallback(() => {
       if (gameName && processNames) {
@@ -104,6 +125,10 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
       }
     }, [isFormVisible]);
 
+    const filteredProcesses = currentProcesses.filter((p) =>
+      p.toLowerCase().includes(processNames.toLowerCase())
+    );
+
     return (
       <div className={styles.settingIndividual}>
         <div className={styles.subSectionTitle}>
@@ -134,16 +159,38 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
                   placeholder="Enter game name"
                 />
               </div>
-              <div className={styles.inputGroup}>
+              <div className={styles.inputGroup} style={{ position: "relative" }}>
                 <label htmlFor="processNames">Game Processes</label>
+
                 <input
                   autoComplete="off"
                   id="processNames"
                   type="text"
                   value={processNames}
                   onChange={(e) => setProcessNames(e.target.value)}
+                  onFocus={() => setShowProcesses(true)}
+                  onBlur={() => setShowProcesses(false)}
                   placeholder="Enter process names, separated by commas"
                 />
+                <Dropdown
+                  isOpen={showProcesses && filteredProcesses.length > 0}
+                  onClose={() => setShowProcesses(false)}
+                >
+                  <div className={styles.processList}>
+                    {filteredProcesses.map((process) => (
+                      <button
+                        key={process}
+                        tabIndex={-1}
+                        onMouseDown={() => {
+                          setProcessNames(process);
+                          setShowProcesses(false);
+                        }}
+                      >
+                        {process}
+                      </button>
+                    ))}
+                  </div>
+                </Dropdown>
               </div>
               <div className={styles.inputGroup}>
                 <label htmlFor="windowTitles">Window Titles</label>
@@ -182,11 +229,9 @@ const GameConfigForm = React.memo<GameConfigFormProps>(
             Object.entries(settings.gamesConfig).map(
               ([gameName, config], index) => (
                 <div
-                  className={`${styles.gameItem} ${styles.currentSetting} ${
-                    index === removingIndex ? styles.remove : ""
-                  } ${gameName === editingGame ? styles.editing : ""} ${
-                    config.record ? styles.recording : ""
-                  }`}
+                  className={`${styles.gameItem} ${styles.currentSetting} ${index === removingIndex ? styles.remove : ""
+                    } ${gameName === editingGame ? styles.editing : ""} ${config.record ? styles.recording : ""
+                    }`}
                   key={index}
                   onClick={(e) => {
                     e.stopPropagation();

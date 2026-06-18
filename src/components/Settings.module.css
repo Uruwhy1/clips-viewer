@@ -225,8 +225,29 @@
   flex-direction: column;
   gap: var(--gap-small);
 
-  > button {
+  >button {
     width: calc(100% - 2px);
+  }
+}
+
+.processList {
+  display: flex;
+  flex-direction: column;
+  
+  max-height: 100px;
+
+  border: 2px solid var(--accent);
+  background: var(--page-bg);
+  z-index: 991111;
+
+  overflow: scroll;
+
+  >* {
+    width: 100%;
+    padding: var(--gap-small) 0;
+
+    border: none;
+    background-color: transparent;
   }
 }
 

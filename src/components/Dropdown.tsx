@@ -15,7 +15,8 @@ const Dropdown: React.FC<DropdownProps> = ({ isOpen, children }) => {
             overflow: "hidden",
             position: 'absolute',
             top: '110%',
-            minWidth: '100%'
+            minWidth: '100%',
+            zIndex: "1"
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
