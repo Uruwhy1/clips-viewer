@@ -59,6 +59,7 @@ interface ClipsContextType {
   goToPrevClip: () => void;
   favorites: Set<string>;
   toggleFavourite: (clipPath: string) => void;
+  markAllAsFavourite: () => Promise<void>;
   updateFavoritePath: (oldPath: string, newPath: string) => void;
   isFavorite: (clipPath: string) => boolean;
 
@@ -102,6 +103,8 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
         const [favouritesSet, initialClips] = await getAllClips(
           settings.gamesDir,
         );
+
+
 
         setFavorites(favouritesSet);
 
@@ -380,6 +383,8 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     return newFavorites.has(clipPath);
   };
 
+
+
   const updateFavoritePath = async (oldPath: string, newPath: string) => {
     const newFavorites = new Set(favorites);
     newFavorites.delete(oldPath);
@@ -392,6 +397,21 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
   };
 
   const isFavorite = (clipPath: string) => favorites.has(clipPath);
+
+  const markAllAsFavourite = async () => {
+    const newFavorites = new Set(favorites);
+    allClips.forEach((clip) => newFavorites.add(clip.filePath));
+
+    await saveFavourites(newFavorites);
+    setFavorites(newFavorites);
+
+    setAllClips((prevClips) =>
+      prevClips.map((clip) => ({ ...clip, isFavourite: true })),
+    );
+  };
+
+  // Expose for dev tools
+  (window as unknown as Record<string, unknown>).markAllAsFavourite = markAllAsFavourite;
 
   const contextValue: ClipsContextType = {
     allClips,
@@ -409,6 +429,7 @@ export const ClipsProvider = ({ children }: ClipsProviderProps) => {
     deleteClip,
     favorites,
     toggleFavourite,
+    markAllAsFavourite,
     updateFavoritePath,
     isFavorite,
     randomClips,

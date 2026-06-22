@@ -259,7 +259,7 @@ pub async fn backup_favourite_clips(window: Window, backup_dir: String) -> Resul
 fn load_favourites() -> Result<HashSet<String>, String> {
     println!("Loading favourites list");
     let document_path: PathBuf = match dirs::document_dir() {
-        Some(path) => path.join("Tauri").join("favourites.json"),
+        Some(path) => path.join("Gaming Viewer").join("favourites.json"),
         None => {
             println!("ERROR: Could not find home directory");
             return Err("Could not find home directory".into());
