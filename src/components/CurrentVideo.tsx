@@ -13,6 +13,7 @@ import RandomVideos from "./RandomVideos";
 import styles from "./CurrentVideo.module.css";
 import { invoke } from "@tauri-apps/api/core";
 import StarButton from "./icons/StarButton";
+import ConfirmDialog from "./ConfirmDialog";
 import { usePopup } from "../contexts/PopupContext";
 import { useClips } from "../contexts/ClipsContext";
 import { useMedia } from "../contexts/MediaContext";
@@ -39,6 +40,7 @@ const CurrentVideo: React.FC = React.memo(() => {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [renaming, setRenaming] = useState<boolean>(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
 
   const handleFavouriteClick = (path: string) => toggleFavourite(path);
 
@@ -49,23 +51,22 @@ const CurrentVideo: React.FC = React.memo(() => {
     setRenaming((prev) => !prev);
   }, []);
 
-  const handleDeleteClick = useCallback(async () => {
-    const confirmDelete = await window.confirm(
-      "Are you sure you want to delete this clip?",
-    );
+  const handleDeleteClick = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, []);
 
-    if (confirmDelete) {
-      let response = await deleteClip(
-        currentClip.filePath,
-        currentClip.isFavourite,
-      );
-      if (response) {
-        showPopup("Clip deleted!", true);
-      } else {
-        showPopup("Failed to delete clip.", false);
-      }
+  const handleDeleteConfirmed = useCallback(async () => {
+    setShowDeleteConfirm(false);
+    let response = await deleteClip(
+      currentClip.filePath,
+      currentClip.isFavourite,
+    );
+    if (response) {
+      showPopup("Clip deleted!", true);
+    } else {
+      showPopup("Failed to delete clip.", false);
     }
-  }, [currentClip, deleteClip]);
+  }, [currentClip, deleteClip, showPopup]);
 
   const renameClipFile = useCallback(
     async (clip: Clip, title: string) => {
@@ -154,6 +155,15 @@ const CurrentVideo: React.FC = React.memo(() => {
         </div>
       </div>
       <RandomVideos />
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete clip?"
+        message={`Are you sure you want to delete "${currentClip.name}"?`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDeleteConfirmed}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </main>
   );
 });

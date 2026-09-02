@@ -1,19 +1,9 @@
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-
-  width: 100vw;
-  height: 100vh;
-  background-color: var(--page-cover);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: var(--settingsZ);
-}
-
 .popup {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
   background: var(--page-bg);
   border-radius: var(--radius-small);
 
@@ -25,7 +15,7 @@
   flex-direction: column;
 
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--borders);
+  border: 2px solid var(--accent);
 }
 
 .header {

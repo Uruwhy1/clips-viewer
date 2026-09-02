@@ -20,34 +20,32 @@ const NewClipsPopup: React.FC<NewClipsPopupProps> = ({
   if (newClips.length === 0) return null;
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.popup}>
-        <div className={styles.header}>
-          <h2>New Clips Found</h2>
+    <div className={styles.popup}>
+      <div className={styles.header}>
+        <h2>New Clips Found</h2>
+      </div>
+      <div className={styles.content}>
+        <div className={styles.clipsGrid}>
+          {newClips.map((clip: Clip) => (
+            <div
+              onClick={onClose}
+              key={clip.filePath}
+              className={styles.clipItem}
+            >
+              <ClipItem clip={clip} setView={setView} />
+            </div>
+          ))}
         </div>
-        <div className={styles.content}>
-          <div className={styles.clipsGrid}>
-            {newClips.map((clip: Clip) => (
-              <div
-                onClick={onClose}
-                key={clip.filePath}
-                className={styles.clipItem}
-              >
-                <ClipItem clip={clip} setView={setView} />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className={styles.footer}>
-          <button className={styles.button} onClick={onClear}>
-            <Trash2 size={16} />
-            Clear
-          </button>
-          <button className={styles.button} onClick={onClose}>
-            <CheckCircle size={16} />
-            Continue
-          </button>
-        </div>
+      </div>
+      <div className={styles.footer}>
+        <button className={styles.button} onClick={onClear}>
+          <Trash2 size={16} />
+          Clear
+        </button>
+        <button className={styles.button} onClick={onClose}>
+          <CheckCircle size={16} />
+          Continue
+        </button>
       </div>
     </div>
   );

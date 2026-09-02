@@ -109,6 +109,9 @@ function App() {
   };
 
   const handleClearNewClips = () => {
+    setAllClips((prevClips) =>
+      prevClips.map((clip) => ({ ...clip, newClip: false })),
+    );
     setShowNewClipsPopup(false);
   };
 
@@ -163,23 +166,24 @@ function App() {
         setNewClipsState={setShowNewClipsPopup}
         openSettings={() => setIsSettingsOpen(!isSettingsOpen)}
       />
-      {showNewClipsPopup && (
-        <NewClipsPopup
-          setView={setView}
-          newClips={allClips.filter((clip) => clip.newClip)}
-          onClose={handleCloseNewClipsPopup}
-          onClear={handleClearNewClips}
-        />
-      )}
+      <AnimatePresence mode="wait">
+        {showNewClipsPopup && (
+          <OverlayModal onClick={handleCloseNewClipsPopup}>
+            <NewClipsPopup
+              setView={setView}
+              newClips={allClips.filter((clip) => clip.newClip)}
+              onClose={handleCloseNewClipsPopup}
+              onClear={handleClearNewClips}
+            />
+          </OverlayModal>
+        )}
+      </AnimatePresence>
       {currentView()}
 
       <AnimatePresence mode="wait">
         {isSettingsOpen && (
           <>
-            <OverlayModal
-              zIndex="var(--settingsZ)"
-              onClick={() => setIsSettingsOpen(false)}
-            >
+            <OverlayModal onClick={() => setIsSettingsOpen(false)}>
               <Settings
                 ref={settingsRef}
                 onClose={() => setIsSettingsOpen(false)}
