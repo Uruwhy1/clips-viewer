@@ -61,7 +61,7 @@ export const saveSettings = async (settings: Settings) => {
 };
 
 export const defaultSettings: Settings = {
-  theme: "System (Default)",
+  theme: "Mocha",
   gamesDir: null,
   gamesConfig: {},
   scrollbarOff: false,

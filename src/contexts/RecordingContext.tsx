@@ -33,8 +33,8 @@ interface ConnectionState {
 interface RecordingContextValue {
   connection: ConnectionState;
   connect: (port: string, password: string) => Promise<boolean>;
-  obsSetting: OBSSettings;
-  setObsSetting: (settings: OBSSettings) => void;
+  obsSettings: OBSSettings;
+  setObsSettings: (settings: OBSSettings) => void;
   startGameDetection: (settings: { gamesConfig: GamesConfig }) => void;
   recordingMethod: RecordingMethod;
 }
@@ -49,7 +49,7 @@ interface RecordingProviderProps {
 
 export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   const { setAllClips } = useClips();
-  const { settings, loadedSettings } = useSettings();
+  const { settings, setSettings, loadedSettings } = useSettings();
   const isRecordingInProgress = useRef(false);
 
   const [connection, setConnection] = useState<ConnectionState>({
@@ -58,13 +58,18 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     error: null,
   });
 
-  const [obsSetting, setObsSetting] = useState<OBSSettings>({
-    port: null,
-    password: null,
-  });
+  const obsSettings = settings.obs;
+  const setObsSettings = (update: Partial<OBSSettings>) => {
+    setSettings((current) => ({
+      ...current,
+      obs: {
+        ...current.obs,
+        ...update,
+      },
+    }));
+  };
 
   const gameDetectionInterval = useRef<NodeJS.Timeout | null>(null);
-
   const clearGameDetectionInterval = () => {
     if (gameDetectionInterval.current) {
       clearInterval(gameDetectionInterval.current);
@@ -112,7 +117,7 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   useEffect(() => {
     const start = async () => {
       const loadedSettings = await loadSettings(null);
-      setObsSetting(loadedSettings.obs);
+      setObsSettings(loadedSettings.obs);
     };
     start();
   }, []);
@@ -122,10 +127,10 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
       try {
         if (
           settings.recordingMethod === "obs" &&
-          obsSetting.port &&
-          obsSetting.password
+          obsSettings.port &&
+          obsSettings.password
         ) {
-          await connect(obsSetting.port, obsSetting.password);
+          await connect(obsSettings.port, obsSettings.password);
         }
       } catch (error) {
         console.error("Failed to initialize recording context:", error);
@@ -133,7 +138,7 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
     };
 
     initialize();
-  }, [obsSetting, settings.recordingMethod]);
+  }, [obsSettings, settings.recordingMethod]);
 
   useEffect(() => {
     if (loadedSettings && connection.status === "connected") {
@@ -342,8 +347,8 @@ export const RecordingProvider = ({ children }: RecordingProviderProps) => {
   const value: RecordingContextValue = {
     connection,
     connect,
-    obsSetting,
-    setObsSetting,
+    obsSettings,
+    setObsSettings,
     startGameDetection,
     recordingMethod: settings.recordingMethod,
   };

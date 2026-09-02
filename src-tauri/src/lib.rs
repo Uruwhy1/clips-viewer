@@ -120,27 +120,52 @@ async fn get_foreground_window_title() -> Result<String, String> {
                 return Err("Failed to get window title".into());
             }
 
-            let title = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            Ok(title)
+            Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
         })
         .await
         .map_err(|e| format!("Join error: {}", e))?
     };
 
-    #[cfg(not(windows))]
+    #[cfg(target_os = "linux")]
     let result = {
         tokio::task::spawn_blocking(|| {
-            let output = Command::new("xdotool")
-                .args(["getactivewindow", "getwindowname"])
-                .output()
-                .map_err(|e| format!("Failed to run xdotool: {}", e))?;
+            // Wayland / Hyprland
+            if std::env::var_os("WAYLAND_DISPLAY").is_some() {
+                if let Ok(output) = Command::new("hyprctl")
+                    .args(["activewindow", "-j"])
+                    .output()
+                {
+                    if output.status.success() {
+                        let window: serde_json::Value =
+                            serde_json::from_slice(&output.stdout)
+                                .map_err(|e| {
+                                    format!("Failed to parse hyprctl output: {}", e)
+                                })?;
 
-            if !output.status.success() {
-                return Err("xdotool failed to get window title".into());
+                        if let Some(title) = window["title"].as_str() {
+                            return Ok(title.to_string());
+                        }
+                    }
+                }
             }
 
-            let title = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            Ok(title)
+            // X11
+            if std::env::var_os("DISPLAY").is_some() {
+                let output = Command::new("xdotool")
+                    .args(["getactivewindow", "getwindowname"])
+                    .output()
+                    .map_err(|e| format!("Failed to run xdotool: {}", e))?;
+
+                if !output.status.success() {
+                    return Err("xdotool failed to get window title".into());
+                }
+
+                return Ok(String::from_utf8_lossy(&output.stdout)
+                    .trim()
+                    .to_string());
+            }
+
+            Err("Could not determine the active window".into())
         })
         .await
         .map_err(|e| format!("Join error: {}", e))?

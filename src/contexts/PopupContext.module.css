@@ -8,7 +8,7 @@
   --info: var(--blue);
   --info-text: #ffffff;
 
-  --background: #1e1e1e;
+  --background: var(--dark-bg);
   --border-radius: var(--radius-small);
 }
 

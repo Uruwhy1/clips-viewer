@@ -5,15 +5,15 @@ import SettingButton from "./SettingButton";
 import styles from "./Settings.module.css";
 
 const ObsConnectionForm = React.memo(() => {
-  const { obsSetting, setObsSetting, connect, connection } = useRecording();
+  const { obsSettings, setObsSettings, connect, connection } = useRecording();
   const [obsPort, setObsPort] = useState("");
   const [obsPassword, setObsPassword] = useState("");
   const [isFormVisible, setIsFormVisible] = useState(false);
 
   useEffect(() => {
-    setObsPassword(obsSetting.password || "");
-    setObsPort(obsSetting.port || "");
-  }, [obsSetting]);
+    setObsPassword(obsSettings.password || "");
+    setObsPort(obsSettings.port || "");
+  }, [obsSettings]);
 
   const toggleFormVisibility = useCallback(() => {
     setIsFormVisible((prev) => !prev);
@@ -27,7 +27,7 @@ const ObsConnectionForm = React.memo(() => {
 
     const success = await connect(obsPort, obsPassword);
     if (success) {
-      setObsSetting({
+      setObsSettings({
         port: obsPort,
         password: obsPassword,
       });
@@ -73,7 +73,7 @@ const ObsConnectionForm = React.memo(() => {
                 type="text"
                 value={obsPort}
                 onChange={(e) => setObsPort(e.target.value)}
-                placeholder={obsSetting.port || ""}
+                placeholder={obsSettings.port || ""}
               />
             </div>
             <div className={styles.inputGroup}>
